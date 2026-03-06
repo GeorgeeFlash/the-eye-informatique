@@ -1,3 +1,9 @@
+# The Eye Informatique — Tei Store
+
+The product requirements for this project are documented in [`docs/tei-store-srs.md`](docs/tei-store-srs.md).
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
