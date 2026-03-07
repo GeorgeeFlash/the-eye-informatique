@@ -3,6 +3,12 @@ ignoredBuiltDependencies:
   - unrs-resolver
 
 onlyBuiltDependencies:
+  - '@clerk/shared'
   - '@parcel/watcher'
+  - '@prisma/engines'
+  - '@sentry/cli'
   - '@swc/core'
   - esbuild
+  - msw
+  - prisma
+  - protobufjs
