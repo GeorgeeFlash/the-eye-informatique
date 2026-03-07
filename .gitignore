@@ -44,3 +44,11 @@ next-env.d.ts
 .env.sentry-build-plugin
 
 /lib/generated/prisma
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
