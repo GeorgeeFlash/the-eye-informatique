@@ -16,6 +16,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
+    "@react-email/components": "^1.0.8",
     "@sentry/nextjs": "^10.42.0",
     "ai": "^6.0.116",
     "class-variance-authority": "^0.7.1",
