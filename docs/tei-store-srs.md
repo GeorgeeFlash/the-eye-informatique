@@ -1136,7 +1136,7 @@ This section documents constraints arising from the Cameroonian market context â
 
 | ID | Assumption | Status |
 |---|---|---|
-| A1 | A single payment gateway integration covers both Mobile Money and card transactions. | Open |
+| A1 | A single payment gateway integration covers both Mobile Money and card transactions. | Resolved |
 | A2 | Branch Admins will manage their own product catalogs and inventory without a dedicated data-entry team. | Open |
 | A3 | Delivery is managed by each branch independently; the platform does not integrate with a shipping carrier API. Shipping fees for cross-branch orders are flat-rate and admin-configured, not calculated dynamically. | Resolved |
 | A4 | A Central Admin can change the role of any staff member directly from the staff management page. Role changes take effect on next request. | Resolved |
