@@ -1,16 +1,19 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+import { withSerwist } from "@serwist/turbopack";
 
 // Create the next-intl plugin with the path to your request config
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+// 
 
 const nextConfig: NextConfig = {
   /* config options here */
 };
 
-// Compose the plugins: first next-intl, then Sentry
-export default withSentryConfig(withNextIntl(nextConfig), {
+// Compose the plugins: first next-intl, then Sentry, then Serwist
+export default withSentryConfig(withSerwist(withNextIntl(nextConfig)), {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 

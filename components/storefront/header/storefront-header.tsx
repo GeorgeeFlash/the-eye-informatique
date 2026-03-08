@@ -14,6 +14,8 @@ import { CartButton } from "@/components/storefront/header/cart-button"
 import { MobileNav } from "@/components/storefront/header/mobile-nav"
 import { APP_NAME } from "@/lib/constants"
 import { cn } from "@/lib/utils"
+import { ClerkLoaded, ClerkLoading, UserButton } from "@clerk/nextjs"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const PRODUCT_CATEGORIES = [
   {
@@ -106,6 +108,12 @@ export function StorefrontHeader() {
           <LocaleSwitcher />
           <ThemeToggle />
           <CartButton />
+          <ClerkLoading>
+            <Skeleton className="h-8 w-8 rounded-full" />
+          </ClerkLoading>
+          <ClerkLoaded>
+            <UserButton />
+          </ClerkLoaded>
         </div>
       </div>
     </header>

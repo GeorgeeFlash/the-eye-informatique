@@ -5,7 +5,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale
 
   // Fall back to default locale if the requested one is not supported
-  if (!locale || !(routing.locales as string[]).includes(locale)) {
+  if (!locale || !(routing.locales as readonly string[]).includes(locale)) {
     locale = routing.defaultLocale
   }
 

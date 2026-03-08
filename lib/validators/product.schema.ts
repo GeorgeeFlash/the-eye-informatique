@@ -5,9 +5,9 @@ export const productSchema = z.object({
   slug: z.string().min(2).max(200),
   description: z.string().optional(),
   basePrice: z.coerce.number().positive(),
-  categoryId: z.string().cuid(),
+  categoryId: z.cuid(),
   brand: z.string().optional(),
-  specs: z.record(z.unknown()).optional(),
+  specs: z.record(z.string(), z.unknown()).optional(),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
 })
