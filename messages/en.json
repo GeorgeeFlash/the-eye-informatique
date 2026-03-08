@@ -1,0 +1,96 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "confirm": "Confirm",
+    "search": "Search",
+    "noResults": "No results found"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "blog": "Blog",
+    "cart": "Cart",
+    "guarantee": "Guarantee",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "dashboard": "Dashboard"
+  },
+  "product": {
+    "addToCart": "Add to Cart",
+    "outOfStock": "Out of Stock",
+    "new": "New",
+    "refurbished": "Refurbished",
+    "viewDetails": "View Details",
+    "brand": "Brand",
+    "condition": "Condition",
+    "price": "Price"
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "checkout": "Proceed to Checkout",
+    "remove": "Remove",
+    "quantity": "Quantity"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "delivery": "Delivery",
+    "pickup": "In-Store Pickup",
+    "payment": "Payment",
+    "mobileMoney": "Mobile Money",
+    "confirmOrder": "Confirm Order",
+    "orderSuccess": "Order placed successfully!",
+    "installments": "Pay in installments"
+  },
+  "order": {
+    "status": {
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "PROCESSING": "Processing",
+      "SHIPPED": "Shipped",
+      "DELIVERED": "Delivered",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "repair": {
+    "title": "Repair Request",
+    "status": {
+      "SUBMITTED": "Submitted",
+      "DIAGNOSED": "Diagnosed",
+      "IN_REPAIR": "In Repair",
+      "READY": "Ready for Pickup",
+      "RETURNED": "Returned",
+      "CLOSED": "Closed"
+    }
+  },
+  "affiliate": {
+    "title": "Affiliate Program",
+    "apply": "Apply Now",
+    "earnings": "Earnings",
+    "links": "My Links",
+    "payouts": "Payout History"
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "orders": "Orders",
+    "products": "Products",
+    "repairs": "Repairs",
+    "affiliates": "Affiliates",
+    "blog": "Blog",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "users": "Users",
+    "branches": "Branches",
+    "broadcasts": "Broadcasts",
+    "knowledgeBase": "Knowledge Base",
+    "activityLog": "Activity Log"
+  }
+}

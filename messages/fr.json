@@ -1,0 +1,96 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "confirm": "Confirmer",
+    "search": "Rechercher",
+    "noResults": "Aucun résultat"
+  },
+  "nav": {
+    "home": "Accueil",
+    "products": "Produits",
+    "blog": "Blog",
+    "cart": "Panier",
+    "guarantee": "Garantie",
+    "signIn": "Connexion",
+    "signUp": "Inscription",
+    "dashboard": "Tableau de bord"
+  },
+  "product": {
+    "addToCart": "Ajouter au panier",
+    "outOfStock": "Rupture de stock",
+    "new": "Neuf",
+    "refurbished": "Reconditionné",
+    "viewDetails": "Voir les détails",
+    "brand": "Marque",
+    "condition": "État",
+    "price": "Prix"
+  },
+  "cart": {
+    "title": "Panier",
+    "empty": "Votre panier est vide",
+    "total": "Total",
+    "subtotal": "Sous-total",
+    "checkout": "Passer la commande",
+    "remove": "Supprimer",
+    "quantity": "Quantité"
+  },
+  "checkout": {
+    "title": "Commande",
+    "delivery": "Livraison",
+    "pickup": "Retrait en magasin",
+    "payment": "Paiement",
+    "mobileMoney": "Mobile Money",
+    "confirmOrder": "Confirmer la commande",
+    "orderSuccess": "Commande passée avec succès !",
+    "installments": "Payer en plusieurs fois"
+  },
+  "order": {
+    "status": {
+      "PENDING": "En attente",
+      "CONFIRMED": "Confirmée",
+      "PROCESSING": "En traitement",
+      "SHIPPED": "Expédiée",
+      "DELIVERED": "Livrée",
+      "CANCELLED": "Annulée"
+    }
+  },
+  "repair": {
+    "title": "Demande de réparation",
+    "status": {
+      "SUBMITTED": "Soumise",
+      "DIAGNOSED": "Diagnostiquée",
+      "IN_REPAIR": "En réparation",
+      "READY": "Prête à récupérer",
+      "RETURNED": "Rendue",
+      "CLOSED": "Clôturée"
+    }
+  },
+  "affiliate": {
+    "title": "Programme Affilié",
+    "apply": "Postuler",
+    "earnings": "Gains",
+    "links": "Mes liens",
+    "payouts": "Historique des paiements"
+  },
+  "dashboard": {
+    "overview": "Vue d'ensemble",
+    "orders": "Commandes",
+    "products": "Produits",
+    "repairs": "Réparations",
+    "affiliates": "Affiliés",
+    "blog": "Blog",
+    "analytics": "Analytiques",
+    "settings": "Paramètres",
+    "users": "Utilisateurs",
+    "branches": "Agences",
+    "broadcasts": "Diffusions",
+    "knowledgeBase": "Base de connaissances",
+    "activityLog": "Journal d'activité"
+  }
+}
