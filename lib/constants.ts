@@ -5,7 +5,7 @@ export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000
 
 // Localisation
 export const LOCALES = ["en", "fr"] as const
-export const DEFAULT_LOCALE = "fr" as const
+export const DEFAULT_LOCALE = "en" as const
 export type Locale = (typeof LOCALES)[number]
 
 // Currency (CON-1)

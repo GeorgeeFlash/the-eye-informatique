@@ -1,5 +1,6 @@
 import { StorefrontHeader } from "@/components/storefront/header/storefront-header"
 import { StorefrontFooter } from "@/components/storefront/footer/storefront-footer"
+import { ChatPanel } from "@/components/ai/chat-panel"
 
 export default function StorefrontLayout({
   children,
@@ -11,6 +12,7 @@ export default function StorefrontLayout({
       <StorefrontHeader />
       <main className="flex-1">{children}</main>
       <StorefrontFooter />
+      <ChatPanel />
     </div>
   )
 }

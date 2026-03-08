@@ -1,10 +1,12 @@
+import { requireAuth } from "@/lib/auth"
+
 // Auth guard: authenticated users only (customer self-service)
 // Shell is provided by the parent dashboard/layout.tsx
-export default function CustomerGuardLayout({
+export default async function CustomerGuardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // TODO: Check authenticated — redirect to /sign-in if not
+  await requireAuth()
   return <>{children}</>
 }

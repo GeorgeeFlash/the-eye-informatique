@@ -1,10 +1,12 @@
+import { requireRole } from "@/lib/auth"
+
 // Auth guard: CENTRAL_ADMIN role only (CON-5)
 // Shell is provided by the parent admin/layout.tsx
-export default function CentralAdminGuardLayout({
+export default async function CentralAdminGuardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // TODO: Check role is CENTRAL_ADMIN — redirect to /admin if insufficient
+  await requireRole(["CENTRAL_ADMIN"])
   return <>{children}</>
 }

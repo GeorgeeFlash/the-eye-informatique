@@ -1,5 +1,9 @@
+"use client"
+
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import {
+  BellIcon,
   BotIcon,
   GitBranchIcon,
   LayoutDashboardIcon,
@@ -7,6 +11,9 @@ import {
   ScrollTextIcon,
   SettingsIcon,
   WrenchIcon,
+  ShieldCheckIcon,
+  DollarSignIcon,
+  LinkIcon,
 } from "lucide-react"
 import {
   Sidebar,
@@ -22,62 +29,65 @@ import {
 import { NavMain, type NavItem } from "@/components/dashboard/sidebar/nav-main"
 import { APP_NAME } from "@/lib/constants"
 
-const CUSTOMER_NAV: NavItem[] = [
-  {
-    title: "Vue d'ensemble",
-    url: "/customer",
-    icon: LayoutDashboardIcon,
-  },
-  {
-    title: "Mes commandes",
-    url: "/customer/orders",
-    icon: ScrollTextIcon,
-    items: [
-      { title: "Commandes", url: "/customer/orders" },
-      { title: "Versements", url: "/customer/orders/installments" },
-    ],
-  },
-  {
-    title: "Mes réparations",
-    url: "/customer/repairs",
-    icon: WrenchIcon,
-  },
-  {
-    title: "Parcourir les produits",
-    url: "/products",
-    icon: PackageSearchIcon,
-  },
-]
-
-const AFFILIATE_NAV: NavItem[] = [
-  {
-    title: "Programme Affilié",
-    url: "/affiliate",
-    icon: GitBranchIcon,
-    items: [
-      { title: "Tableau de bord", url: "/affiliate" },
-      { title: "Mes liens", url: "/affiliate/links" },
-      { title: "Paiements", url: "/affiliate/payouts" },
-    ],
-  },
-]
-
-const COMMON_BOTTOM: NavItem[] = [
-  {
-    title: "AI Assistant",
-    url: "/customer/ai",
-    icon: BotIcon,
-  },
-  {
-    title: "Paramètres",
-    url: "/customer/settings",
-    icon: SettingsIcon,
-  },
-]
-
 type PortalVariant = "customer" | "affiliate"
 
 export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVariant }) {
+  const t = useTranslations("sidebar.customer")
+
+  const customerNav: NavItem[] = [
+    {
+      title: t("overview"),
+      url: "/dashboard",
+      icon: LayoutDashboardIcon,
+    },
+    {
+      title: t("orders"),
+      url: "/dashboard/orders",
+      icon: ScrollTextIcon,
+    },
+    {
+      title: t("guarantee"),
+      url: "/dashboard/guarantee",
+      icon: ShieldCheckIcon,
+    },
+    {
+      title: t("repairs"),
+      url: "/dashboard/repairs",
+      icon: WrenchIcon,
+    },
+    {
+      title: t("notifications"),
+      url: "/dashboard/notifications",
+      icon: BellIcon,
+    },
+    {
+      title: t("browseProducts"),
+      url: "/products",
+      icon: PackageSearchIcon,
+    },
+  ]
+
+  const affiliateNav: NavItem[] = [
+    {
+      title: t("affiliateProgram"),
+      url: "/dashboard/earnings",
+      icon: GitBranchIcon,
+      items: [
+        { title: t("earnings"), url: "/dashboard/earnings" },
+        { title: t("myLinks"), url: "/dashboard/links" },
+        { title: t("payouts"), url: "/dashboard/payouts" },
+      ],
+    },
+  ]
+
+  const bottomNav: NavItem[] = [
+    {
+      title: t("settings"),
+      url: "/dashboard/settings",
+      icon: SettingsIcon,
+    },
+  ]
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -91,7 +101,7 @@ export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVari
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold text-sm">{APP_NAME}</span>
                   <span className="text-[10px] text-muted-foreground">
-                    {variant === "affiliate" ? "Espace Affilié" : "Mon Espace"}
+                    {variant === "affiliate" ? t("affiliateSpace") : t("mySpace")}
                   </span>
                 </div>
               </Link>
@@ -101,15 +111,15 @@ export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVari
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={CUSTOMER_NAV} label="Mon Compte" />
+        <NavMain items={customerNav} label={t("myAccount")} />
         {variant === "affiliate" && (
           <>
             <SidebarSeparator />
-            <NavMain items={AFFILIATE_NAV} label="Affiliation" />
+            <NavMain items={affiliateNav} label={t("affiliation")} />
           </>
         )}
         <SidebarSeparator />
-        <NavMain items={COMMON_BOTTOM} />
+        <NavMain items={bottomNav} />
       </SidebarContent>
 
       <SidebarFooter>
@@ -118,7 +128,7 @@ export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVari
             <SidebarMenuButton asChild size="sm">
               <Link href="/">
                 <PackageSearchIcon />
-                <span>Retour à la boutique</span>
+                <span>{t("backToStore")}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

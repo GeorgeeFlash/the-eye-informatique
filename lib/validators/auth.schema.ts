@@ -22,7 +22,7 @@ export const profileSchema = z.object({
     .regex(/^(\+237|237)?[6][5-9]\d{7}$/, "Enter a valid Cameroon mobile number")
     .optional()
     .or(z.literal("")),
-  preferredLocale: z.enum(["en", "fr"]).default("fr"),
+  preferredLocale: z.enum(["en", "fr"]).default("en"),
 })
 
 export type SignUpFormValues = z.infer<typeof signUpSchema>

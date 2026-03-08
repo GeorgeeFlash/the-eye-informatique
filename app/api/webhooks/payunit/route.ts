@@ -1,16 +1,78 @@
-// TODO: Implement PayUnit webhook handler once @payunit/nodejs-sdk is installed
-// and webhook signature verification method is confirmed from SDK docs.
-// Expected events: payment.success, payment.failed, payment.pending
+import { NextResponse } from "next/server"
+import { processPaymentResult } from "@/lib/payment"
+import { inngest } from "@/server/inngest/client"
+import { db } from "@/server/db"
 
+/**
+ * PayUnit webhook handler.
+ * Called by PayUnit after a payment attempt (success or failure).
+ */
 export async function POST(req: Request) {
-  const payload = await req.json()
+  try {
+    const payload = (await req.json()) as {
+      transaction_id?: string
+      status?: string
+      signature?: string
+    }
 
-  // TODO: Verify webhook signature
-  // TODO: Handle payment.success → update Order.paymentStatus, trigger email
-  // TODO: Handle payment.failed → update Order.paymentStatus
-  // TODO: Handle installment payment events
+    const transactionId = payload.transaction_id
+    if (!transactionId) {
+      return NextResponse.json(
+        { error: "Missing transaction_id" },
+        { status: 400 },
+      )
+    }
 
-  console.log("PayUnit webhook received:", payload)
+    // Verify the transaction with PayUnit to prevent spoofed webhooks
+    const result = await processPaymentResult(transactionId)
 
-  return new Response("OK", { status: 200 })
+    // If payment succeeded, trigger confirmation email via Inngest
+    if (result.status === "SUCCESS") {
+      const order = await db.order.findUnique({
+        where: { id: result.orderId },
+        include: {
+          user: { select: { email: true, name: true } },
+          items: {
+            include: {
+              variant: {
+                include: {
+                  product: { select: { name: true } },
+                },
+              },
+            },
+          },
+        },
+      })
+
+      if (order?.user?.email) {
+        await inngest.send({
+          name: "email/send",
+          data: {
+            to: order.user.email,
+            subject: `Order ${order.orderNumber} — Payment Confirmed`,
+            templateName: "order-confirmation",
+            templateData: {
+              customerName: order.user.name ?? "Customer",
+              orderId: order.orderNumber,
+              items: order.items.map((i) => ({
+                name: i.variant?.product?.name ?? "Product",
+                quantity: i.quantity,
+                price: Number(i.unitPrice),
+              })),
+              total: Number(order.total),
+              deliveryMethod: order.deliveryMethod,
+            },
+          },
+        })
+      }
+    }
+
+    return NextResponse.json({ received: true, status: result.status })
+  } catch (error) {
+    console.error("PayUnit webhook error:", error)
+    return NextResponse.json(
+      { error: "Webhook processing failed" },
+      { status: 500 },
+    )
+  }
 }

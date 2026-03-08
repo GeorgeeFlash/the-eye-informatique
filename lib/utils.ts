@@ -13,7 +13,7 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function formatCurrency(
   amount: number | string,
-  locale: "en" | "fr" = "fr",
+  locale: "en" | "fr" = "en",
 ): string {
   const num = typeof amount === "string" ? parseFloat(amount) : amount
   return new Intl.NumberFormat(locale === "fr" ? "fr-CM" : "en-CM", {
@@ -31,7 +31,7 @@ export function formatCurrency(
 export function formatDate(
   date: Date | string | number,
   pattern = "dd/MM/yyyy",
-  locale: "en" | "fr" = "fr",
+  locale: "en" | "fr" = "en",
 ): string {
   const d = date instanceof Date ? date : new Date(date)
   return format(d, pattern, { locale: locale === "fr" ? fr : enUS })
@@ -42,7 +42,21 @@ export function formatDate(
  */
 export function formatDateTime(
   date: Date | string | number,
-  locale: "en" | "fr" = "fr",
+  locale: "en" | "fr" = "en",
 ): string {
   return formatDate(date, "dd/MM/yyyy HH:mm", locale)
+}
+
+/**
+ * Generate a URL-safe slug from a string.
+ */
+export function slugify(text: string): string {
+  return text
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 }

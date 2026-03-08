@@ -2,11 +2,15 @@
 
 import { useState } from "react"
 import { useChat } from "@ai-sdk/react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { MessageCircleIcon, XIcon } from "lucide-react"
 
 export function ChatPanel() {
+  const t = useTranslations("ai")
+  const [open, setOpen] = useState(false)
   const [input, setInput] = useState("")
   const { messages, sendMessage, status } = useChat()
 
@@ -19,14 +23,36 @@ export function ChatPanel() {
     setInput("")
   }
 
+  if (!open) {
+    return (
+      <Button
+        onClick={() => setOpen(true)}
+        size="icon"
+        className="fixed bottom-6 right-6 z-50 size-14 rounded-full shadow-lg"
+      >
+        <MessageCircleIcon className="size-6" />
+      </Button>
+    )
+  }
+
   return (
-    <div className="flex h-125 flex-col rounded-lg border">
-      <div className="border-b p-4">
-        <h3 className="font-semibold">Assistant TEI</h3>
-        <p className="text-xs text-muted-foreground">Posez vos questions sur nos produits</p>
+    <div className="fixed bottom-6 right-6 z-50 flex h-125 w-95 flex-col rounded-lg border bg-background shadow-xl">
+      <div className="flex items-center justify-between border-b p-4">
+        <div>
+          <h3 className="font-semibold">{t("chatTitle")}</h3>
+          <p className="text-xs text-muted-foreground">{t("chatSubtitle")}</p>
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+          <XIcon className="size-4" />
+        </Button>
       </div>
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
+          {messages.length === 0 && (
+            <p className="text-center text-sm text-muted-foreground">
+              {t("chatWelcome")}
+            </p>
+          )}
           {messages.map((m) => (
             <div
               key={m.id}
@@ -41,7 +67,7 @@ export function ChatPanel() {
               >
                 {m.parts
                   ?.filter((p) => p.type === "text")
-                  .map((p, i) => <span key={i}>{p.text}</span>)}
+                  .map((p, i) => (<span key={i}>{p.text}</span>))}
               </div>
             </div>
           ))}
@@ -56,11 +82,11 @@ export function ChatPanel() {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Votre message..."
+          placeholder={t("chatPlaceholder")}
           disabled={isLoading}
         />
         <Button type="submit" disabled={isLoading || !input.trim()}>
-          Envoyer
+          {t("send")}
         </Button>
       </form>
     </div>
