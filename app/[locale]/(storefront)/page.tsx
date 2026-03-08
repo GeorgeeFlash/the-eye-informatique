@@ -3,6 +3,7 @@ export default function HomePage() {
   return (
     <div>
       {/* TODO: Hero section, featured products, categories */}
+      <h1>Store Front</h1>
     </div>
   )
 }
