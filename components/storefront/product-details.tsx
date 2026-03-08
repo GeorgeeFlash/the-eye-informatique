@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { useCart } from "@/hooks/use-cart"
 import { formatCurrency } from "@/lib/utils"
+import { sanitizeHtml } from "@/lib/sanitize"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -22,8 +23,8 @@ type Variant = {
   color: string | null
   condition: string
   stock: number
-  price: unknown // Decimal
-  weight: unknown | null
+  price: number
+  weight: number | null
   stockByBranch: {
     stock: number
     branch: { id: string; name: string }
@@ -35,7 +36,7 @@ type ProductData = {
   name: string
   slug: string
   description: string | null
-  basePrice: unknown // Decimal
+  basePrice: number
   brand: string | null
   category: { id: string; name: string } | null
   variants: Variant[]
@@ -53,6 +54,7 @@ interface ProductDetailsProps {
 
 export function ProductDetails({ product }: ProductDetailsProps) {
   const t = useTranslations("product")
+  const locale = useLocale()
   const { addItem } = useCart()
 
   const [selectedVariantId, setSelectedVariantId] = useState(
@@ -60,7 +62,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   )
 
   const selectedVariant = product.variants.find((v) => v.id === selectedVariantId)
-  const price = selectedVariant ? Number(selectedVariant.price) : Number(product.basePrice)
+  const price = selectedVariant ? selectedVariant.price : product.basePrice
   const inStock = selectedVariant ? selectedVariant.stock > 0 : false
 
   const avgRating =
@@ -96,7 +98,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       )}
 
       {/* Price */}
-      <p className="text-3xl font-bold">{formatCurrency(price)}</p>
+      <p className="text-3xl font-bold">{formatCurrency(price, locale as "en" | "fr")}</p>
 
       <Separator />
 
@@ -114,7 +116,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   {v.condition === "NEW" ? t("new") : t("refurbished")}
                   {v.color ? ` — ${v.color}` : ""}
                   {" · "}
-                  {formatCurrency(Number(v.price))}
+                  {formatCurrency(v.price, locale as "en" | "fr")}
                   {v.stock === 0 ? ` (${t("outOfStock")})` : ""}
                 </SelectItem>
               ))}
@@ -183,7 +185,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <h2 className="text-lg font-semibold">{t("descriptionHeading")}</h2>
           <div
             className="prose prose-sm max-w-none text-muted-foreground"
-            dangerouslySetInnerHTML={{ __html: product.description }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }}
           />
         </div>
       )}

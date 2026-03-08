@@ -15,6 +15,7 @@ import {
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { LocaleSwitcher } from "@/components/shared/locale-switcher"
 import { CartButton } from "@/components/storefront/header/cart-button"
+import { CartSheet } from "@/components/storefront/cart-sheet"
 import { MobileNav } from "@/components/storefront/header/mobile-nav"
 import { Skeleton } from "@/components/ui/skeleton"
 import { APP_NAME } from "@/lib/constants"
@@ -112,6 +113,7 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
           <AuthActions userRole={userRole} />
         </div>
       </div>
+      <CartSheet />
     </header>
   )
 }

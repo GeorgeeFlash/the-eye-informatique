@@ -1,5 +1,5 @@
 // Homepage (M2.1, M11.2)
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { getTranslations } from "next-intl/server"
 import { getProducts } from "@/actions/product.actions"
 import { getCategories } from "@/actions/category.actions"

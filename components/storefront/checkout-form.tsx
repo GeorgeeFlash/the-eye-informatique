@@ -449,7 +449,7 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
                   <Alert>
                     <AlertDescription>
                       {t("installmentsBreakdown", {
-                        amount: formatCurrency(Math.ceil(totalPrice / 3)),
+                        amount: formatCurrency(Math.ceil(totalPrice / 3), locale as "en" | "fr"),
                         months: 3,
                       })}
                     </AlertDescription>
@@ -517,7 +517,7 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
                 <span className="text-muted-foreground">
                   {item.productName} x{item.quantity}
                 </span>
-                <span>{formatCurrency(item.price * item.quantity)}</span>
+                <span>{formatCurrency(item.price * item.quantity, locale as "en" | "fr")}</span>
               </div>
             ))}
             <Separator />
@@ -525,7 +525,7 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
               <span className="text-muted-foreground">
                 {t("subtotal")} ({totalItems})
               </span>
-              <span>{formatCurrency(totalPrice)}</span>
+              <span>{formatCurrency(totalPrice, locale as "en" | "fr")}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">{t("shipping")}</span>
@@ -538,7 +538,7 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
             <Separator />
             <div className="flex justify-between font-semibold text-lg">
               <span>{t("total")}</span>
-              <span>{formatCurrency(totalPrice)}</span>
+              <span>{formatCurrency(totalPrice, locale as "en" | "fr")}</span>
             </div>
           </CardContent>
         </Card>

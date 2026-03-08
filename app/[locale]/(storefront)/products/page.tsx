@@ -5,7 +5,7 @@ import { CategoryNav } from "@/components/storefront/category-nav"
 import { SearchBar } from "@/components/storefront/search-bar"
 import { Button } from "@/components/ui/button"
 import { getTranslations } from "next-intl/server"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 
 interface Props {
   searchParams: Promise<{
