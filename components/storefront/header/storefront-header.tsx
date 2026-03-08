@@ -1,4 +1,7 @@
+"use client"
+
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -14,8 +17,10 @@ import { CartButton } from "@/components/storefront/header/cart-button"
 import { MobileNav } from "@/components/storefront/header/mobile-nav"
 import { APP_NAME } from "@/lib/constants"
 import { cn } from "@/lib/utils"
-import { ClerkLoaded, ClerkLoading, UserButton } from "@clerk/nextjs"
+import { ClerkLoaded, ClerkLoading, UserButton, useAuth } from "@clerk/nextjs"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
+import type { Role } from "@/lib/types"
 
 const PRODUCT_CATEGORIES = [
   {
@@ -50,7 +55,7 @@ const PRODUCT_CATEGORIES = [
   },
 ]
 
-export function StorefrontHeader() {
+export function StorefrontHeader({ userRole }: { userRole?: Role }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -112,11 +117,57 @@ export function StorefrontHeader() {
             <Skeleton className="h-8 w-8 rounded-full" />
           </ClerkLoading>
           <ClerkLoaded>
-            <UserButton />
+            <AuthActions userRole={userRole} />
           </ClerkLoaded>
         </div>
       </div>
     </header>
+  )
+}
+
+// Auth actions component - shows sign-in/up buttons for unauthenticated users,
+// and dashboard/admin buttons for authenticated users
+function AuthActions({ userRole }: { userRole?: Role }) {
+  const [mounted, setMounted] = useState(false)
+  const { isSignedIn } = useAuth()
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true)
+  }, [])
+
+  // Prevent hydration mismatch by only rendering after client mount
+  if (!mounted) {
+    return null
+  }
+
+  const isAdmin = userRole === "ADMIN" || userRole === "CENTRAL_ADMIN"
+
+  if (!isSignedIn) {
+    return (
+      <div className="flex items-center gap-2">
+        <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+          <Link href="/sign-in">Sign In</Link>
+        </Button>
+        <Button asChild size="sm" className="hidden sm:inline-flex">
+          <Link href="/sign-up">Sign Up</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+        <Link href="/dashboard">Dashboard</Link>
+      </Button>
+      {isAdmin && (
+        <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+          <Link href="/admin">Admin</Link>
+        </Button>
+      )}
+      <UserButton />
+    </div>
   )
 }
 

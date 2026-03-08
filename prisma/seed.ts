@@ -364,7 +364,7 @@ async function main() {
   const SEED_PASSWORD = "TeiStore2026!"
 
   const seedUsers = [
-    { firstName: "Customer", lastName: "Tei", email: "customer@tei-store.test", role: "CUSTOMER" as const, branchId: null },
+    { firstName: "Customer", lastName: "Tei", email: "ninobav359@him6.com", role: "CUSTOMER" as const, branchId: null },
     { firstName: "Affiliate", lastName: "Tei", email: "affiliate@tei-store.test", role: "AFFILIATE" as const, branchId: null },
     { firstName: "Staff", lastName: "Tei", email: "staff@tei-store.test", role: "STAFF" as const, branchId: yaoundeBranch.id },
     { firstName: "Admin", lastName: "Tei", email: "admin@tei-store.test", role: "ADMIN" as const, branchId: yaoundeBranch.id },
