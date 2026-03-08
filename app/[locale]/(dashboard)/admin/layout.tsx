@@ -1,16 +1,22 @@
-// Shared admin portal shell — all admin roles (Branch Admin + Central Admin) (M8.1)
+import { AppSidebar } from "@/components/dashboard/sidebar/app-sidebar"
+import { DashboardNavbar } from "@/components/dashboard/navbar/dashboard-navbar"
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar"
+
 export default function AdminPortalLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="flex h-screen">
-      {/* TODO: <AdminSidebar /> — role-adaptive nav items */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* TODO: <AdminHeader /> */}
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <DashboardNavbar />
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

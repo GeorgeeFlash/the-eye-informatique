@@ -1,4 +1,6 @@
-// Storefront shell — Navigation header + footer
+import { StorefrontHeader } from "@/components/storefront/header/storefront-header"
+import { StorefrontFooter } from "@/components/storefront/footer/storefront-footer"
+
 export default function StorefrontLayout({
   children,
 }: {
@@ -6,9 +8,9 @@ export default function StorefrontLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col">
-      {/* TODO: <StorefrontHeader /> */}
+      <StorefrontHeader />
       <main className="flex-1">{children}</main>
-      {/* TODO: <StorefrontFooter /> */}
+      <StorefrontFooter />
     </div>
   )
 }
