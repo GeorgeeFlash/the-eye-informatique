@@ -41,6 +41,8 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 src={img.url}
                 alt={img.altText ?? productName}
                 fill
+                priority={i === selected}
+                unoptimized
                 className="object-cover"
               />
             </button>

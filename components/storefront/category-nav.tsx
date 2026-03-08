@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
-import { useLocale } from "next-intl"
+import { Link } from "@/i18n/navigation"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 
 interface Category {
@@ -16,7 +16,7 @@ interface CategoryNavProps {
 }
 
 export function CategoryNav({ categories, activeSlug }: CategoryNavProps) {
-  const locale = useLocale()
+  const t = useTranslations("storefront")
 
   return (
     <nav className="flex gap-2 overflow-x-auto pb-2">
@@ -25,7 +25,7 @@ export function CategoryNav({ categories, activeSlug }: CategoryNavProps) {
         variant={!activeSlug ? "default" : "outline"}
         size="sm"
       >
-        <Link href={`/${locale}/products`}>Tous</Link>
+        <Link href="/products">{t("all")}</Link>
       </Button>
       {categories.map((cat) => (
         <Button
@@ -35,7 +35,7 @@ export function CategoryNav({ categories, activeSlug }: CategoryNavProps) {
           size="sm"
           className="shrink-0"
         >
-          <Link href={`/${locale}/products?category=${cat.slug}`}>{cat.name}</Link>
+          <Link href={`/products?category=${cat.slug}`}>{cat.name}</Link>
         </Button>
       ))}
     </nav>

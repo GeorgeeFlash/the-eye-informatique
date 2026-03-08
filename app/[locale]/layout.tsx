@@ -76,7 +76,7 @@ export default async function LocaleLayout({
       signInFallbackRedirectUrl={`/${locale}`}
       signUpFallbackRedirectUrl={`/${locale}`}
     >
-      <html lang={locale} suppressHydrationWarning>
+      <html lang={locale} translate="no" className="notranslate" suppressHydrationWarning>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <NextIntlClientProvider messages={messages}>

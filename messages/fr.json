@@ -19,7 +19,23 @@
     "guarantee": "Garantie",
     "signIn": "Connexion",
     "signUp": "Inscription",
-    "dashboard": "Tableau de bord"
+    "dashboard": "Tableau de bord",
+    "admin": "Admin",
+    "openMenu": "Ouvrir le menu",
+    "categories": {
+      "smartphones": "Smartphones",
+      "smartphonesDesc": "Téléphones Android et iOS, neufs et reconditionnés",
+      "computers": "Ordinateurs",
+      "computersDesc": "Laptops, desktops et stations de travail",
+      "accessories": "Accessoires",
+      "accessoriesDesc": "Câbles, chargeurs, étuis et plus encore",
+      "networks": "Réseaux & Sécurité",
+      "networksDesc": "Routeurs, switches, caméras de surveillance",
+      "components": "Composants",
+      "componentsDesc": "RAM, SSD, cartes graphiques, processeurs",
+      "viewAll": "Voir tout",
+      "viewAllDesc": "Parcourir l'ensemble du catalogue"
+    }
   },
   "product": {
     "addToCart": "Ajouter au panier",
@@ -618,6 +634,23 @@
     "unitsSold": "Unités vendues",
     "revenue": "Chiffre d'affaires",
     "noData": "Aucune donnée pour la période sélectionnée.",
-    "selectDateRange": "Sélectionnez une plage de dates et cliquez sur Charger pour voir les analytiques."
-  }
+    "selectDateRange": "Sélectionnez une plage de dates et cliquez sur Charger pour voir les analytiques."  },
+  "footer": {
+    "tagline": "Votre boutique tech de confiance au Cameroun. T\u00e9l\u00e9phones, ordinateurs, accessoires et r\u00e9parations.",
+    "shop": "Boutique",
+    "allProducts": "Tous les produits",
+    "newProducts": "Neufs",
+    "refurbished": "Reconditionn\u00e9s",
+    "services": "Services",
+    "repair": "R\u00e9paration",
+    "order": "Commander",
+    "affiliateProgram": "Programme Affili\u00e9",
+    "contact": "Contact",
+    "headquarters": "Yaound\u00e9 — Si\u00e8ge",
+    "allRightsReserved": "Tous droits r\u00e9serv\u00e9s.",
+    "privacy": "Confidentialit\u00e9",
+    "terms": "Conditions d'utilisation"
+  },
+  "search": {
+    "placeholder": "Rechercher un produit..."  }
 }

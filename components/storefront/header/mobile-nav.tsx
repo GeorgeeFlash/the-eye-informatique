@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { useState } from "react"
+import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
 import { MenuIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,25 +13,23 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 
-const NAV_LINKS = [
-  { href: "/", label: "Accueil" },
-  { href: "/products", label: "Produits" },
-  { href: "/blog", label: "Blog" },
-  { href: "/guarantee", label: "Garantie" },
+const NAV_KEYS = [
+  { href: "/", key: "home" },
+  { href: "/products", key: "products" },
+  { href: "/blog", key: "blog" },
+  { href: "/guarantee", key: "guarantee" },
 ] as const
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const t = useTranslations("nav")
 
   return (
-    <Sheet open={mounted ? open : undefined} onOpenChange={mounted ? setOpen : undefined}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Ouvrir le menu">
+        {/* suppressHydrationWarning: Radix generates aria-controls via useId() which
+            can differ between Next.js SSR and client due to RSC fiber tree differences */}
+        <Button variant="ghost" size="icon" className="md:hidden" aria-label={t("openMenu")} suppressHydrationWarning>
           <MenuIcon className="size-5" />
         </Button>
       </SheetTrigger>
@@ -41,14 +40,14 @@ export function MobileNav() {
           </SheetTitle>
         </SheetHeader>
         <nav className="mt-6 flex flex-col gap-1">
-          {NAV_LINKS.map(({ href, label }) => (
+          {NAV_KEYS.map(({ href, key }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setOpen(false)}
               className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
             >
-              {label}
+              {t(key)}
             </Link>
           ))}
         </nav>

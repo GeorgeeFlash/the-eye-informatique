@@ -38,7 +38,7 @@ export function ProductCard({
       <Link href={`/${locale}/products/${slug}`}>
         <div className="relative aspect-square bg-muted">
           {imageUrl && (
-            <Image src={imageUrl} alt={name} fill className="object-cover" />
+            <Image src={imageUrl} alt={name} unoptimized fill className="object-cover" />
           )}
           <Badge className="absolute left-2 top-2" variant="secondary">
             {condition === "NEW" ? "Neuf" : "Reconditionné"}

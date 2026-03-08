@@ -1,7 +1,7 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useLocale } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
+import { useTranslations } from "next-intl"
 import { useDebounce } from "@/hooks/use-debounce"
 import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
@@ -9,15 +9,15 @@ import { Search } from "lucide-react"
 
 export function SearchBar() {
   const router = useRouter()
-  const locale = useLocale()
+  const t = useTranslations("search")
   const [query, setQuery] = useState("")
   const debouncedQuery = useDebounce(query, 300)
 
   useEffect(() => {
     if (debouncedQuery.trim()) {
-      router.push(`/${locale}/products?q=${encodeURIComponent(debouncedQuery)}`)
+      router.push(`/products?q=${encodeURIComponent(debouncedQuery)}`)
     }
-  }, [debouncedQuery, locale, router])
+  }, [debouncedQuery, router])
 
   return (
     <div className="relative">
@@ -25,7 +25,7 @@ export function SearchBar() {
       <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Rechercher un produit..."
+        placeholder={t("placeholder")}
         className="pl-9"
       />
     </div>

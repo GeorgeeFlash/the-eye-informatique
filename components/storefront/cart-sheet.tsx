@@ -6,11 +6,11 @@ import { formatCurrency } from "@/lib/utils"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import Link from "next/link"
-import { useLocale } from "next-intl"
+import { Link } from "@/i18n/navigation"
+import { useTranslations } from "next-intl"
 
 export function CartSheet() {
-  const locale = useLocale()
+  const t = useTranslations("cart")
   const cartSheetOpen = useUiStore((s) => s.cartSheetOpen)
   const setCartSheetOpen = useUiStore((s) => s.setCartSheetOpen)
   const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCart()
@@ -19,12 +19,12 @@ export function CartSheet() {
     <Sheet open={cartSheetOpen} onOpenChange={setCartSheetOpen}>
       <SheetContent className="flex w-full flex-col sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Panier ({totalItems})</SheetTitle>
+          <SheetTitle>{t("title")} ({totalItems})</SheetTitle>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto py-4">
           {items.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              Votre panier est vide
+              {t("emptyTitle")}
             </p>
           ) : (
             <ul className="space-y-4">
@@ -58,7 +58,7 @@ export function CartSheet() {
                         onClick={() => removeItem(item.variantId)}
                         className="ml-auto text-destructive"
                       >
-                        Supprimer
+                        {t("remove")}
                       </Button>
                     </div>
                   </div>
@@ -72,11 +72,11 @@ export function CartSheet() {
             <Separator />
             <div className="py-4 space-y-3">
               <div className="flex justify-between font-semibold">
-                <span>Total</span>
+                <span>{t("total")}</span>
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
               <Button asChild className="w-full" onClick={() => setCartSheetOpen(false)}>
-                <Link href={`/${locale}/checkout`}>Passer la commande</Link>
+                <Link href="/checkout">{t("checkout")}</Link>
               </Button>
             </div>
           </>

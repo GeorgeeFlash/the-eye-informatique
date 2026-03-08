@@ -1,7 +1,8 @@
 "use client"
 
-import Link from "next/link"
-import { useEffect, useState } from "react"
+import dynamic from "next/dynamic"
+import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -15,47 +16,40 @@ import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { LocaleSwitcher } from "@/components/shared/locale-switcher"
 import { CartButton } from "@/components/storefront/header/cart-button"
 import { MobileNav } from "@/components/storefront/header/mobile-nav"
+import { Skeleton } from "@/components/ui/skeleton"
 import { APP_NAME } from "@/lib/constants"
 import { cn } from "@/lib/utils"
-import { ClerkLoaded, ClerkLoading, UserButton, useAuth } from "@clerk/nextjs"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Button } from "@/components/ui/button"
 import type { Role } from "@/lib/types"
 
-const PRODUCT_CATEGORIES = [
+// ssr:false is required — Clerk has no auth context on the server, so ClerkLoading/ClerkLoaded
+// always mismatch between SSR and client hydration. Opting out of SSR entirely is the
+// only reliable solution.
+const AuthActions = dynamic(
+  () => import("@/components/storefront/header/auth-actions"),
   {
-    title: "Smartphones",
-    href: "/products?category=smartphones",
-    description: "Téléphones Android et iOS, neufs et reconditionnés",
-  },
-  {
-    title: "Ordinateurs",
-    href: "/products?category=ordinateurs",
-    description: "Laptops, desktops et stations de travail",
-  },
-  {
-    title: "Accessoires",
-    href: "/products?category=accessoires",
-    description: "Câbles, chargeurs, étuis et plus encore",
-  },
-  {
-    title: "Réseaux & Sécurité",
-    href: "/products?category=reseaux",
-    description: "Routeurs, switches, caméras de surveillance",
-  },
-  {
-    title: "Composants",
-    href: "/products?category=composants",
-    description: "RAM, SSD, cartes graphiques, processeurs",
-  },
-  {
-    title: "Voir tout",
-    href: "/products",
-    description: "Parcourir l'ensemble du catalogue",
-  },
-]
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center gap-2">
+        <Skeleton className="hidden sm:block h-8 w-16 rounded-md" />
+        <Skeleton className="hidden sm:block h-8 w-16 rounded-md" />
+        <Skeleton className="h-8 w-8 rounded-full" />
+      </div>
+    ),
+  }
+)
+
+const CATEGORY_KEYS = [
+  { key: "smartphones", href: "/products?category=smartphones" },
+  { key: "computers", href: "/products?category=ordinateurs" },
+  { key: "accessories", href: "/products?category=accessoires" },
+  { key: "networks", href: "/products?category=reseaux" },
+  { key: "components", href: "/products?category=composants" },
+  { key: "viewAll", href: "/products" },
+] as const
 
 export function StorefrontHeader({ userRole }: { userRole?: Role }) {
+  const t = useTranslations("nav")
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -76,12 +70,14 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
           <NavigationMenuList>
             {/* Products mega-menu */}
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Produits</NavigationMenuTrigger>
+              {/* suppressHydrationWarning: Radix generates id/aria-controls via useId(),
+                  which differs between Next.js SSR and client due to RSC fiber tree depth */}
+              <NavigationMenuTrigger suppressHydrationWarning>{t("products")}</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid w-125 gap-2 p-4 md:grid-cols-2">
-                  {PRODUCT_CATEGORIES.map((cat) => (
-                    <ListItem key={cat.href} href={cat.href} title={cat.title}>
-                      {cat.description}
+                  {CATEGORY_KEYS.map((cat) => (
+                    <ListItem key={cat.href} href={cat.href} title={t(`categories.${cat.key}`)}>
+                      {t(`categories.${cat.key}Desc`)}
                     </ListItem>
                   ))}
                 </ul>
@@ -92,7 +88,7 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
             <NavigationMenuItem>
               <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                 <Link href="/blog">
-                  Blog
+                  {t("blog")}
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -101,7 +97,7 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
             <NavigationMenuItem>
               <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                 <Link href="/guarantee">
-                  Garantie
+                  {t("guarantee")}
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -113,61 +109,10 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
           <LocaleSwitcher />
           <ThemeToggle />
           <CartButton />
-          <ClerkLoading>
-            <Skeleton className="h-8 w-8 rounded-full" />
-          </ClerkLoading>
-          <ClerkLoaded>
-            <AuthActions userRole={userRole} />
-          </ClerkLoaded>
+          <AuthActions userRole={userRole} />
         </div>
       </div>
     </header>
-  )
-}
-
-// Auth actions component - shows sign-in/up buttons for unauthenticated users,
-// and dashboard/admin buttons for authenticated users
-function AuthActions({ userRole }: { userRole?: Role }) {
-  const [mounted, setMounted] = useState(false)
-  const { isSignedIn } = useAuth()
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
-
-  // Prevent hydration mismatch by only rendering after client mount
-  if (!mounted) {
-    return null
-  }
-
-  const isAdmin = userRole === "ADMIN" || userRole === "CENTRAL_ADMIN"
-
-  if (!isSignedIn) {
-    return (
-      <div className="flex items-center gap-2">
-        <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-          <Link href="/sign-in">Sign In</Link>
-        </Button>
-        <Button asChild size="sm" className="hidden sm:inline-flex">
-          <Link href="/sign-up">Sign Up</Link>
-        </Button>
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex items-center gap-2">
-      <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-        <Link href="/dashboard">Dashboard</Link>
-      </Button>
-      {isAdmin && (
-        <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-          <Link href="/admin">Admin</Link>
-        </Button>
-      )}
-      <UserButton />
-    </div>
   )
 }
 

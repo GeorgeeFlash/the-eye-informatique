@@ -19,7 +19,23 @@
     "guarantee": "Guarantee",
     "signIn": "Sign In",
     "signUp": "Sign Up",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "openMenu": "Open the menu",
+    "categories": {
+      "smartphones": "Smartphones",
+      "smartphonesDesc": "Android and iOS phones, new and refurbished",
+      "computers": "Computers",
+      "computersDesc": "Laptops, desktops and workstations",
+      "accessories": "Accessories",
+      "accessoriesDesc": "Cables, chargers, cases and more",
+      "networks": "Networks & Security",
+      "networksDesc": "Routers, switches, surveillance cameras",
+      "components": "Components",
+      "componentsDesc": "RAM, SSD, graphics cards, processors",
+      "viewAll": "View All",
+      "viewAllDesc": "Browse the entire catalogue"
+    }
   },
   "product": {
     "addToCart": "Add to Cart",
@@ -619,5 +635,24 @@
     "revenue": "Revenue",
     "noData": "No data for the selected period.",
     "selectDateRange": "Select a date range and click Load Data to view analytics."
+  },
+  "footer": {
+    "tagline": "Your trusted tech shop in Cameroon. Phones, computers, accessories and repairs.",
+    "shop": "Shop",
+    "allProducts": "All Products",
+    "newProducts": "New",
+    "refurbished": "Refurbished",
+    "services": "Services",
+    "repair": "Repair",
+    "order": "Order",
+    "affiliateProgram": "Affiliate Program",
+    "contact": "Contact",
+    "headquarters": "Yaoundé — Headquarters",
+    "allRightsReserved": "All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms of Use"
+  },
+  "search": {
+    "placeholder": "Search for a product..."
   }
 }
