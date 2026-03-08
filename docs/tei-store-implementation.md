@@ -244,66 +244,71 @@ the-eye-informatique/
 │   │   │   └── layout.tsx        # Storefront shell (nav, footer)
 │   │   │
 │   │   ├── (dashboard)/
-│   │   │   ├── (admin)/          # Admin panel
-│   │   │   │   ├── layout.tsx    # Admin sidebar + header
-│   │   │   │   ├── page.tsx      # Dashboard overview     (M8.1)
-│   │   │   │   ├── products/
-│   │   │   │   │   ├── page.tsx  # Product management     (M2.2)
-│   │   │   │   │   └── [id]/
-│   │   │   │   │       └── page.tsx  # Product editor     (M2.2)
-│   │   │   │   ├── orders/
-│   │   │   │   │   ├── page.tsx  # Order management       (M3.3)
-│   │   │   │   │   └── [id]/
-│   │   │   │   │       └── page.tsx  # Order detail       (M3.3)
-│   │   │   │   ├── repairs/
-│   │   │   │   │   ├── page.tsx  # Repair queue           (M4.1)
-│   │   │   │   │   └── [id]/
-│   │   │   │   │       └── page.tsx  # Repair ticket      (M4.1)
-│   │   │   │   ├── affiliates/
-│   │   │   │   │   └── page.tsx  # Affiliate management   (M5.5)
-│   │   │   │   ├── blog/
-│   │   │   │   │   ├── page.tsx  # Blog management        (M6.1)
-│   │   │   │   │   └── [id]/
-│   │   │   │   │       └── page.tsx  # Blog editor        (M6.1)
+│   │   │   ├── admin/                        # Branch Admin + Central Admin portal
+│   │   │   │   ├── layout.tsx                # Shared admin shell (sidebar, header)
+│   │   │   │   ├── page.tsx                  # Dashboard home (role-adaptive)    (M8.1)
 │   │   │   │   ├── analytics/
-│   │   │   │   │   └── page.tsx  # Analytics dashboard    (M8.1)
-│   │   │   │   └── settings/
-│   │   │   │       └── page.tsx  # Platform settings      (M1.2)
+│   │   │   │   │   └── page.tsx              # Analytics (role-adaptive)         (M8.1)
+│   │   │   │   │                             #   Branch Admin: branch metrics
+│   │   │   │   │                             #   Central Admin: consolidated view
+│   │   │   │   ├── (admin)/                  # Branch staff/admin sections
+│   │   │   │   │   ├── layout.tsx            # Auth guard: ADMIN or STAFF role
+│   │   │   │   │   ├── products/
+│   │   │   │   │   │   ├── page.tsx          # Product management               (M2.2)
+│   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │       └── page.tsx      # Product editor                   (M2.2)
+│   │   │   │   │   ├── orders/
+│   │   │   │   │   │   ├── page.tsx          # Order management                 (M3.3)
+│   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │       └── page.tsx      # Order detail                     (M3.3)
+│   │   │   │   │   ├── repairs/
+│   │   │   │   │   │   ├── page.tsx          # Repair queue                     (M4.1)
+│   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │       └── page.tsx      # Repair ticket                    (M4.1)
+│   │   │   │   │   ├── affiliates/
+│   │   │   │   │   │   └── page.tsx          # Affiliate management             (M5.5)
+│   │   │   │   │   ├── blog/
+│   │   │   │   │   │   ├── page.tsx          # Blog management                  (M6.1)
+│   │   │   │   │   │   └── [id]/
+│   │   │   │   │   │       └── page.tsx      # Blog editor                      (M6.1)
+│   │   │   │   │   └── settings/
+│   │   │   │   │       └── page.tsx          # Branch settings                  (M1.2)
+│   │   │   │   │
+│   │   │   │   └── (central-admin)/          # Central Admin-only sections (role-gated)
+│   │   │   │       ├── layout.tsx            # Auth guard: CENTRAL_ADMIN role
+│   │   │   │       ├── branches/
+│   │   │   │       │   └── page.tsx          # Branch management                (CON-5)
+│   │   │   │       ├── users/
+│   │   │   │       │   └── page.tsx          # System-wide user management      (M1.2)
+│   │   │   │       ├── broadcasts/
+│   │   │   │       │   └── page.tsx          # System-wide broadcasts           (M7.1)
+│   │   │   │       ├── knowledge-base/
+│   │   │   │       │   └── page.tsx          # AI knowledge base docs           (M11)
+│   │   │   │       └── activity-log/
+│   │   │   │           └── page.tsx          # Platform activity log            (M7.3)
 │   │   │   │
-│   │   │   ├── (central-admin)/  # Central Admin dashboard (R6 only)
-│   │   │   │   ├── layout.tsx    # Central admin shell
-│   │   │   │   ├── page.tsx      # Cross-branch overview   (M8.1)
-│   │   │   │   ├── branches/
-│   │   │   │   │   └── page.tsx  # Branch management       (CON-5)
-│   │   │   │   ├── users/
-│   │   │   │   │   └── page.tsx  # System-wide user mgmt   (M1.2)
-│   │   │   │   ├── broadcasts/
-│   │   │   │   │   └── page.tsx  # System-wide broadcasts  (M7.1)
-│   │   │   │   ├── knowledge-base/
-│   │   │   │   │   └── page.tsx  # AI knowledge base docs  (M11)
-│   │   │   │   ├── analytics/
-│   │   │   │   │   └── page.tsx  # Consolidated analytics  (M8.1)
-│   │   │   │   └── activity-log/
-│   │   │   │       └── page.tsx  # Platform activity log   (M7.3)
-│   │   │   │
-│   │   │   ├── (affiliate)/      # Affiliate dashboard
-│   │   │   │   ├── layout.tsx
-│   │   │   │   ├── page.tsx      # Affiliate overview     (M5.2)
-│   │   │   │   ├── links/
-│   │   │   │   │   └── page.tsx  # Link management        (M5.3)
-│   │   │   │   ├── earnings/
-│   │   │   │   │   └── page.tsx  # Earnings view          (M5.4)
-│   │   │   │   └── payouts/
-│   │   │   │       └── page.tsx  # Payout history         (M5.6)
-│   │   │   │
-│   │   │   └── (customer)/       # Customer self-service
-│   │   │       ├── layout.tsx
-│   │   │       ├── orders/
-│   │   │       │   └── page.tsx  # Order history          (M3.4)
-│   │   │       ├── guarantee/
-│   │   │       │   └── page.tsx  # Warranty cards         (M4.2)
-│   │   │       └── settings/
-│   │   │           └── page.tsx  # Profile settings       (M1.1)
+│   │   │   └── dashboard/                    # Customer + Affiliate shared portal
+│   │   │       ├── layout.tsx                # Shared dashboard shell (sidebar)
+│   │   │       ├── page.tsx                  # Dashboard home (role-adaptive)
+│   │   │       │                             #   Affiliate: referral stats       (M5.2)
+│   │   │       │                             #   Customer: order summary
+│   │   │       ├── (affiliate)/              # Affiliate-only sections (role-gated)
+│   │   │       │   ├── layout.tsx            # Auth guard: AFFILIATE role
+│   │   │       │   ├── links/
+│   │   │       │   │   └── page.tsx          # Link management                  (M5.3)
+│   │   │       │   ├── earnings/
+│   │   │       │   │   └── page.tsx          # Earnings view                    (M5.4)
+│   │   │       │   └── payouts/
+│   │   │       │       └── page.tsx          # Payout history                   (M5.6)
+│   │   │       │
+│   │   │       └── (customer)/               # All authenticated users
+│   │   │           ├── layout.tsx            # Auth guard: authenticated only
+│   │   │           ├── orders/
+│   │   │           │   └── page.tsx          # Order history                    (M3.4)
+│   │   │           ├── guarantee/
+│   │   │           │   └── page.tsx          # Warranty cards                   (M4.2)
+│   │   │           └── settings/
+│   │   │               └── page.tsx          # Profile settings                 (M1.1)
 │   │   │
 │   │   └── layout.tsx            # Root locale layout (ClerkProvider, ThemeProvider, fonts)
 │   │
