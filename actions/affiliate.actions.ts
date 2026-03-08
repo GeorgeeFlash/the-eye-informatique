@@ -9,7 +9,8 @@ import { requireAuth, requireRole } from "@/lib/auth"
 import { createNotification } from "@/actions/notification.actions"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
-import { DEFAULT_PAGE_SIZE } from "@/lib/constants"
+import { APP_URL, DEFAULT_PAGE_SIZE } from "@/lib/constants"
+import { createDisbursement, confirmDisbursement } from "@/server/payunit"
 
 // ─── Customer: Apply ─────────────────────────────────────────────────
 
@@ -27,6 +28,7 @@ export async function applyForAffiliate(
   if (existing) {
     if (existing.status === "PENDING") return { error: "Application already pending." }
     if (existing.status === "APPROVED") return { error: "Already an affiliate." }
+    if (existing.status === "SUSPENDED") return { error: "Your affiliate account has been suspended. Please contact support." }
     if (
       existing.status === "REJECTED" &&
       existing.rejectedAt &&
@@ -172,6 +174,24 @@ export async function requestPayout() {
   const amount = pending._sum.commission?.toNumber() ?? 0
   if (amount <= 0) return { error: "No pending earnings." }
 
+  const payoutId = `PAYOUT-${Date.now().toString(36).toUpperCase()}`
+
+  // Create a PayUnit disbursement to the affiliate's mobile money account
+  const disbursement = await createDisbursement({
+    amount,
+    accountNumber: profile.payoutPhone ?? "",
+    beneficiaryName: user.name ?? "Affiliate",
+    gateway: profile.payoutMethod === "ORANGE" ? "CM_ORANGE" : "CM_MTNMOMO",
+    transactionId: payoutId,
+  })
+
+  // Confirm the disbursement
+  await confirmDisbursement({
+    payToken: disbursement.pay_token,
+    message: `Affiliate commission payout ${payoutId}`,
+    notifyUrl: `${APP_URL}/api/webhooks/payunit`,
+  })
+
   await db.$transaction(async (tx) => {
     await tx.commissionPayout.create({
       data: {
@@ -179,6 +199,7 @@ export async function requestPayout() {
         amount,
         currency: "XAF",
         status: "PENDING",
+        payunitDisbursementId: disbursement.pay_token,
       },
     })
     await tx.affiliateReferral.updateMany({
@@ -208,7 +229,7 @@ export async function getAdminAffiliates({
   pageSize?: number
   status?: string
 } = {}) {
-  await requireRole(["ADMIN", "BRANCH_ADMIN"])
+  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
 
   const where = status ? { status: status as never } : {}
 
@@ -232,7 +253,7 @@ export async function getAdminAffiliates({
 // ─── Admin: Get affiliate detail ────────────────────────────────────
 
 export async function getAdminAffiliateDetail(profileId: string) {
-  await requireRole(["ADMIN", "BRANCH_ADMIN"])
+  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
 
   return db.affiliateProfile.findUnique({
     where: { id: profileId },
@@ -251,7 +272,7 @@ export async function getAdminAffiliateDetail(profileId: string) {
 // ─── Admin: Approve ─────────────────────────────────────────────────
 
 export async function approveAffiliate(profileId: string) {
-  await requireRole(["ADMIN", "BRANCH_ADMIN"])
+  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
 
   const profile = await db.affiliateProfile.update({
     where: { id: profileId },
@@ -274,7 +295,7 @@ export async function approveAffiliate(profileId: string) {
 // ─── Admin: Reject ──────────────────────────────────────────────────
 
 export async function rejectAffiliate(profileId: string, reason?: string) {
-  await requireRole(["ADMIN", "BRANCH_ADMIN"])
+  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
 
   const profile = await db.affiliateProfile.update({
     where: { id: profileId },
@@ -300,7 +321,7 @@ export async function rejectAffiliate(profileId: string, reason?: string) {
 // ─── Admin: Suspend ─────────────────────────────────────────────────
 
 export async function suspendAffiliate(profileId: string, reason: string) {
-  await requireRole(["ADMIN", "BRANCH_ADMIN"])
+  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
 
   const profile = await db.affiliateProfile.update({
     where: { id: profileId },

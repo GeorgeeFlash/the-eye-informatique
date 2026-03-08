@@ -6,6 +6,7 @@ import { requireAuth, requireRole } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import type { OrderStatus } from "@prisma/client"
+import { Prisma } from "@/lib/generated/prisma/client"
 import { calculateShippingFee } from "@/lib/shipping"
 import { createCheckoutSession } from "@/lib/payment"
 
@@ -194,7 +195,7 @@ export async function createOrder(data: CreateOrderInput) {
       data: {
         orderNumber: generateOrderNumber(),
         userId: user.id,
-        status: parsed.data.installments ? "PENDING" : "PENDING",
+        status: "PENDING",
         subtotal,
         deliveryFee: totalShipping,
         total,
@@ -253,23 +254,25 @@ export async function createOrder(data: CreateOrderInput) {
     }
 
     return newOrder
+  }).catch((e: unknown) => {
+    // Surface a user-friendly message on order-number collision (P2002 unique violation).
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      throw new Error("Order number conflict — please try again.")
+    }
+    throw e
   })
 
   revalidateOrders()
 
-  // Initiate PayUnit checkout session
+  // Initiate PayUnit checkout session.
+  // user.name / user.email are already available from requireAuth() above.
   try {
-    const user2 = await db.user.findUnique({
-      where: { id: user.id },
-      select: { name: true, email: true },
-    })
-
     const session = await createCheckoutSession({
       orderId: order.id,
       amount: total,
       gateway: parsed.data.gateway ?? "CM_MTNMOMO",
-      customerName: user2?.name ?? undefined,
-      customerEmail: user2?.email ?? undefined,
+      customerName: user.name ?? undefined,
+      customerEmail: user.email,
     })
 
     return {

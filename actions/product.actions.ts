@@ -221,6 +221,7 @@ export async function deleteProduct(id: string) {
 export async function createProductVariant(
   productId: string,
   data: z.infer<typeof productVariantSchema>,
+  targetBranchId?: string,
 ) {
   const user = await requireRole(["STAFF", "ADMIN", "CENTRAL_ADMIN"])
   await assertProductAccess(user, productId)
@@ -228,7 +229,8 @@ export async function createProductVariant(
   const parsed = productVariantSchema.safeParse(data)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
-  const branchId = user.role === "CENTRAL_ADMIN" ? user.branchId : user.branchId
+  // CENTRAL_ADMIN must supply an explicit branchId; scoped roles use their own.
+  const branchId = user.role === "CENTRAL_ADMIN" ? targetBranchId : user.branchId
   if (!branchId) return { error: "No branch context." }
 
   const variant = await db.$transaction(async (tx) => {

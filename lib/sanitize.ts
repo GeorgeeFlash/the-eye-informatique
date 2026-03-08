@@ -86,5 +86,15 @@ export function sanitizeHtml(input: string): string {
     return match.endsWith("/>") ? `<${lowerTag}${attrs} />` : `<${lowerTag}${attrs}>`
   })
 
+  // Prevent tab-napping: enforce rel="noopener noreferrer" on every
+  // <a target="_blank">. Done as a post-pass so it applies regardless
+  // of the order in which attributes were originally written.
+  cleaned = cleaned.replace(/<a\b([^>]*)>/gi, (match) => {
+    if (!match.includes('target="_blank"')) return match
+    // Strip any existing rel value and inject the safe combination.
+    const withoutRel = match.replace(/\s+rel="[^"]*"/g, "")
+    return withoutRel.replace(">", ' rel="noopener noreferrer">')
+  })
+
   return cleaned.trim()
 }

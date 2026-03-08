@@ -1,31 +1,41 @@
 // PayUnit SDK client singleton
-// Docs: https://doc.payunit.net/
-//
-// PayUnit uses a REST API with API key authentication.
-// We implement a lightweight client rather than depending on a third-party SDK package.
+// Docs: https://developer.payunit.net/sdk-and-plugins/nodejs
 
-const PAYUNIT_API_URL =
-  process.env.PAYUNIT_MODE === "live"
-    ? "https://gateway.payunit.net/api"
-    : "https://gateway.payunit.net/api"
+import { PayunitClient } from "@payunit/nodejs-sdk"
+import type {
+  TransactionPaymentStatusResponse,
+  CheckoutInitializeRequest,
+  CheckoutInitializeResponse,
+  DisbursementInitResponse,
+  DisbursementConfirmResponse,
+} from "@payunit/nodejs-sdk"
 
-const payunitHeaders = () => ({
-  "Content-Type": "application/json",
-  "x-api-key": process.env.PAYUNIT_API_KEY ?? "",
-  Authorization: `Bearer ${Buffer.from(
-    `${process.env.PAYUNIT_API_USERNAME ?? ""}:${process.env.PAYUNIT_API_PASSWORD ?? ""}`,
-  ).toString("base64")}`,
-})
+// ---------------------------------------------------------------------------
+// Singleton client — reused across all server calls
+// ---------------------------------------------------------------------------
 
-export interface PayUnitTransaction {
-  t_id: string
-  t_url: string
-  transaction_id: string
-  status: string
+let _client: PayunitClient | null = null
+
+function getClient(): PayunitClient {
+  if (!_client) {
+    _client = new PayunitClient({
+      apiKey: process.env.PAYUNIT_API_KEY!,
+      apiUsername: process.env.PAYUNIT_API_USERNAME!,
+      apiPassword: process.env.PAYUNIT_API_PASSWORD!,
+      mode: (process.env.PAYUNIT_MODE as "test" | "live") ?? "test",
+    })
+  }
+  return _client
 }
 
+export { getClient as getPayUnitClient }
+
+// ---------------------------------------------------------------------------
+// Collections — initiate payment & verify
+// ---------------------------------------------------------------------------
+
 /**
- * Initiate a payment transaction with PayUnit.
+ * Initiate a payment transaction with PayUnit (Collections service).
  * Returns a redirect URL for the customer to complete payment.
  */
 export async function initiatePayment(params: {
@@ -38,40 +48,33 @@ export async function initiatePayment(params: {
   customerEmail?: string
   description?: string
 }): Promise<{ transactionId: string; redirectUrl: string }> {
-  const body = {
+  const client = getClient()
+
+  const response = await client.collections.initiatePayment({
     total_amount: params.totalAmount,
     currency: "XAF",
     transaction_id: params.orderId,
     return_url: params.returnUrl,
     notify_url: params.notifyUrl,
-    purchaseRef: params.orderId,
-    gateway: params.gateway,
-    description: params.description ?? `Order ${params.orderId}`,
-    name: params.customerName ?? "",
-    email: params.customerEmail ?? "",
-  }
-
-  const response = await fetch(`${PAYUNIT_API_URL}/gateway/initialize`, {
-    method: "POST",
-    headers: payunitHeaders(),
-    body: JSON.stringify(body),
+    pay_with: params.gateway,
+    payment_country: "CM",
+    redirect_on_failed: "yes",
+    custom_fields: {
+      order_id: params.orderId,
+      customer_name: params.customerName ?? "",
+      customer_email: params.customerEmail ?? "",
+      description: params.description ?? `Order ${params.orderId}`,
+    },
   })
 
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`PayUnit initiate payment failed: ${response.status} — ${text}`)
-  }
-
-  const data = (await response.json()) as PayUnitTransaction
-
   return {
-    transactionId: data.transaction_id ?? data.t_id,
-    redirectUrl: data.t_url,
+    transactionId: response.transaction_id ?? response.t_id,
+    redirectUrl: response.transaction_url ?? response.t_url,
   }
 }
 
 /**
- * Verify a PayUnit transaction status.
+ * Verify a PayUnit transaction status (Collections service).
  */
 export async function verifyTransaction(transactionId: string): Promise<{
   status: "SUCCESS" | "FAILED" | "PENDING"
@@ -79,25 +82,10 @@ export async function verifyTransaction(transactionId: string): Promise<{
   gateway?: string
   transactionRef?: string
 }> {
-  const response = await fetch(
-    `${PAYUNIT_API_URL}/gateway/verify/${transactionId}`,
-    {
-      method: "GET",
-      headers: payunitHeaders(),
-    },
-  )
+  const client = getClient()
 
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`PayUnit verify failed: ${response.status} — ${text}`)
-  }
-
-  const data = (await response.json()) as {
-    status: string
-    transaction_amount?: number
-    gateway?: string
-    transaction_id?: string
-  }
+  const data: TransactionPaymentStatusResponse =
+    await client.collections.getTransactionStatus(transactionId)
 
   const statusMap: Record<string, "SUCCESS" | "FAILED" | "PENDING"> = {
     SUCCESS: "SUCCESS",
@@ -109,9 +97,86 @@ export async function verifyTransaction(transactionId: string): Promise<{
   }
 
   return {
-    status: statusMap[data.status?.toUpperCase()] ?? "PENDING",
+    status: statusMap[data.transaction_status?.toUpperCase()] ?? "PENDING",
     amount: data.transaction_amount,
-    gateway: data.gateway,
+    gateway: data.transaction_gateway,
     transactionRef: data.transaction_id,
   }
+}
+
+// ---------------------------------------------------------------------------
+// Checkout — full checkout session (items, customer, success/cancel URLs)
+// ---------------------------------------------------------------------------
+
+/**
+ * Initialize a PayUnit Checkout session with line-item details.
+ */
+export async function initializeCheckout(
+  params: CheckoutInitializeRequest,
+): Promise<CheckoutInitializeResponse> {
+  const client = getClient()
+  return client.checkout.initialize(params)
+}
+
+/**
+ * Retrieve the status of a checkout session.
+ */
+export async function getCheckoutStatus(checkoutId: string) {
+  const client = getClient()
+  return client.checkout.getStatus(checkoutId)
+}
+
+// ---------------------------------------------------------------------------
+// Disbursements — affiliate / payout
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a disbursement to send money via mobile money.
+ */
+export async function createDisbursement(params: {
+  amount: number
+  accountNumber: string
+  beneficiaryName: string
+  gateway: string
+  transactionId: string
+}): Promise<DisbursementInitResponse> {
+  const client = getClient()
+
+  return client.disbursement.createDisbursement({
+    destination_currency: "XAF",
+    debit_currency: "XAF",
+    account_number: Number(params.accountNumber),
+    amount: params.amount,
+    beneficiary_name: params.beneficiaryName,
+    deposit_type: "MOBILE_MONEY",
+    transaction_id: params.transactionId,
+    country: "CM",
+    account_bank: params.gateway,
+  })
+}
+
+/**
+ * Confirm a previously created disbursement.
+ */
+export async function confirmDisbursement(params: {
+  payToken: string
+  message: string
+  notifyUrl: string
+}): Promise<DisbursementConfirmResponse> {
+  const client = getClient()
+
+  return client.disbursement.confirmDisbursement({
+    pay_token: params.payToken,
+    deposit_message: params.message,
+    deposit_note: params.message,
+    notify_url: params.notifyUrl,
+  })
+}
+
+/**
+ * Get the status of a disbursement.
+ */
+export async function getDisbursementStatus(payToken: string) {
+  const client = getClient()
+  return client.disbursement.getDisbursementStatus(payToken)
 }

@@ -66,20 +66,26 @@ export async function getAnalyticsKPIs(
       _sum: { total: true },
       _count: true,
     }),
-    // Current in-store purchases
-    db.inStorePurchase.aggregate({
-      where: {
-        purchaseDate: { gte: range.from, lte: range.to },
-      },
-      _sum: { totalAmount: true },
-    }),
-    // Previous in-store purchases
-    db.inStorePurchase.aggregate({
-      where: {
-        purchaseDate: { gte: prev.from, lte: prev.to },
-      },
-      _sum: { totalAmount: true },
-    }),
+    // Current in-store purchases — InStorePurchase has no branchId column so it
+    // cannot be scoped to a branch. Exclude from branch-scoped views to avoid
+    // leaking cross-branch revenue data (only include for Central Admin / global view).
+    scopedBranchId
+      ? Promise.resolve({ _sum: { totalAmount: null } })
+      : db.inStorePurchase.aggregate({
+          where: {
+            purchaseDate: { gte: range.from, lte: range.to },
+          },
+          _sum: { totalAmount: true },
+        }),
+    // Previous in-store purchases (same scoping logic as above)
+    scopedBranchId
+      ? Promise.resolve({ _sum: { totalAmount: null } })
+      : db.inStorePurchase.aggregate({
+          where: {
+            purchaseDate: { gte: prev.from, lte: prev.to },
+          },
+          _sum: { totalAmount: true },
+        }),
     // Current affiliate-referred orders
     db.order.aggregate({
       where: {
