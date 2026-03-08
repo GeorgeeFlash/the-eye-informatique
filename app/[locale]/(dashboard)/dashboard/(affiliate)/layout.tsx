@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/lib/auth"
-import { redirect } from "next/navigation"
+import { redirect } from "@/i18n/navigation"
 import { db } from "@/server/db"
 
 // Auth guard: users with an approved affiliate profile

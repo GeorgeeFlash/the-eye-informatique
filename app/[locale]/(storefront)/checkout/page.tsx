@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation"
+import { redirect } from "@/i18n/navigation"
 import { getTranslations } from "next-intl/server"
 import { getCurrentUser } from "@/lib/auth"
 import { getUserAddresses } from "@/actions/order.actions"
