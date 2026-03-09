@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/auth"
 import { db } from "@/server/db"
-import { getTranslations } from "next-intl/server"
+import { getTranslations, getLocale } from "next-intl/server"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +20,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 export default async function AdminDashboardPage() {
   const user = await requireRole(["STAFF", "ADMIN", "CENTRAL_ADMIN"])
   const t = await getTranslations("adminDashboard")
+  const locale = await getLocale() as "en" | "fr"
 
   const isCentralAdmin = user.role === "CENTRAL_ADMIN"
   const branchFilter = isCentralAdmin ? {} : { branchId: user.branchId! }
@@ -151,12 +152,12 @@ export default async function AdminDashboardPage() {
                       <span>{order.user?.name || order.user?.email}</span>
                       <span>&middot;</span>
                       <ClockIcon className="h-3 w-3" />
-                      {formatDate(order.createdAt, "dd/MM/yyyy", "en")}
+                      {formatDate(order.createdAt, "dd/MM/yyyy", locale)}
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium">
-                      {formatCurrency(Number(order.total), "en")}
+                      {formatCurrency(Number(order.total), locale)}
                     </span>
                     <Badge
                       variant={order.status === "PENDING" ? "secondary" : "default"}

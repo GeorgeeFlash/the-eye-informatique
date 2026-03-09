@@ -14,11 +14,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "next-intl"
 
 export function UserNav() {
   const { user } = useUser()
   const { signOut } = useClerk()
   const router = useRouter()
+  const t = useTranslations("userNav")
 
   const initials = user
     ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "?"
@@ -27,9 +29,9 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative size-9 rounded-full p-0" aria-label="Mon compte">
+        <Button variant="ghost" className="relative size-9 rounded-full p-0" aria-label={t("myAccount")}>
           <Avatar className="size-9">
-            <AvatarImage src={user?.imageUrl} alt={user?.fullName ?? "Utilisateur"} />
+            <AvatarImage src={user?.imageUrl} alt={user?.fullName ?? t("user")} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
@@ -39,7 +41,7 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col gap-1">
             <p className="text-sm font-medium leading-none">
-              {user?.fullName ?? "Utilisateur"}
+              {user?.fullName ?? t("user")}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user?.primaryEmailAddress?.emailAddress ?? ""}
@@ -50,13 +52,13 @@ export function UserNav() {
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push("/customer")}>
+          <DropdownMenuItem onClick={() => router.push("/dashboard")}>
             <UserIcon className="mr-2 size-4" />
-            Mon profil
+            {t("profile")}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/customer/settings")}>
+          <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>
             <SettingsIcon className="mr-2 size-4" />
-            Paramètres
+            {t("settings")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
@@ -67,7 +69,7 @@ export function UserNav() {
           className="text-destructive focus:text-destructive"
         >
           <LogOutIcon className="mr-2 size-4" />
-          Se déconnecter
+          {t("signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

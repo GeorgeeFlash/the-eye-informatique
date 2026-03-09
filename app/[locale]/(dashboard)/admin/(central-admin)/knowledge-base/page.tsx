@@ -22,7 +22,7 @@ import { UploadForm } from "./upload-form"
 import { DeleteDocButton } from "./delete-doc-button"
 
 export default async function KnowledgeBasePage() {
-  await requireRole(["ADMIN"])
+  await requireRole(["CENTRAL_ADMIN"])
   const t = await getTranslations("ai")
 
   const documents = await db.knowledgeBaseDocument.findMany({

@@ -67,17 +67,17 @@ export function SearchCommand() {
         <CommandList>
           <CommandEmpty>{t("noResults")}</CommandEmpty>
           <CommandGroup heading={t("navGroup")}>
-            <CommandItem onSelect={() => navigate("/dashboard")}>{t("overview")}</CommandItem>
-            <CommandItem onSelect={() => navigate("/dashboard/orders")}>{t("orders")}</CommandItem>
-            <CommandItem onSelect={() => navigate("/dashboard/products")}>{t("products")}</CommandItem>
-            <CommandItem onSelect={() => navigate("/dashboard/repairs")}>{t("repairs")}</CommandItem>
+            <CommandItem onSelect={() => navigate("/admin")}>{t("overview")}</CommandItem>
+            <CommandItem onSelect={() => navigate("/admin/orders")}>{t("orders")}</CommandItem>
+            <CommandItem onSelect={() => navigate("/admin/products")}>{t("products")}</CommandItem>
+            <CommandItem onSelect={() => navigate("/admin/repairs")}>{t("repairs")}</CommandItem>
           </CommandGroup>
           <CommandSeparator />
           <CommandGroup heading={t("quickActionsGroup")}>
-            <CommandItem onSelect={() => navigate("/dashboard/products/new")}>
+            <CommandItem onSelect={() => navigate("/admin/products/new")}>
               {t("newProduct")}
             </CommandItem>
-            <CommandItem onSelect={() => navigate("/dashboard/blog/new")}>
+            <CommandItem onSelect={() => navigate("/admin/blog/new")}>
               {t("newArticle")}
             </CommandItem>
           </CommandGroup>
