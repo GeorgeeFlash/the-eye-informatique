@@ -14,14 +14,25 @@ export type AuthUser = {
 }
 
 /**
+ * Determine the role for a newly provisioned user.
+ * The very first user in the database becomes CENTRAL_ADMIN.
+ */
+async function resolveRoleForNewUser(): Promise<Role> {
+  const count = await db.user.count()
+  return count === 0 ? "CENTRAL_ADMIN" : "CUSTOMER"
+}
+
+/**
  * Get the current platform user from the database (not just Clerk session).
- * Returns null if the user is not authenticated or doesn't exist in our DB yet.
+ * If a Clerk session exists but no DB record is found the user is created
+ * on-the-fly (first user ever becomes CENTRAL_ADMIN).
+ * Returns null if there is no active Clerk session.
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
   const { userId: clerkId } = await auth()
   if (!clerkId) return null
 
-  const user = await db.user.findUnique({
+  const existing = await db.user.findUnique({
     where: { clerkId },
     select: {
       id: true,
@@ -34,7 +45,33 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     },
   })
 
-  return user as AuthUser | null
+  if (existing) return existing as AuthUser
+
+  // No DB record yet — provision one from the Clerk session
+  const clerkUser = await currentUser()
+  if (!clerkUser) return null
+
+  const email = clerkUser.emailAddresses[0]?.emailAddress
+  if (!email) return null
+
+  const role = await resolveRoleForNewUser()
+  const name =
+    [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || null
+
+  const created = await db.user.create({
+    data: { clerkId, email, name, role },
+    select: {
+      id: true,
+      clerkId: true,
+      email: true,
+      name: true,
+      role: true,
+      branchId: true,
+      isActive: true,
+    },
+  })
+
+  return created as AuthUser
 }
 
 /**

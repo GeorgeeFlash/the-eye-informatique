@@ -14,7 +14,8 @@ const aj = arcjet({
     shield({ mode: "LIVE" }),
     detectBot({
       mode: "LIVE",
-      allow: ["CATEGORY:SEARCH_ENGINE"],
+      // Allow search engines AND verified webhook senders (e.g. Svix / Clerk)
+      allow: ["CATEGORY:SEARCH_ENGINE", "CATEGORY:MONITOR"],
     }),
     slidingWindow({
       mode: "LIVE",
@@ -58,6 +59,9 @@ const isAuthRoute = createRouteMatcher([
   "/sign-up(.*)",
 ])
 
+// API routes that must never be touched by the intl middleware
+const isApiRoute = createRouteMatcher(["/api/(.*)", "/trpc/(.*)"])
+
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   // 1a. Arcjet — stricter rate limits on auth endpoints
   if (isAuthRoute(req)) {
@@ -71,12 +75,15 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   }
 
   // 1b. Arcjet — global shield, bot detection, rate limiting
-  const decision = await aj.protect(req)
-  if (decision.isDenied()) {
-    return NextResponse.json(
-      { error: decision.reason.isRateLimit() ? "Too Many Requests" : "Forbidden" },
-      { status: decision.reason.isRateLimit() ? 429 : 403 },
-    )
+  // Skip bot detection for webhook endpoints (Svix / third-party senders)
+  if (!req.nextUrl.pathname.startsWith("/api/webhooks")) {
+    const decision = await aj.protect(req)
+    if (decision.isDenied()) {
+      return NextResponse.json(
+        { error: decision.reason.isRateLimit() ? "Too Many Requests" : "Forbidden" },
+        { status: decision.reason.isRateLimit() ? 429 : 403 },
+      )
+    }
   }
 
   // 2. Clerk — enforce auth on private (dashboard) routes
@@ -85,6 +92,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   }
 
   // 3. next-intl — locale detection & routing
+  // API / tRPC routes must NOT be processed by the intl middleware because
+  // next-intl would redirect them to /<locale>/api/… which has no handler → 404
+  if (isApiRoute(req)) {
+    return NextResponse.next()
+  }
+
   return intlMiddleware(req)
 })
 

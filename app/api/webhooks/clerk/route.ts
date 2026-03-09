@@ -45,18 +45,26 @@ export async function POST(req: Request) {
       return new Response("No email on user", { status: 400 })
     }
 
-    await db.user.upsert({
-      where: { clerkId: id },
-      update: {
-        email,
-        name: [first_name, last_name].filter(Boolean).join(" ") || null,
-      },
-      create: {
-        clerkId: id,
-        email,
-        name: [first_name, last_name].filter(Boolean).join(" ") || null,
-      },
-    })
+    const name = [first_name, last_name].filter(Boolean).join(" ") || null
+
+    if (type === "user.created") {
+      // The very first user in the platform becomes CENTRAL_ADMIN
+      const existingCount = await db.user.count()
+      const role = existingCount === 0 ? "CENTRAL_ADMIN" : "CUSTOMER"
+
+      await db.user.upsert({
+        where: { clerkId: id },
+        update: { email, name },
+        create: { clerkId: id, email, name, role },
+      })
+    } else {
+      // user.updated — only sync contact details, never change the role
+      await db.user.upsert({
+        where: { clerkId: id },
+        update: { email, name },
+        create: { clerkId: id, email, name },
+      })
+    }
   }
 
   if (type === "user.deleted") {

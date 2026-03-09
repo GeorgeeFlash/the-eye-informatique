@@ -390,7 +390,7 @@ async function main() {
         name: `${u.firstName} ${u.lastName}`,
         role: u.role,
         branchId: u.branchId,
-        preferredLocale: "fr",
+        preferredLocale: "en",
       },
     })
 

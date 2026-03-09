@@ -138,7 +138,7 @@ export function CartSheet() {
             <div className="border-t px-6 py-5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  {t("subtotal")} ({totalItems} {t("items")})
+                  {t("subtotal")} ({t("items", { count: totalItems })})
                 </span>
                 <span className="text-lg font-bold">
                   {formatCurrency(totalPrice, locale as "en" | "fr")}
