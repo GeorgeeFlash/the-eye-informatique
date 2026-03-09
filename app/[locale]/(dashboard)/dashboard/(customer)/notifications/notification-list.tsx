@@ -1,9 +1,9 @@
 "use client"
 
 import { useTransition } from "react"
-import { useRouter } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { formatDistanceToNow } from "date-fns"
+import { fr as frLocale, enUS } from "date-fns/locale"
 import {
   markNotificationRead,
   markAllNotificationsRead,
@@ -17,7 +17,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
+import { useRouter } from "@/i18n/navigation"
 
 type Notification = {
   id: string
@@ -50,6 +51,7 @@ export function NotificationList({
   totalPages: number
 }) {
   const t = useTranslations("notifications")
+  const locale = useLocale()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -116,7 +118,10 @@ export function NotificationList({
               <p className="mt-1 font-medium">{n.title}</p>
               <p className="mt-0.5 text-sm text-muted-foreground">{n.body}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                {formatDistanceToNow(new Date(n.createdAt), {
+                  addSuffix: true,
+                  locale: locale === "fr" ? frLocale : enUS,
+                })}
               </p>
             </div>
 

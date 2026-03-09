@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getRepairTicket } from "@/actions/repair.actions"
+import { formatDateTime } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -39,6 +40,7 @@ export default async function RepairTicketDetailPage({
 }) {
   const { ticketId } = await params
   const t = await getTranslations("repairs")
+  const locale = (await getLocale()) as "en" | "fr"
 
   const ticket = await getRepairTicket(ticketId)
   if (!ticket) notFound()
@@ -120,7 +122,7 @@ export default async function RepairTicketDetailPage({
                       {t(`status_${entry.status}`)}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(entry.createdAt).toLocaleString()}
+                      {formatDateTime(entry.createdAt, locale)}
                     </span>
                   </div>
                   {entry.note && (

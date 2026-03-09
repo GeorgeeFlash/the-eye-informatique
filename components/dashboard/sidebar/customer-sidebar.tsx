@@ -1,10 +1,9 @@
 "use client"
 
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import {
   BellIcon,
-  BotIcon,
   GitBranchIcon,
   LayoutDashboardIcon,
   PackageSearchIcon,
@@ -12,8 +11,6 @@ import {
   SettingsIcon,
   WrenchIcon,
   ShieldCheckIcon,
-  DollarSignIcon,
-  LinkIcon,
 } from "lucide-react"
 import {
   Sidebar,

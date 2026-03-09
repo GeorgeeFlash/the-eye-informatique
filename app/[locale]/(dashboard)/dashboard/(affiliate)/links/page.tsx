@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getMyAffiliateProfile } from "@/actions/affiliate.actions"
 import { formatDate } from "@/lib/utils"
 import {
@@ -21,6 +21,7 @@ import { DeleteLinkButton } from "./delete-link-button"
 
 export default async function AffiliateLinksPage() {
   const t = await getTranslations("affiliate")
+  const locale = (await getLocale()) as "en" | "fr"
   const profile = await getMyAffiliateProfile()
   if (!profile) return null
 
@@ -60,7 +61,7 @@ export default async function AffiliateLinksPage() {
                       {link.targetUrl}
                     </TableCell>
                     <TableCell>{link.clickCount}</TableCell>
-                    <TableCell>{formatDate(link.createdAt)}</TableCell>
+                    <TableCell>{formatDate(link.createdAt, "dd/MM/yyyy", locale)}</TableCell>
                     <TableCell>
                       <DeleteLinkButton linkId={link.id} />
                     </TableCell>

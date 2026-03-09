@@ -169,7 +169,31 @@
     "status_PROCESSING": "En traitement",
     "status_SHIPPED": "Expédiée",
     "status_DELIVERED": "Livrée",
-    "status_CANCELLED": "Annulée"
+    "status_CANCELLED": "Annulée",
+    "fulfillment": "Exécution",
+    "fulfillment_PENDING": "En attente",
+    "fulfillment_PROCESSING": "En traitement",
+    "fulfillment_SHIPPED": "Expédiée",
+    "fulfillment_DELIVERED": "Livrée",
+    "shipsFrom": "Expédié depuis {city}",
+    "guaranteeActive": "Garantie active",
+    "guaranteeExpired": "Garantie expirée",
+    "expiresOn": "Expire le {date}",
+    "installments": "Versements",
+    "dueDate": "Échéance",
+    "installmentPaid": "Payé",
+    "installmentOverdue": "En retard",
+    "installmentPending": "En attente",
+    "outstandingBalance": "Solde restant",
+    "amount": "Montant",
+    "transactionId": "ID de transaction",
+    "paidAt": "Payé le",
+    "receiptNumber": "Reçu n°",
+    "paymentMethod_PAYUNIT": "PayUnit",
+    "paymentMethod_CASH": "Espèces",
+    "paymentStatus_PENDING": "En attente",
+    "paymentStatus_SUCCESS": "Payé",
+    "paymentStatus_FAILED": "Échoué"
   },
   "repair": {
     "title": "Demande de réparation",
@@ -326,7 +350,14 @@
       "APPROVED": "Approuvé",
       "SUSPENDED": "Suspendu",
       "REJECTED": "Rejeté"
-    }
+    },
+    "referralStatus_PENDING": "En attente",
+    "referralStatus_CONFIRMED": "Confirmé",
+    "referralStatus_PAID": "Payé",
+    "payoutStatus_PENDING": "En attente",
+    "payoutStatus_PROCESSING": "En traitement",
+    "payoutStatus_COMPLETED": "Terminé",
+    "payoutStatus_FAILED": "Échoué"
   },
   "dashboard": {
     "overview": "Vue d'ensemble",
@@ -402,7 +433,17 @@
     "active": "Actif",
     "affiliatePendingNotice": "Votre candidature d'affilié est en cours d'examen. Vous serez notifié une fois approuvé.",
     "totalEarnings": "Gains Totaux",
-    "viewDetails": "Voir les détails"
+    "viewDetails": "Voir les détails",
+    "guaranteeExpiryWarning": "Avertissement d'expiration de garantie",
+    "expiringGuarantees": "{count, plural, one {# carte de garantie expire} other {# cartes de garantie expirent}} dans les 14 prochains jours.",
+    "expiresOn": "Expire le {date}",
+    "product": "Produit",
+    "affiliateStatus_APPROVED": "Actif",
+    "affiliateStatus_PENDING": "En attente d'approbation",
+    "affiliateStatus_SUSPENDED": "Suspendu",
+    "affiliateStatus_REJECTED": "Rejeté",
+    "affiliateSuspendedNotice": "Votre compte affilié a été suspendu. Contactez le support pour de l'aide.",
+    "affiliateRejectedNotice": "Votre candidature d'affilié n'a pas été approuvée."
   },
   "adminDashboard": {
     "centralTitle": "Administration Centrale",
@@ -656,5 +697,27 @@
     "terms": "Conditions d'utilisation"
   },
   "search": {
-    "placeholder": "Rechercher un produit..."  }
+    "placeholder": "Rechercher un produit..."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "description": "Gérez votre profil et vos préférences.",
+    "profile": "Profil",
+    "profileDescription": "Modifiez votre nom, numéro de téléphone et langue préférée.",
+    "name": "Nom",
+    "phone": "Numéro de téléphone",
+    "language": "Langue préférée",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "profileUpdated": "Profil mis à jour avec succès.",
+    "profileError": "Échec de la mise à jour du profil.",
+    "addresses": "Adresses enregistrées",
+    "addressesDescription": "Adresses utilisées pour vos livraisons.",
+    "noAddresses": "Aucune adresse enregistrée. Ajoutez-en une lors du paiement.",
+    "addedOn": "Ajoutée le {date}",
+    "default": "Par défaut",
+    "accountInfo": "Informations du compte",
+    "email": "Email",
+    "memberSince": "Membre depuis"
+  }
 }

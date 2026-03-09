@@ -1,8 +1,8 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import Image from "next/image"
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getCustomerGuarantees } from "@/actions/guarantee.actions"
-import { formatCurrency } from "@/lib/utils"
+import { formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,6 +21,7 @@ export async function generateMetadata() {
 
 export default async function CustomerGuaranteePage() {
   const t = await getTranslations("guarantee")
+  const locale = (await getLocale()) as "en" | "fr"
   const guarantees = await getCustomerGuarantees()
 
   return (
@@ -87,7 +88,7 @@ export default async function CustomerGuaranteePage() {
                       {t("expiresAt")}
                     </span>
                     <span>
-                      {new Date(card.expiresAt).toLocaleDateString()}
+                      {formatDate(card.expiresAt, "dd/MM/yyyy", locale)}
                     </span>
                   </div>
                   <div className="flex justify-between">

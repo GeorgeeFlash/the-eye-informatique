@@ -1,6 +1,7 @@
-import Link from "next/link"
-import { getTranslations } from "next-intl/server"
+import { Link } from "@/i18n/navigation"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getRepairTickets } from "@/actions/repair.actions"
+import { formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -45,6 +46,7 @@ export default async function CustomerRepairsPage({
   const { page: pageParam } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1)
   const t = await getTranslations("repairs")
+  const locale = (await getLocale()) as "en" | "fr"
 
   const { tickets, totalPages } = await getRepairTickets({ page, pageSize: 10 })
 
@@ -117,7 +119,7 @@ export default async function CustomerRepairsPage({
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {new Date(ticket.createdAt).toLocaleDateString()}
+                        {formatDate(ticket.createdAt, "dd/MM/yyyy", locale)}
                       </TableCell>
                       <TableCell>
                         <Button asChild variant="ghost" size="sm">

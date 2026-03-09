@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation"
-import Link from "next/link"
-import { getTranslations } from "next-intl/server"
+import { Link } from "@/i18n/navigation"
+import { getTranslations, getLocale } from "next-intl/server"
 import { getOrder } from "@/actions/order.actions"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -54,9 +54,12 @@ export default async function OrderDetailPage({
 }) {
   const { orderId } = await params
   const t = await getTranslations("orders")
+  const locale = (await getLocale()) as "en" | "fr"
 
   const order = await getOrder(orderId)
   if (!order) notFound()
+
+  const hasInstallments = order.installments && order.installments.length > 0
 
   return (
     <div className="space-y-6">
@@ -71,13 +74,7 @@ export default async function OrderDetailPage({
             {t("order")} {order.orderNumber}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {new Date(order.createdAt).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {formatDateTime(order.createdAt, locale)}
           </p>
         </div>
         <Badge
@@ -89,7 +86,7 @@ export default async function OrderDetailPage({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Order items */}
+        {/* Order items — AC-M3.2-12: per-item fulfillment status */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>{t("items")}</CardTitle>
@@ -102,6 +99,7 @@ export default async function OrderDetailPage({
                   <TableHead className="text-center">{t("qty")}</TableHead>
                   <TableHead className="text-right">{t("unitPrice")}</TableHead>
                   <TableHead className="text-right">{t("lineTotal")}</TableHead>
+                  <TableHead>{t("fulfillment")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -116,15 +114,45 @@ export default async function OrderDetailPage({
                           {item.variant.color}
                         </span>
                       )}
+                      {/* AC-M4.2-4: Guarantee info per item */}
+                      {item.guaranteeCard && (
+                        <div className="mt-1">
+                          <Badge variant="outline" className="text-xs">
+                            {new Date(item.guaranteeCard.expiresAt) > new Date()
+                              ? t("guaranteeActive")
+                              : t("guaranteeExpired")}
+                            {" — "}
+                            {t("expiresOn", {
+                              date: formatDate(item.guaranteeCard.expiresAt, "dd/MM/yyyy", locale),
+                            })}
+                          </Badge>
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       {item.quantity}
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency(Number(item.unitPrice))}
+                      {formatCurrency(Number(item.unitPrice), locale)}
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      {formatCurrency(Number(item.total))}
+                      {formatCurrency(Number(item.total), locale)}
+                    </TableCell>
+                    <TableCell>
+                      {/* AC-M3.2-12: per-item fulfillment */}
+                      <div className="space-y-1">
+                        <Badge
+                          variant={item.fulfillmentStatus === "DELIVERED" ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {t(`fulfillment_${item.fulfillmentStatus}`)}
+                        </Badge>
+                        {item.fulfillmentBranch && (
+                          <p className="text-xs text-muted-foreground">
+                            {t("shipsFrom", { city: item.fulfillmentBranch.city })}
+                          </p>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -142,27 +170,27 @@ export default async function OrderDetailPage({
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{t("subtotal")}</span>
-                <span>{formatCurrency(Number(order.subtotal))}</span>
+                <span>{formatCurrency(Number(order.subtotal), locale)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{t("shipping")}</span>
-                <span>{formatCurrency(Number(order.deliveryFee))}</span>
+                <span>{formatCurrency(Number(order.deliveryFee), locale)}</span>
               </div>
               {Number(order.tax) > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t("tax")}</span>
-                  <span>{formatCurrency(Number(order.tax))}</span>
+                  <span>{formatCurrency(Number(order.tax), locale)}</span>
                 </div>
               )}
               <Separator />
               <div className="flex justify-between font-semibold text-lg">
                 <span>{t("total")}</span>
-                <span>{formatCurrency(Number(order.total))}</span>
+                <span>{formatCurrency(Number(order.total), locale)}</span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Payment info */}
+          {/* Payment info — AC-M9.1-3: full receipt */}
           {order.payment && (
             <Card>
               <CardHeader>
@@ -171,13 +199,94 @@ export default async function OrderDetailPage({
               <CardContent className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("method")}</span>
-                  <span>{order.payment.method}</span>
+                  <span>{t(`paymentMethod_${order.payment.method}`)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("paymentStatus")}</span>
                   <Badge variant={order.payment.status === "SUCCESS" ? "default" : "outline"}>
-                    {order.payment.status}
+                    {t(`paymentStatus_${order.payment.status}`)}
                   </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("amount")}</span>
+                  <span>{formatCurrency(Number(order.payment.amount), locale)}</span>
+                </div>
+                {order.payment.payunitTransactionId && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("transactionId")}</span>
+                    <span className="font-mono text-xs">{order.payment.payunitTransactionId}</span>
+                  </div>
+                )}
+                {order.payment.paidAt && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("paidAt")}</span>
+                    <span>{formatDateTime(order.payment.paidAt, locale)}</span>
+                  </div>
+                )}
+                {order.payment.receiptNumber && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("receiptNumber")}</span>
+                    <span className="font-mono text-xs">{order.payment.receiptNumber}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Installment info — AC-M3.2-8, CON-3.5 */}
+          {hasInstallments && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("installments")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>#</TableHead>
+                      <TableHead>{t("amount")}</TableHead>
+                      <TableHead>{t("dueDate")}</TableHead>
+                      <TableHead>{t("status")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {order.installments.map((inst) => {
+                      const isPaid = inst.status === "PAID"
+                      const isOverdue = !isPaid && new Date(inst.dueDate) < new Date()
+                      return (
+                        <TableRow key={inst.id}>
+                          <TableCell>{inst.sequenceNumber}</TableCell>
+                          <TableCell>{formatCurrency(Number(inst.amount), locale)}</TableCell>
+                          <TableCell>{formatDate(inst.dueDate, "dd/MM/yyyy", locale)}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                isPaid ? "default" : isOverdue ? "destructive" : "outline"
+                              }
+                            >
+                              {isPaid
+                                ? t("installmentPaid")
+                                : isOverdue
+                                  ? t("installmentOverdue")
+                                  : t("installmentPending")}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+                {/* Outstanding balance */}
+                <div className="mt-4 flex justify-between border-t pt-3 text-sm font-medium">
+                  <span>{t("outstandingBalance")}</span>
+                  <span>
+                    {formatCurrency(
+                      order.installments
+                        .filter((i) => i.status !== "PAID")
+                        .reduce((sum, i) => sum + Number(i.amount), 0),
+                      locale
+                    )}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -226,7 +335,7 @@ export default async function OrderDetailPage({
                           {t(`status_${entry.status}`)}
                         </Badge>
                         <span className="text-muted-foreground">
-                          {new Date(entry.createdAt).toLocaleDateString()}
+                          {formatDateTime(entry.createdAt, locale)}
                         </span>
                       </div>
                       {entry.note && (

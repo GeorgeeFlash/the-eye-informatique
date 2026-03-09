@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getAffiliateEarnings } from "@/actions/affiliate.actions"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import {
@@ -21,6 +21,7 @@ import { PayoutButton } from "./payout-button"
 
 export default async function AffiliateEarningsPage() {
   const t = await getTranslations("affiliate")
+  const locale = (await getLocale()) as "en" | "fr"
   const data = await getAffiliateEarnings()
   if (!data) return null
 
@@ -41,7 +42,7 @@ export default async function AffiliateEarningsPage() {
             <TrendingUpIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalEarned)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalEarned, locale)}</div>
           </CardContent>
         </Card>
 
@@ -51,7 +52,7 @@ export default async function AffiliateEarningsPage() {
             <WalletIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(pendingBalance)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(pendingBalance, locale)}</div>
           </CardContent>
         </Card>
 
@@ -61,7 +62,7 @@ export default async function AffiliateEarningsPage() {
             <DollarSignIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalPaid)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalPaid, locale)}</div>
           </CardContent>
         </Card>
 
@@ -113,7 +114,7 @@ export default async function AffiliateEarningsPage() {
                 {profile.referrals.map((ref) => (
                   <TableRow key={ref.id}>
                     <TableCell className="font-mono text-sm">{ref.link.code}</TableCell>
-                    <TableCell>{formatCurrency(ref.commission.toNumber())}</TableCell>
+                    <TableCell>{formatCurrency(ref.commission.toNumber(), locale)}</TableCell>
                     <TableCell>
                       <Badge
                         variant={
@@ -124,10 +125,10 @@ export default async function AffiliateEarningsPage() {
                               : "outline"
                         }
                       >
-                        {ref.status}
+                        {t(`referralStatus_${ref.status}`)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{formatDate(ref.createdAt)}</TableCell>
+                    <TableCell>{formatDate(ref.createdAt, "dd/MM/yyyy", locale)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

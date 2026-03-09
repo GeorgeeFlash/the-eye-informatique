@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getMyAffiliateProfile } from "@/actions/affiliate.actions"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import {
@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge"
 
 export default async function AffiliatePayoutsPage() {
   const t = await getTranslations("affiliate")
+  const locale = (await getLocale()) as "en" | "fr"
   const profile = await getMyAffiliateProfile()
   if (!profile) return null
 
@@ -58,7 +59,7 @@ export default async function AffiliatePayoutsPage() {
                 {profile.payouts.map((payout) => (
                   <TableRow key={payout.id}>
                     <TableCell className="font-medium">
-                      {formatCurrency(payout.amount.toNumber())}
+                      {formatCurrency(payout.amount.toNumber(), locale)}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -70,12 +71,12 @@ export default async function AffiliatePayoutsPage() {
                               : "secondary"
                         }
                       >
-                        {payout.status}
+                        {t(`payoutStatus_${payout.status}`)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{formatDate(payout.createdAt)}</TableCell>
+                    <TableCell>{formatDate(payout.createdAt, "dd/MM/yyyy", locale)}</TableCell>
                     <TableCell>
-                      {payout.processedAt ? formatDate(payout.processedAt) : "—"}
+                      {payout.processedAt ? formatDate(payout.processedAt, "dd/MM/yyyy", locale) : "—"}
                     </TableCell>
                   </TableRow>
                 ))}

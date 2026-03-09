@@ -1,7 +1,7 @@
-import Link from "next/link"
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
+import { Link } from "@/i18n/navigation"
 import { getCustomerOrders } from "@/actions/order.actions"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -43,6 +43,7 @@ export default async function CustomerOrdersPage({
   const { page: pageParam } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1)
   const t = await getTranslations("orders")
+  const locale = (await getLocale()) as "en" | "fr"
 
   const { orders, totalPages } = await getCustomerOrders(page, 10)
 
@@ -91,7 +92,7 @@ export default async function CustomerOrdersPage({
                         {order.orderNumber}
                       </TableCell>
                       <TableCell>
-                        {new Date(order.createdAt).toLocaleDateString()}
+                        {formatDate(order.createdAt, "dd/MM/yyyy", locale)}
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -106,7 +107,7 @@ export default async function CustomerOrdersPage({
                         {order._count?.items ?? "-"}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {formatCurrency(Number(order.total))}
+                        {formatCurrency(Number(order.total), locale)}
                       </TableCell>
                       <TableCell>
                         <Button asChild variant="ghost" size="sm">

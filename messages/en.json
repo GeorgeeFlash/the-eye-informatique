@@ -169,7 +169,31 @@
     "status_PROCESSING": "Processing",
     "status_SHIPPED": "Shipped",
     "status_DELIVERED": "Delivered",
-    "status_CANCELLED": "Cancelled"
+    "status_CANCELLED": "Cancelled",
+    "fulfillment": "Fulfillment",
+    "fulfillment_PENDING": "Pending",
+    "fulfillment_PROCESSING": "Processing",
+    "fulfillment_SHIPPED": "Shipped",
+    "fulfillment_DELIVERED": "Delivered",
+    "shipsFrom": "Ships from {city}",
+    "guaranteeActive": "Guarantee Active",
+    "guaranteeExpired": "Guarantee Expired",
+    "expiresOn": "Expires {date}",
+    "installments": "Installments",
+    "dueDate": "Due Date",
+    "installmentPaid": "Paid",
+    "installmentOverdue": "Overdue",
+    "installmentPending": "Pending",
+    "outstandingBalance": "Outstanding Balance",
+    "amount": "Amount",
+    "transactionId": "Transaction ID",
+    "paidAt": "Paid At",
+    "receiptNumber": "Receipt #",
+    "paymentMethod_PAYUNIT": "PayUnit",
+    "paymentMethod_CASH": "Cash",
+    "paymentStatus_PENDING": "Pending",
+    "paymentStatus_SUCCESS": "Paid",
+    "paymentStatus_FAILED": "Failed"
   },
   "repair": {
     "title": "Repair Request",
@@ -326,7 +350,14 @@
       "APPROVED": "Approved",
       "SUSPENDED": "Suspended",
       "REJECTED": "Rejected"
-    }
+    },
+    "referralStatus_PENDING": "Pending",
+    "referralStatus_CONFIRMED": "Confirmed",
+    "referralStatus_PAID": "Paid",
+    "payoutStatus_PENDING": "Pending",
+    "payoutStatus_PROCESSING": "Processing",
+    "payoutStatus_COMPLETED": "Completed",
+    "payoutStatus_FAILED": "Failed"
   },
   "dashboard": {
     "overview": "Overview",
@@ -402,7 +433,17 @@
     "active": "Active",
     "affiliatePendingNotice": "Your affiliate application is being reviewed. You'll be notified once approved.",
     "totalEarnings": "Total Earnings",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "guaranteeExpiryWarning": "Guarantee Expiry Warning",
+    "expiringGuarantees": "{count, plural, one {# guarantee card} other {# guarantee cards}} expiring within 14 days.",
+    "expiresOn": "Expires {date}",
+    "product": "Product",
+    "affiliateStatus_APPROVED": "Active",
+    "affiliateStatus_PENDING": "Pending Approval",
+    "affiliateStatus_SUSPENDED": "Suspended",
+    "affiliateStatus_REJECTED": "Rejected",
+    "affiliateSuspendedNotice": "Your affiliate account has been suspended. Contact support for help.",
+    "affiliateRejectedNotice": "Your affiliate application was not approved."
   },
   "adminDashboard": {
     "centralTitle": "Central Administration",
@@ -658,5 +699,26 @@
   },
   "search": {
     "placeholder": "Search for a product..."
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your profile and preferences.",
+    "profile": "Profile",
+    "profileDescription": "Update your name, phone number, and language preference.",
+    "name": "Name",
+    "phone": "Phone Number",
+    "language": "Preferred Language",
+    "save": "Save Changes",
+    "saving": "Saving…",
+    "profileUpdated": "Profile updated successfully.",
+    "profileError": "Failed to update profile.",
+    "addresses": "Saved Addresses",
+    "addressesDescription": "Addresses used for your deliveries.",
+    "noAddresses": "No saved addresses yet. Add one at checkout.",
+    "addedOn": "Added {date}",
+    "default": "Default",
+    "accountInfo": "Account Information",
+    "email": "Email",
+    "memberSince": "Member Since"
   }
 }
