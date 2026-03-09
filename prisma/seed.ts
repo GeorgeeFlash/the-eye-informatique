@@ -1,54 +1,8 @@
 import { db } from "@/server/db"
-import { clerkClient } from "@clerk/nextjs/server"
 
 
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
-/**
- * Create a Clerk user idempotently.
- * If the email already exists in Clerk, fetch and return that existing user.
- * Returns the Clerk user ID.
- */
-async function upsertClerkUser(opts: {
-  firstName: string
-  lastName: string
-  email: string
-  password: string
-}): Promise<string> {
-  const clerk = await clerkClient()
-  try {
-    const user = await clerk.users.createUser({
-      firstName: opts.firstName,
-      lastName: opts.lastName,
-      emailAddress: [opts.email],
-      password: opts.password,
-    })
-    return user.id
-  } catch (err: unknown) {
-    // Clerk returns a 422 with code "form_identifier_exists" when the email is taken
-    const isAlreadyExists =
-      typeof err === "object" &&
-      err !== null &&
-      "errors" in err &&
-      Array.isArray((err as { errors: { code: string }[] }).errors) &&
-      (err as { errors: { code: string }[] }).errors.some(
-        (e) => e.code === "form_identifier_exists",
-      )
-
-    if (isAlreadyExists) {
-      const list = await clerk.users.getUserList({
-        emailAddress: [opts.email],
-      })
-      const existing = list.data[0]
-      if (!existing) throw new Error(`Could not find existing Clerk user for ${opts.email}`)
-      return existing.id
-    }
-    throw err
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Main seed
@@ -228,6 +182,8 @@ async function main() {
   // -------------------------------------------------------------------------
   // 5. Sample products
   // -------------------------------------------------------------------------
+  const baseAssetUrl = "/assets/samples/products"
+
   const samsung = await db.product.upsert({
     where: { slug: "samsung-galaxy-a55-5g" },
     update: {},
@@ -314,13 +270,266 @@ async function main() {
       tags: { connect: [{ slug: "promo" }] },
       images: {
         create: [
-          { url: "https://placehold.co/800x800/f0f0f0/333333?text=AirPods+Pro+2", alt: "Apple AirPods Pro 2", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/earphones_a_1.webp`, alt: "Apple AirPods Pro 2 vue 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/earphones_a_2.webp`, alt: "Apple AirPods Pro 2 vue 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/earphones_a_3.webp`, alt: "Apple AirPods Pro 2 vue 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/earphones_a_4.webp`, alt: "Apple AirPods Pro 2 vue 4", isPrimary: false, sortOrder: 3 },
         ],
       },
       variants: {
         create: [
           { sku: "APP-PRO2-WHT", color: "Blanc", condition: "NEW", stock: 25, price: 155000, weight: 0.061 },
           { sku: "APP-PRO2-WHT-REF", color: "Blanc", condition: "REFURBISHED", stock: 6, price: 119000, weight: 0.061 },
+        ],
+      },
+    },
+    include: { variants: true },
+  })
+
+  // Additional earphones products
+  const earphones_b = await db.product.upsert({
+    where: { slug: "earphones-standard" },
+    update: {},
+    create: {
+      slug: "earphones-standard",
+      name: "Écouteurs Standard",
+      description: "Écouteurs filaires de qualité avec driver haute performance et confort optimal.",
+      basePrice: 45000,
+      currency: "XAF",
+      categoryId: audio.id,
+      brand: "Audio Pro",
+      specs: { connectivity: "Filaire", impedance: "32Ω", frequency: "20Hz-20kHz" },
+      metaTitle: "Écouteurs Standard - Achat en ligne | The Eye Informatique",
+      metaDescription: "Écouteurs filaires au meilleur prix au Cameroun.",
+      isActive: true,
+      isFeatured: false,
+      tags: { connect: [{ slug: "best-seller" }] },
+      images: {
+        create: [
+          { url: `${baseAssetUrl}/earphones_b_1.webp`, alt: "Écouteurs Standard vue 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/earphones_b_2.webp`, alt: "Écouteurs Standard vue 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/earphones_b_3.webp`, alt: "Écouteurs Standard vue 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/earphones_b_4.webp`, alt: "Écouteurs Standard vue 4", isPrimary: false, sortOrder: 3 },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "EARPH-STD-BLK", color: "Noir", condition: "NEW", stock: 15, price: 45000, weight: 0.08 },
+          { sku: "EARPH-STD-WHT", color: "Blanc", condition: "NEW", stock: 12, price: 45000, weight: 0.08 },
+        ],
+      },
+    },
+    include: { variants: true },
+  })
+
+  const earphones_c = await db.product.upsert({
+    where: { slug: "earphones-premium" },
+    update: {},
+    create: {
+      slug: "earphones-premium",
+      name: "Écouteurs Premium",
+      description: "Écouteurs sans fil haut de gamme avec technologie noise-cancelling.",
+      basePrice: 125000,
+      currency: "XAF",
+      categoryId: audio.id,
+      brand: "Premium Audio",
+      specs: { connectivity: "Bluetooth 5.0", anc: "Oui", battery: "8h" },
+      metaTitle: "Écouteurs Premium - Achat en ligne | The Eye Informatique",
+      metaDescription: "Écouteurs sans fil premium avec réduction de bruit au Cameroun.",
+      isActive: true,
+      isFeatured: true,
+      tags: { connect: [{ slug: "new-arrival" }] },
+      images: {
+        create: [
+          { url: `${baseAssetUrl}/earphones_c_1.webp`, alt: "Écouteurs Premium vue 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/earphones_c_2.webp`, alt: "Écouteurs Premium vue 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/earphones_c_3.webp`, alt: "Écouteurs Premium vue 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/earphones_c_4.webp`, alt: "Écouteurs Premium vue 4", isPrimary: false, sortOrder: 3 },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "EARPH-PREM-BLK", color: "Noir", condition: "NEW", stock: 18, price: 125000, weight: 0.085 },
+          { sku: "EARPH-PREM-SLV", color: "Argent", condition: "NEW", stock: 12, price: 125000, weight: 0.085 },
+        ],
+      },
+    },
+    include: { variants: true },
+  })
+
+  // Headphones products
+  const headphones_a = await db.product.upsert({
+    where: { slug: "headphones-sport" },
+    update: {},
+    create: {
+      slug: "headphones-sport",
+      name: "Casque Sport",
+      description: "Casque audio filaire confortable pour les séances de sport avec prise renforcée.",
+      basePrice: 55000,
+      currency: "XAF",
+      categoryId: audio.id,
+      brand: "Sport Audio",
+      specs: { connectivity: "Filaire", weight: "150g", impedance: "32Ω" },
+      metaTitle: "Casque Sport - Achat en ligne | The Eye Informatique",
+      metaDescription: "Casque audio sport au Cameroun - confortable et durable.",
+      isActive: true,
+      isFeatured: false,
+      tags: { connect: [{ slug: "new-arrival" }] },
+      images: {
+        create: [
+          { url: `${baseAssetUrl}/headphones_a_1.webp`, alt: "Casque Sport vue 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/headphones_a_2.webp`, alt: "Casque Sport vue 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/headphones_a_3.webp`, alt: "Casque Sport vue 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/headphones_a_4.webp`, alt: "Casque Sport vue 4", isPrimary: false, sortOrder: 3 },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "HEAD-SPORT-BLK", color: "Noir", condition: "NEW", stock: 20, price: 55000, weight: 0.15 },
+          { sku: "HEAD-SPORT-BLU", color: "Bleu", condition: "NEW", stock: 16, price: 55000, weight: 0.15 },
+        ],
+      },
+    },
+    include: { variants: true },
+  })
+
+  const headphones_b = await db.product.upsert({
+    where: { slug: "headphones-gaming" },
+    update: {},
+    create: {
+      slug: "headphones-gaming",
+      name: "Casque Gaming",
+      description: "Casque de gaming sans fil avec son surround 7.1 et microphone détachable.",
+      basePrice: 185000,
+      currency: "XAF",
+      categoryId: audio.id,
+      brand: "Gaming Gear",
+      specs: { connectivity: "Wireless 2.4GHz", sound: "7.1 Surround", mic: "Oui" },
+      metaTitle: "Casque Gaming - Achat en ligne | The Eye Informatique",
+      metaDescription: "Casque gaming sans fil au Cameroun - expérience immersive.",
+      isActive: true,
+      isFeatured: true,
+      tags: { connect: [{ slug: "best-seller" }] },
+      images: {
+        create: [
+          { url: `${baseAssetUrl}/headphones_b_1.webp`, alt: "Casque Gaming vue 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/headphones_b_2.webp`, alt: "Casque Gaming vue 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/headphones_b_3.webp`, alt: "Casque Gaming vue 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/headphones_b_4.webp`, alt: "Casque Gaming vue 4", isPrimary: false, sortOrder: 3 },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "HEAD-GAME-BLK", color: "Noir", condition: "NEW", stock: 14, price: 185000, weight: 0.32 },
+          { sku: "HEAD-GAME-RED", color: "Noir & Rouge", condition: "NEW", stock: 11, price: 185000, weight: 0.32 },
+        ],
+      },
+    },
+    include: { variants: true },
+  })
+
+  const headphones_c = await db.product.upsert({
+    where: { slug: "headphones-studio" },
+    update: {},
+    create: {
+      slug: "headphones-studio",
+      name: "Casque Studio",
+      description: "Casque de monitoring professionnel pour studio d'enregistrement et production audio.",
+      basePrice: 275000,
+      currency: "XAF",
+      categoryId: audio.id,
+      brand: "Pro Audio",
+      specs: { connectivity: "Filaire", frequency: "5Hz-40kHz", impedance: "32Ω" },
+      metaTitle: "Casque Studio - Achat en ligne | The Eye Informatique",
+      metaDescription: "Casque audio studio professionnel au Cameroun.",
+      isActive: true,
+      isFeatured: true,
+      tags: { connect: [{ slug: "best-seller" }] },
+      images: {
+        create: [
+          { url: `${baseAssetUrl}/headphones_c_1.webp`, alt: "Casque Studio vue 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/headphones_c_2.webp`, alt: "Casque Studio vue 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/headphones_c_3.webp`, alt: "Casque Studio vue 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/headphones_c_4.webp`, alt: "Casque Studio vue 4", isPrimary: false, sortOrder: 3 },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "HEAD-STUDIO-WHT", color: "Blanc", condition: "NEW", stock: 9, price: 275000, weight: 0.25 },
+          { sku: "HEAD-STUDIO-GRY", color: "Gris", condition: "NEW", stock: 7, price: 275000, weight: 0.25 },
+        ],
+      },
+    },
+    include: { variants: true },
+  })
+
+  // Speaker product
+  const speaker = await db.product.upsert({
+    where: { slug: "portable-speaker" },
+    update: {},
+    create: {
+      slug: "portable-speaker",
+      name: "Haut-parleur Portable",
+      description: "Haut-parleur Bluetooth portable avec LED RGB et batterie longue durée.",
+      basePrice: 95000,
+      currency: "XAF",
+      categoryId: audio.id,
+      brand: "Portable Sound",
+      specs: { connectivity: "Bluetooth 5.0", power: "20W", battery: "12h" },
+      metaTitle: "Haut-parleur Portable - Achat en ligne | The Eye Informatique",
+      metaDescription: "Haut-parleur Bluetooth portable au Cameroun avec LED RGB.",
+      isActive: true,
+      isFeatured: true,
+      tags: { connect: [{ slug: "new-arrival" }] },
+      images: {
+        create: [
+          { url: `${baseAssetUrl}/speaker1.webp`, alt: "Haut-parleur Portable vue 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/speaker2.webp`, alt: "Haut-parleur Portable vue 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/speaker3.webp`, alt: "Haut-parleur Portable vue 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/speaker4.webp`, alt: "Haut-parleur Portable vue 4", isPrimary: false, sortOrder: 3 },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "SPEAK-PORT-BLK", color: "Noir", condition: "NEW", stock: 22, price: 95000, weight: 0.58 },
+          { sku: "SPEAK-PORT-BLU", color: "Bleu", condition: "NEW", stock: 18, price: 95000, weight: 0.58 },
+        ],
+      },
+    },
+    include: { variants: true },
+  })
+
+  // Smartwatch product
+  const watch = await db.product.upsert({
+    where: { slug: "smartwatch-fitness" },
+    update: {},
+    create: {
+      slug: "smartwatch-fitness",
+      name: "Montre Connectée Fitness",
+      description: "Smartwatch avec suivi de la fréquence cardiaque, compteur de pas et notifications.",
+      basePrice: 75000,
+      currency: "XAF",
+      categoryId: accessoires.id,
+      brand: "Fitness Tech",
+      specs: { screen: "1.4\" AMOLED", battery: "5 jours", waterproof: "50m" },
+      metaTitle: "Montre Connectée Fitness - Achat en ligne | The Eye Informatique",
+      metaDescription: "Smartwatch fitness moins cher au Cameroun - suivi santé complet.",
+      isActive: true,
+      isFeatured: true,
+      tags: { connect: [{ slug: "new-arrival" }, { slug: "best-seller" }] },
+      images: {
+        create: [
+          { url: `${baseAssetUrl}/watch_1.webp`, alt: "Montre Connectée Fitness vue 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/watch_2.webp`, alt: "Montre Connectée Fitness vue 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/watch_3.webp`, alt: "Montre Connectée Fitness vue 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/watch_4.webp`, alt: "Montre Connectée Fitness vue 4", isPrimary: false, sortOrder: 3 },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "WATCH-FIT-BLK", color: "Noir", condition: "NEW", stock: 26, price: 75000, weight: 0.042 },
+          { sku: "WATCH-FIT-BLU", color: "Bleu", condition: "NEW", stock: 19, price: 75000, weight: 0.042 },
+          { sku: "WATCH-FIT-RED", color: "Rouge", condition: "NEW", stock: 15, price: 75000, weight: 0.042 },
         ],
       },
     },
@@ -336,6 +545,13 @@ async function main() {
     ...samsung.variants,
     ...macbook.variants,
     ...airpods.variants,
+    ...earphones_b.variants,
+    ...earphones_c.variants,
+    ...headphones_a.variants,
+    ...headphones_b.variants,
+    ...headphones_c.variants,
+    ...speaker.variants,
+    ...watch.variants,
   ]
 
   for (const variant of allVariants) {
@@ -359,85 +575,11 @@ async function main() {
   console.log("  ✔ ProductStockByBranch")
 
   // -------------------------------------------------------------------------
-  // 7. Seed users (Clerk + Prisma)
-  // -------------------------------------------------------------------------
-  const SEED_PASSWORD = "TeiStore2026!"
-
-  const seedUsers = [
-    { firstName: "Customer", lastName: "Tei", email: "ninobav359@him6.com", role: "CUSTOMER" as const, branchId: null },
-    { firstName: "Affiliate", lastName: "Tei", email: "affiliate@tei-store.test", role: "AFFILIATE" as const, branchId: null },
-    { firstName: "Staff", lastName: "Tei", email: "staff@tei-store.test", role: "STAFF" as const, branchId: yaoundeBranch.id },
-    { firstName: "Admin", lastName: "Tei", email: "admin@tei-store.test", role: "ADMIN" as const, branchId: yaoundeBranch.id },
-    { firstName: "Central", lastName: "Admin", email: "central@tei-store.test", role: "CENTRAL_ADMIN" as const, branchId: null },
-  ]
-
-  const createdUsers: { role: string; clerkId: string; dbId: string }[] = []
-
-  for (const u of seedUsers) {
-    const clerkId = await upsertClerkUser({
-      firstName: u.firstName,
-      lastName: u.lastName,
-      email: u.email,
-      password: SEED_PASSWORD,
-    })
-
-    const dbUser = await db.user.upsert({
-      where: { clerkId },
-      update: { role: u.role, branchId: u.branchId },
-      create: {
-        clerkId,
-        email: u.email,
-        name: `${u.firstName} ${u.lastName}`,
-        role: u.role,
-        branchId: u.branchId,
-        preferredLocale: "en",
-      },
-    })
-
-    createdUsers.push({ role: u.role, clerkId, dbId: dbUser.id })
-    console.log(`    ✔ ${u.role} — ${u.email}`)
-  }
-
-  console.log("  ✔ Users (Clerk + Prisma)")
-
-  // -------------------------------------------------------------------------
-  // 8. Affiliate profile for the AFFILIATE seed user
-  // -------------------------------------------------------------------------
-  const affiliateDbUser = createdUsers.find((u) => u.role === "AFFILIATE")!
-
-  const affiliateProfile = await db.affiliateProfile.upsert({
-    where: { userId: affiliateDbUser.dbId },
-    update: {},
-    create: {
-      userId: affiliateDbUser.dbId,
-      status: "APPROVED",
-      commissionRate: 0.03,
-      payoutMethod: "MOBILE_MONEY",
-      payoutPhone: "+237690000001",
-      websiteUrl: "https://affiliate.tei-store.test",
-    },
-  })
-
-  await db.affiliateLink.upsert({
-    where: { code: "TEI-AFF-001" },
-    update: {},
-    create: {
-      affiliateId: affiliateProfile.id,
-      code: "TEI-AFF-001",
-      targetUrl: "/products",
-      clickCount: 0,
-    },
-  })
-
-  console.log("  ✔ AffiliateProfile + AffiliateLink")
-
-  // -------------------------------------------------------------------------
   // Summary
   // -------------------------------------------------------------------------
   console.log("\n✅  Seed complete!")
   console.log("   Branches :", [yaoundeBranch.name, douala.name].join(", "))
-  console.log("   Products :", [samsung.name, macbook.name, airpods.name].join(", "))
-  console.log("   Users    :", createdUsers.map((u) => u.role).join(", "))
+  console.log("   Products :", 11, "products seeded")
 }
 
 main()
