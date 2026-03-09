@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { formatDate } from "@/lib/utils"
+import { Locale } from "@/lib/constants"
 
 export async function generateMetadata() {
   const t = await getTranslations("adminUsers")
@@ -45,7 +46,7 @@ export default async function UsersPage({
   const { page: pageParam, role, search } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1)
   const t = await getTranslations("adminUsers")
-  const locale = await getLocale()
+  const locale = await getLocale() as Locale
 
   const { users, totalPages, total } = await getUsers({
     search: search || undefined,

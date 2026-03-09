@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { Locale } from "@/lib/constants"
 
 export async function generateMetadata() {
   const t = await getTranslations("adminOrders")
@@ -57,7 +58,7 @@ export default async function AdminOrdersPage({
   const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1)
   const t = await getTranslations("adminOrders")
   const tOrders = await getTranslations("orders")
-  const locale = await getLocale()
+  const locale = await getLocale() as Locale
 
   const branchId =
     user.role === "CENTRAL_ADMIN" ? undefined : user.branchId ?? undefined

@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator"
 import { ArrowLeftIcon } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { AdminOrderActions } from "./order-actions"
+import { Locale } from "@/lib/constants"
 
 const STATUS_VARIANT: Record<
   string,
@@ -79,7 +80,7 @@ export default async function AdminOrderDetailPage({
   const { id } = await params
   const t = await getTranslations("adminOrders")
   const tOrders = await getTranslations("orders")
-  const locale = await getLocale()
+  const locale = await getLocale() as Locale
 
   const order = await getOrder(id)
   if (!order) notFound()

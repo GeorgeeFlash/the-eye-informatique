@@ -1,28 +1,23 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { useTranslations } from "next-intl"
-import { updateOrderStatus, cancelOrder } from "@/actions/order.actions"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { updateOrderStatus, cancelOrder } from "@/actions/order.actions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { toast } from "sonner"
-import { useState, useTransition } from "react"
-import { Loader2Icon } from "lucide-react"
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { useState, useRef, useTransition } from "react";
+import { Loader2Icon } from "lucide-react";
 
 const STATUSES = [
   "PENDING",
@@ -31,65 +26,71 @@ const STATUSES = [
   "SHIPPED",
   "DELIVERED",
   "CANCELLED",
-] as const
+] as const;
 
 interface AdminOrderActionsProps {
-  orderId: string
-  currentStatus: string
+  orderId: string;
+  currentStatus: string;
 }
 
 export function AdminOrderActions({
   orderId,
   currentStatus,
 }: AdminOrderActionsProps) {
-  const router = useRouter()
-  const t = useTranslations("adminOrders")
-  const tOrders = useTranslations("orders")
-  const [isPending, startTransition] = useTransition()
-  const [status, setStatus] = useState(currentStatus)
-  const [note, setNote] = useState("")
+  const router = useRouter();
+  const t = useTranslations("adminOrders");
+  const tOrders = useTranslations("orders");
+  const [isPending, startTransition] = useTransition();
+  const [status, setStatus] = useState(currentStatus);
+  const [note, setNote] = useState("");
+
+  // Keep local status in sync when the server refreshes with new currentStatus
+  const prevStatusRef = useRef(currentStatus);
+  if (prevStatusRef.current !== currentStatus) {
+    prevStatusRef.current = currentStatus;
+    setStatus(currentStatus);
+  }
 
   function handleUpdate() {
-    if (status === currentStatus && !note) return
+    if (status === currentStatus && !note) return;
 
     startTransition(async () => {
       const result = await updateOrderStatus(
         orderId,
         status as (typeof STATUSES)[number],
         note || undefined,
-      )
+      );
       if (result && "error" in result) {
         toast.error(
           typeof result.error === "string" ? result.error : t("updateStatus"),
-        )
-        return
+        );
+        return;
       }
-      toast.success(t("updateStatus"))
-      setNote("")
-      router.refresh()
-    })
+      toast.success(t("updateStatus"));
+      setNote("");
+      router.refresh();
+    });
   }
 
   function handleCancel() {
-    if (!confirm(t("cancelConfirm"))) return
+    if (!confirm(t("cancelConfirm"))) return;
 
     startTransition(async () => {
-      const result = await cancelOrder(orderId)
+      const result = await cancelOrder(orderId);
       if (result && "error" in result) {
         toast.error(
           typeof result.error === "string" ? result.error : t("cancelOrder"),
-        )
-        return
+        );
+        return;
       }
-      toast.success(t("cancelOrder"))
-      router.refresh()
-    })
+      toast.success(t("cancelOrder"));
+      router.refresh();
+    });
   }
 
-  const isCancelled = currentStatus === "CANCELLED"
-  const isDelivered = currentStatus === "DELIVERED"
-  const canCancel =
-    !isCancelled && !isDelivered && currentStatus !== "SHIPPED"
+  const isCancelled = currentStatus === "CANCELLED";
+  const isDelivered = currentStatus === "DELIVERED";
+  const canCancel = !isCancelled && !isDelivered && currentStatus !== "SHIPPED";
 
   return (
     <Card>
@@ -160,5 +161,5 @@ export function AdminOrderActions({
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

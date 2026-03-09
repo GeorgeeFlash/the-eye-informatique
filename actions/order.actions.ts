@@ -424,6 +424,13 @@ export async function updateOrderStatus(
     return { error: "Access denied" }
   }
 
+  // Map order status → item fulfillment status where applicable
+  const fulfillmentStatusMap: Partial<Record<OrderStatus, "SHIPPED" | "DELIVERED">> = {
+    SHIPPED: "SHIPPED",
+    DELIVERED: "DELIVERED",
+  }
+  const newFulfillmentStatus = fulfillmentStatusMap[status]
+
   await db.$transaction([
     db.order.update({
       where: { id: orderId },
@@ -437,6 +444,14 @@ export async function updateOrderStatus(
         changedBy: user.id,
       },
     }),
+    ...(newFulfillmentStatus
+      ? [
+          db.orderItem.updateMany({
+            where: { orderId },
+            data: { fulfillmentStatus: newFulfillmentStatus },
+          }),
+        ]
+      : []),
   ])
 
   revalidateOrders()
