@@ -1,24 +1,13 @@
-"use client"
-
-import { Link } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import {
   BarChart3Icon,
   BriefcaseIcon,
-  BuildingIcon,
-  FileTextIcon,
-  GitBranchIcon,
   LayoutDashboardIcon,
-  MessageSquareIcon,
-  PackageIcon,
-  ScanLineIcon,
-  ScrollTextIcon,
+  ServerIcon,
   SettingsIcon,
-  ShieldIcon,
-  UsersIcon,
-  WrenchIcon,
-  BookOpenIcon,
-} from "lucide-react"
+  ShoppingCartIcon,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -29,14 +18,18 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
-} from "@/components/ui/sidebar"
-import { NavMain, type NavItem } from "@/components/dashboard/sidebar/nav-main"
-import { APP_NAME } from "@/lib/constants"
+} from "@/components/ui/sidebar";
+import { NavMain, type NavItem } from "@/components/dashboard/sidebar/nav-main";
+import { APP_NAME } from "@/lib/constants";
 
-type SidebarVariant = "admin" | "central-admin"
+type SidebarVariant = "admin" | "central-admin";
 
-export function AppSidebar({ variant = "admin" }: { variant?: SidebarVariant }) {
-  const t = useTranslations("sidebar.admin")
+export function AppSidebar({
+  variant = "admin",
+}: {
+  variant?: SidebarVariant;
+}) {
+  const t = useTranslations("sidebar.admin");
 
   const adminNav: NavItem[] = [
     {
@@ -45,69 +38,42 @@ export function AppSidebar({ variant = "admin" }: { variant?: SidebarVariant }) 
       icon: LayoutDashboardIcon,
     },
     {
-      title: t("orders"),
+      title: t("storeManagement"),
       url: "/admin/orders",
-      icon: ScrollTextIcon,
+      icon: ShoppingCartIcon,
+      items: [
+        { title: t("orders"), url: "/admin/orders" },
+        { title: t("products"), url: "/admin/products" },
+        { title: t("repairs"), url: "/admin/repairs" },
+        { title: t("receipts"), url: "/admin/receipts" },
+      ],
     },
     {
-      title: t("products"),
-      url: "/admin/products",
-      icon: PackageIcon,
-    },
-    {
-      title: t("repairs"),
-      url: "/admin/repairs",
-      icon: WrenchIcon,
-    },
-    {
-      title: t("affiliates"),
-      url: "/admin/affiliates",
-      icon: GitBranchIcon,
-    },
-    {
-      title: t("blog"),
-      url: "/admin/blog",
-      icon: FileTextIcon,
-    },
-    {
-      title: t("receipts"),
-      url: "/admin/receipts",
-      icon: ScanLineIcon,
-    },
-    {
-      title: t("analytics"),
+      title: t("insights"),
       url: "/admin/analytics",
       icon: BarChart3Icon,
+      items: [
+        { title: t("analytics"), url: "/admin/analytics" },
+        { title: t("blog"), url: "/admin/blog" },
+        { title: t("affiliates"), url: "/admin/affiliates" },
+      ],
     },
-  ]
+  ];
 
   const centralAdminExtras: NavItem[] = [
     {
-      title: t("users"),
+      title: t("system"),
       url: "/admin/users",
-      icon: UsersIcon,
+      icon: ServerIcon,
+      items: [
+        { title: t("users"), url: "/admin/users" },
+        { title: t("branches"), url: "/admin/branches" },
+        { title: t("broadcasts"), url: "/admin/broadcasts" },
+        { title: t("knowledgeBase"), url: "/admin/knowledge-base" },
+        { title: t("activityLog"), url: "/admin/activity-log" },
+      ],
     },
-    {
-      title: t("branches"),
-      url: "/admin/branches",
-      icon: BuildingIcon,
-    },
-    {
-      title: t("broadcasts"),
-      url: "/admin/broadcasts",
-      icon: MessageSquareIcon,
-    },
-    {
-      title: t("knowledgeBase"),
-      url: "/admin/knowledge-base",
-      icon: BookOpenIcon,
-    },
-    {
-      title: t("activityLog"),
-      url: "/admin/activity-log",
-      icon: ScrollTextIcon,
-    },
-  ]
+  ];
 
   const bottomNav: NavItem[] = [
     {
@@ -115,9 +81,7 @@ export function AppSidebar({ variant = "admin" }: { variant?: SidebarVariant }) 
       url: "/admin/settings",
       icon: SettingsIcon,
     },
-  ]
-
-  const mainNav = variant === "central-admin" ? [...adminNav, ...centralAdminExtras] : adminNav
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -132,7 +96,9 @@ export function AppSidebar({ variant = "admin" }: { variant?: SidebarVariant }) 
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold text-sm">{APP_NAME}</span>
                   <span className="text-[10px] text-muted-foreground">
-                    {variant === "central-admin" ? t("centralAdmin") : t("administration")}
+                    {variant === "central-admin"
+                      ? t("centralAdmin")
+                      : t("administration")}
                   </span>
                 </div>
               </Link>
@@ -142,7 +108,13 @@ export function AppSidebar({ variant = "admin" }: { variant?: SidebarVariant }) 
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={mainNav} label={t("navigation")} />
+        <NavMain items={adminNav} label={t("navigation")} />
+        {variant === "central-admin" && (
+          <>
+            <SidebarSeparator />
+            <NavMain items={centralAdminExtras} />
+          </>
+        )}
         <SidebarSeparator />
         <NavMain items={bottomNav} />
       </SidebarContent>
@@ -162,5 +134,5 @@ export function AppSidebar({ variant = "admin" }: { variant?: SidebarVariant }) 
 
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

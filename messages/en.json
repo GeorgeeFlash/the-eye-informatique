@@ -387,6 +387,7 @@
       "repairs": "My Repairs",
       "notifications": "Notifications",
       "browseProducts": "Browse Products",
+      "myServices": "My Services",
       "affiliateProgram": "Affiliate Program",
       "earnings": "Dashboard",
       "myLinks": "My Links",
@@ -416,6 +417,9 @@
       "navigation": "Navigation",
       "centralAdmin": "Central Admin",
       "administration": "Administration",
+      "storeManagement": "Store",
+      "insights": "Insights",
+      "system": "System",
       "viewStore": "View Store"
     }
   },

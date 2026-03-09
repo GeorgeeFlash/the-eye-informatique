@@ -1,17 +1,13 @@
-"use client"
-
-import { Link } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import {
   BellIcon,
   GitBranchIcon,
   LayoutDashboardIcon,
+  PackageIcon,
   PackageSearchIcon,
-  ScrollTextIcon,
   SettingsIcon,
-  WrenchIcon,
-  ShieldCheckIcon,
-} from "lucide-react"
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,14 +18,18 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
-} from "@/components/ui/sidebar"
-import { NavMain, type NavItem } from "@/components/dashboard/sidebar/nav-main"
-import { APP_NAME } from "@/lib/constants"
+} from "@/components/ui/sidebar";
+import { NavMain, type NavItem } from "@/components/dashboard/sidebar/nav-main";
+import { APP_NAME } from "@/lib/constants";
 
-type PortalVariant = "customer" | "affiliate"
+type PortalVariant = "customer" | "affiliate";
 
-export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVariant }) {
-  const t = useTranslations("sidebar.customer")
+export function CustomerSidebar({
+  variant = "customer",
+}: {
+  variant?: PortalVariant;
+}) {
+  const t = useTranslations("sidebar.customer");
 
   const customerNav: NavItem[] = [
     {
@@ -38,19 +38,14 @@ export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVari
       icon: LayoutDashboardIcon,
     },
     {
-      title: t("orders"),
+      title: t("myServices"),
       url: "/dashboard/orders",
-      icon: ScrollTextIcon,
-    },
-    {
-      title: t("guarantee"),
-      url: "/dashboard/guarantee",
-      icon: ShieldCheckIcon,
-    },
-    {
-      title: t("repairs"),
-      url: "/dashboard/repairs",
-      icon: WrenchIcon,
+      icon: PackageIcon,
+      items: [
+        { title: t("orders"), url: "/dashboard/orders" },
+        { title: t("repairs"), url: "/dashboard/repairs" },
+        { title: t("guarantee"), url: "/dashboard/guarantee" },
+      ],
     },
     {
       title: t("notifications"),
@@ -62,7 +57,7 @@ export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVari
       url: "/products",
       icon: PackageSearchIcon,
     },
-  ]
+  ];
 
   const affiliateNav: NavItem[] = [
     {
@@ -75,7 +70,7 @@ export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVari
         { title: t("payouts"), url: "/dashboard/payouts" },
       ],
     },
-  ]
+  ];
 
   const bottomNav: NavItem[] = [
     {
@@ -83,7 +78,7 @@ export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVari
       url: "/dashboard/settings",
       icon: SettingsIcon,
     },
-  ]
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -98,7 +93,9 @@ export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVari
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold text-sm">{APP_NAME}</span>
                   <span className="text-[10px] text-muted-foreground">
-                    {variant === "affiliate" ? t("affiliateSpace") : t("mySpace")}
+                    {variant === "affiliate"
+                      ? t("affiliateSpace")
+                      : t("mySpace")}
                   </span>
                 </div>
               </Link>
@@ -134,5 +131,5 @@ export function CustomerSidebar({ variant = "customer" }: { variant?: PortalVari
 
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

@@ -1,15 +1,10 @@
-import { Link } from "@/i18n/navigation"
-import { getTranslations, getLocale } from "next-intl/server"
-import { requireRole } from "@/lib/auth"
-import { getActivityLogs } from "@/actions/notification.actions"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Link } from "@/i18n/navigation";
+import { getTranslations, getLocale } from "next-intl/server";
+import { requireRole } from "@/lib/auth";
+import { getActivityLogs } from "@/actions/notification.actions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -17,30 +12,30 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { formatDate } from "@/lib/utils"
+} from "@/components/ui/table";
+import { formatDate } from "@/lib/utils";
 
 export async function generateMetadata() {
-  const t = await getTranslations("adminActivityLog")
-  return { title: t("title") }
+  const t = await getTranslations("adminActivityLog");
+  return { title: t("title") };
 }
 
 export default async function ActivityLogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; action?: string }>
+  searchParams: Promise<{ page?: string; action?: string }>;
 }) {
-  await requireRole(["CENTRAL_ADMIN"])
-  const { page: pageParam, action } = await searchParams
-  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1)
-  const t = await getTranslations("adminActivityLog")
-  const locale = await getLocale()
+  await requireRole(["CENTRAL_ADMIN"]);
+  const { page: pageParam, action } = await searchParams;
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const t = await getTranslations("adminActivityLog");
+  const locale = (await getLocale()) as "en" | "fr";
 
   const { logs, totalPages, total } = await getActivityLogs({
     action: action || undefined,
     page,
     pageSize: 50,
-  })
+  });
 
   return (
     <div className="space-y-6">
@@ -68,7 +63,10 @@ export default async function ActivityLogPage({
             <TableBody>
               {logs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={4}
+                    className="h-24 text-center text-muted-foreground"
+                  >
                     {t("noEntries")}
                   </TableCell>
                 </TableRow>
@@ -78,13 +76,17 @@ export default async function ActivityLogPage({
                     <TableCell>
                       {log.user ? (
                         <div>
-                          <p className="text-sm font-medium">{log.user.name ?? log.user.email}</p>
+                          <p className="text-sm font-medium">
+                            {log.user.name ?? log.user.email}
+                          </p>
                           <Badge variant="outline" className="text-xs">
                             {log.user.role}
                           </Badge>
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">{t("system")}</span>
+                        <span className="text-muted-foreground">
+                          {t("system")}
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -120,7 +122,7 @@ export default async function ActivityLogPage({
           {page > 1 && (
             <Button asChild variant="outline" size="sm">
               <Link
-                href={`?page=${page - 1}${action ? `&action=${action}` : ""}`}
+                href={`?${new URLSearchParams({ page: String(page - 1), ...(action && { action }) }).toString()}`}
               >
                 ←
               </Link>
@@ -132,7 +134,7 @@ export default async function ActivityLogPage({
           {page < totalPages && (
             <Button asChild variant="outline" size="sm">
               <Link
-                href={`?page=${page + 1}${action ? `&action=${action}` : ""}`}
+                href={`?${new URLSearchParams({ page: String(page + 1), ...(action && { action }) }).toString()}`}
               >
                 →
               </Link>
@@ -141,5 +143,5 @@ export default async function ActivityLogPage({
         </div>
       )}
     </div>
-  )
+  );
 }
