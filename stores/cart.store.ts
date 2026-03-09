@@ -19,17 +19,39 @@ export const useCartStore = create<CartStore>()(
 
       addItem: (item) => {
         set((state) => {
+          const requestedQuantity = Math.max(0, Math.floor(item.quantity))
+          const availableStock = Math.max(0, Math.floor(item.stockAvailable ?? 0))
+
+          if (requestedQuantity <= 0 || availableStock <= 0) {
+            return state
+          }
+
           const existing = state.items.find((i) => i.variantId === item.variantId)
           if (existing) {
+            const nextQuantity = Math.min(
+              existing.quantity + requestedQuantity,
+              availableStock,
+            )
+
             return {
               items: state.items.map((i) =>
                 i.variantId === item.variantId
-                  ? { ...i, quantity: i.quantity + item.quantity }
+                  ? { ...i, quantity: nextQuantity, stockAvailable: availableStock }
                   : i
               ),
             }
           }
-          return { items: [...state.items, item] }
+
+          return {
+            items: [
+              ...state.items,
+              {
+                ...item,
+                quantity: Math.min(requestedQuantity, availableStock),
+                stockAvailable: availableStock,
+              },
+            ],
+          }
         })
       },
 
@@ -44,9 +66,26 @@ export const useCartStore = create<CartStore>()(
           get().removeItem(variantId)
           return
         }
+
+        const currentItem = get().items.find((i) => i.variantId === variantId)
+        if (!currentItem) return
+
+        const nextRequestedQuantity = Math.floor(quantity)
+        const availableStock = Math.max(
+          0,
+          Math.floor(currentItem.stockAvailable ?? Number.MAX_SAFE_INTEGER),
+        )
+
+        const nextQuantity = Math.min(nextRequestedQuantity, availableStock)
+
+        if (nextQuantity <= 0) {
+          get().removeItem(variantId)
+          return
+        }
+
         set((state) => ({
           items: state.items.map((i) =>
-            i.variantId === variantId ? { ...i, quantity } : i
+            i.variantId === variantId ? { ...i, quantity: nextQuantity } : i
           ),
         }))
       },

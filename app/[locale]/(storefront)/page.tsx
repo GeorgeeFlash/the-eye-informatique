@@ -121,6 +121,7 @@ export default async function HomePage() {
                     condition={variant?.condition ?? "NEW"}
                     inStock={(variant?.stock ?? 0) > 0}
                     variantId={variant?.id ?? ""}
+                    variantStock={variant?.stock ?? 0}
                   />
                 )
               })}

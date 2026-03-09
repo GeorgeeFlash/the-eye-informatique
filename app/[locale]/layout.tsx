@@ -83,7 +83,7 @@ export default async function LocaleLayout({
               <SerwistProvider swUrl="/serwist/sw.js">
                 {children}
               </SerwistProvider>
-              <Toaster />
+              <Toaster richColors />
             </NextIntlClientProvider>
           </ThemeProvider>
         </body>

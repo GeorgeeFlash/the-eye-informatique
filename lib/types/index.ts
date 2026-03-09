@@ -83,6 +83,8 @@ export interface CartItem {
   sku: string
   price: number
   quantity: number
+  // Snapshot of known stock for this variant when item is added/updated.
+  stockAvailable?: number
   imageUrl?: string
 }
 

@@ -81,9 +81,12 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
       paymentMethod: "MOBILE_MONEY",
       installments: false,
       gateway: "CM_MTNMOMO",
+      phone: "",
+      notes: "",
     },
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const deliveryMethod = form.watch("deliveryMethod")
   const paymentMethod = form.watch("paymentMethod")
   const installments = form.watch("installments")
@@ -410,6 +413,7 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
                           <FormControl>
                             <Input
                               {...field}
+                              value={field.value ?? ""}
                               type="tel"
                               placeholder="6XXXXXXXX"
                             />
@@ -472,6 +476,7 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
                       <FormControl>
                         <Textarea
                           {...field}
+                          value={field.value ?? ""}
                           placeholder={t("notesPlaceholder")}
                           rows={3}
                         />

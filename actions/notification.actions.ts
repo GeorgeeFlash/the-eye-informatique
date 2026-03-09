@@ -4,7 +4,7 @@ import { db } from "@/server/db"
 import { requireAuth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants"
-import type { NotificationType } from "@prisma/client"
+import type { NotificationType } from "@/lib/generated/prisma/client"
 
 /* ─── Read ──────────────────────────────────────────────── */
 

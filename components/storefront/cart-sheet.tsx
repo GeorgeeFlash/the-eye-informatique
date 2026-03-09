@@ -117,6 +117,10 @@ export function CartSheet() {
                             size="icon"
                             className="size-7"
                             onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                            disabled={
+                              typeof item.stockAvailable === "number" &&
+                              item.quantity >= item.stockAvailable
+                            }
                             aria-label="Increase quantity"
                           >
                             <PlusIcon className="size-3" />

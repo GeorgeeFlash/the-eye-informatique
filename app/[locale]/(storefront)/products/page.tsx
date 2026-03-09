@@ -110,6 +110,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                 condition={cheapestVariant.condition as "NEW" | "REFURBISHED"}
                 inStock={totalStock > 0}
                 variantId={cheapestVariant.id}
+                variantStock={cheapestVariant.stock}
               />
             )
           })}

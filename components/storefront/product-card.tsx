@@ -8,6 +8,7 @@ import { formatCurrency } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { toast } from "sonner"
 
 interface ProductCardProps {
   id: string
@@ -18,6 +19,7 @@ interface ProductCardProps {
   condition: "NEW" | "REFURBISHED"
   inStock: boolean
   variantId: string
+  variantStock: number
 }
 
 export function ProductCard({
@@ -29,10 +31,35 @@ export function ProductCard({
   condition,
   inStock,
   variantId,
+  variantStock,
 }: ProductCardProps) {
   const locale = useLocale()
   const t = useTranslations("product")
-  const { addItem } = useCart()
+  const { addItem, items } = useCart()
+
+  const quantityInCart = items.find((item) => item.variantId === variantId)?.quantity ?? 0
+  const canAddToCart = inStock && quantityInCart < variantStock
+
+  const handleAddToCart = () => {
+    if (!canAddToCart) {
+      toast.error(t("outOfStock"))
+      return
+    }
+
+    addItem({
+      variantId,
+      productId: id,
+      productName: name,
+      variantLabel: "",
+      sku: "",
+      price,
+      quantity: 1,
+      stockAvailable: variantStock,
+      imageUrl,
+    })
+
+    toast.success(t("addedToCart", { name }))
+  }
 
   return (
     <Card className="overflow-hidden">
@@ -55,21 +82,10 @@ export function ProductCard({
       <CardFooter className="p-4 pt-0">
         <Button
           className="w-full"
-          disabled={!inStock}
-          onClick={() =>
-            addItem({
-              variantId,
-              productId: id,
-              productName: name,
-              variantLabel: "",
-              sku: "",
-              price,
-              quantity: 1,
-              imageUrl,
-            })
-          }
+          disabled={!canAddToCart}
+          onClick={handleAddToCart}
         >
-          {inStock ? t("addToCart") : t("outOfStock")}
+          {canAddToCart ? t("addToCart") : t("outOfStock")}
         </Button>
       </CardFooter>
     </Card>

@@ -11,6 +11,7 @@ interface RecommendedProduct {
   condition: "NEW" | "REFURBISHED"
   inStock: boolean
   variantId: string
+  variantStock: number
 }
 
 interface RecommendationGridProps {

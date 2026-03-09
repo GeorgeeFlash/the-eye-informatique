@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslations, useLocale } from "next-intl"
 import { useCart } from "@/hooks/use-cart"
 import { formatCurrency } from "@/lib/utils"
@@ -15,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ShoppingCartIcon, CheckCircleIcon } from "lucide-react"
+import { ShoppingCartIcon, CheckCircleIcon, MinusIcon, PlusIcon } from "lucide-react"
+import { toast } from "sonner"
 
 type Variant = {
   id: string
@@ -53,17 +54,40 @@ interface ProductDetailsProps {
 }
 
 export function ProductDetails({ product }: ProductDetailsProps) {
+  const LOW_STOCK_THRESHOLD = 3
+
   const t = useTranslations("product")
   const locale = useLocale()
-  const { addItem } = useCart()
+  const { addItem, items } = useCart()
 
   const [selectedVariantId, setSelectedVariantId] = useState(
     product.variants[0]?.id ?? "",
   )
+  const [quantity, setQuantity] = useState(1)
 
   const selectedVariant = product.variants.find((v) => v.id === selectedVariantId)
   const price = selectedVariant ? selectedVariant.price : product.basePrice
-  const inStock = selectedVariant ? selectedVariant.stock > 0 : false
+  const stockCount = selectedVariant?.stock ?? 0
+  const quantityInCart =
+    selectedVariant
+      ? (items.find((i) => i.variantId === selectedVariant.id)?.quantity ?? 0)
+      : 0
+  const availableToAdd = Math.max(0, stockCount - quantityInCart)
+  const inStock = stockCount > 0
+  const isLowStock = inStock && stockCount <= LOW_STOCK_THRESHOLD
+  const maxQuantity = Math.max(1, availableToAdd)
+  const canAddToCart = Boolean(selectedVariant && availableToAdd > 0)
+
+  useEffect(() => {
+    // Keep quantity valid whenever selected variant changes.
+    if (!selectedVariant || availableToAdd <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQuantity(1)
+      return
+    }
+
+    setQuantity((current) => Math.min(Math.max(current, 1), availableToAdd))
+  }, [availableToAdd, selectedVariant])
 
   const avgRating =
     product.reviews.length > 0
@@ -145,19 +169,61 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <span className="text-green-600 font-medium">
               {t("inStock")}
             </span>
+            <span className="text-muted-foreground">{t("stockCount", { count: stockCount })}</span>
+            {isLowStock && <Badge variant="destructive">{t("lowStock")}</Badge>}
           </>
         ) : (
-          <span className="text-destructive font-medium">{t("outOfStock")}</span>
+          <>
+            <span className="text-destructive font-medium">{t("outOfStock")}</span>
+            <span className="text-muted-foreground">{t("stockCount", { count: stockCount })}</span>
+          </>
         )}
       </div>
 
       {/* Add to Cart */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">{t("quantity")}</label>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-9"
+            onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+            disabled={!inStock || quantity <= 1}
+            aria-label="Decrease quantity"
+          >
+            <MinusIcon className="size-4" />
+          </Button>
+
+          <span className="w-10 text-center text-sm tabular-nums">{quantity}</span>
+
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-9"
+            onClick={() =>
+              setQuantity((current) => Math.min(maxQuantity, current + 1))
+            }
+            disabled={!canAddToCart || quantity >= maxQuantity}
+            aria-label="Increase quantity"
+          >
+            <PlusIcon className="size-4" />
+          </Button>
+        </div>
+      </div>
+
       <Button
         size="lg"
         className="w-full"
-        disabled={!inStock || !selectedVariant}
+        disabled={!canAddToCart}
         onClick={() => {
-          if (!selectedVariant) return
+          if (!selectedVariant || availableToAdd <= 0) {
+            toast.error(t("outOfStock"))
+            return
+          }
+
+          const quantityToAdd = Math.min(quantity, availableToAdd)
+
           addItem({
             variantId: selectedVariant.id,
             productId: product.id,
@@ -170,9 +236,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               .join(" — "),
             sku: selectedVariant.sku,
             price,
-            quantity: 1,
+            quantity: quantityToAdd,
+            stockAvailable: selectedVariant.stock,
             imageUrl: undefined,
           })
+
+          toast.success(t("addedToCart", { name: product.name }))
         }}
       >
         <ShoppingCartIcon className="mr-2 h-5 w-5" />
