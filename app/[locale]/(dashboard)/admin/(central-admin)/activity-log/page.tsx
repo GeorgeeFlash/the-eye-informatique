@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils";
+import { Locale } from "@/lib/constants";
 
 export async function generateMetadata() {
   const t = await getTranslations("adminActivityLog");
@@ -29,7 +30,7 @@ export default async function ActivityLogPage({
   const { page: pageParam, action } = await searchParams;
   const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
   const t = await getTranslations("adminActivityLog");
-  const locale = (await getLocale()) as "en" | "fr";
+  const locale = (await getLocale()) as Locale;
 
   const { logs, totalPages, total } = await getActivityLogs({
     action: action || undefined,

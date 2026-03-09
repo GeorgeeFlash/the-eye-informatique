@@ -1,28 +1,29 @@
-import { Link } from "@/i18n/navigation"
-import Image from "next/image"
-import { getLocale, getTranslations } from "next-intl/server"
-import { getCustomerGuarantees } from "@/actions/guarantee.actions"
-import { formatDate } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Link } from "@/i18n/navigation";
+import Image from "next/image";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getCustomerGuarantees } from "@/actions/guarantee.actions";
+import { formatDate } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { ShieldCheckIcon } from "lucide-react"
+} from "@/components/ui/card";
+import { ShieldCheckIcon } from "lucide-react";
+import { Locale } from "@/lib/constants";
 
 export async function generateMetadata() {
-  const t = await getTranslations("guarantee")
-  return { title: t("title") }
+  const t = await getTranslations("guarantee");
+  return { title: t("title") };
 }
 
 export default async function CustomerGuaranteePage() {
-  const t = await getTranslations("guarantee")
-  const locale = (await getLocale()) as "en" | "fr"
-  const guarantees = await getCustomerGuarantees()
+  const t = await getTranslations("guarantee");
+  const locale = (await getLocale()) as Locale;
+  const guarantees = await getCustomerGuarantees();
 
   return (
     <div className="space-y-6">
@@ -42,9 +43,9 @@ export default async function CustomerGuaranteePage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {guarantees.map((card) => {
-            const isActive = new Date(card.expiresAt) > new Date()
-            const product = card.orderItem?.variant?.product
-            const image = product?.images?.[0]
+            const isActive = new Date(card.expiresAt) > new Date();
+            const product = card.orderItem?.variant?.product;
+            const image = product?.images?.[0];
 
             return (
               <Card key={card.id}>
@@ -92,15 +93,18 @@ export default async function CustomerGuaranteePage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {t("order")}
-                    </span>
+                    <span className="text-muted-foreground">{t("order")}</span>
                     <span className="font-mono text-xs">
                       {card.orderItem?.order?.orderNumber}
                     </span>
                   </div>
                   {isActive && (
-                    <Button asChild variant="outline" className="mt-2 w-full" size="sm">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="mt-2 w-full"
+                      size="sm"
+                    >
                       <Link
                         href={`/dashboard/repairs/new?guarantee=${card.id}`}
                       >
@@ -110,10 +114,10 @@ export default async function CustomerGuaranteePage() {
                   )}
                 </CardContent>
               </Card>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,17 +1,12 @@
-import { notFound } from "next/navigation"
-import { Link } from "@/i18n/navigation"
-import { getTranslations, getLocale } from "next-intl/server"
-import { getOrder } from "@/actions/order.actions"
-import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { notFound } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { getTranslations, getLocale } from "next-intl/server";
+import { getOrder } from "@/actions/order.actions";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -19,20 +14,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { ArrowLeftIcon } from "lucide-react"
+} from "@/components/ui/table";
+import { ArrowLeftIcon } from "lucide-react";
+import { Locale } from "@/lib/constants";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ orderId: string }>
+  params: Promise<{ orderId: string }>;
 }) {
-  const { orderId } = await params
-  const t = await getTranslations("orders")
-  const order = await getOrder(orderId)
+  const { orderId } = await params;
+  const t = await getTranslations("orders");
+  const order = await getOrder(orderId);
   return {
     title: order ? `${t("order")} ${order.orderNumber}` : t("orderNotFound"),
-  }
+  };
 }
 
 const STATUS_VARIANT: Record<
@@ -45,21 +41,21 @@ const STATUS_VARIANT: Record<
   SHIPPED: "default",
   DELIVERED: "default",
   CANCELLED: "destructive",
-}
+};
 
 export default async function OrderDetailPage({
   params,
 }: {
-  params: Promise<{ orderId: string }>
+  params: Promise<{ orderId: string }>;
 }) {
-  const { orderId } = await params
-  const t = await getTranslations("orders")
-  const locale = (await getLocale()) as "en" | "fr"
+  const { orderId } = await params;
+  const t = await getTranslations("orders");
+  const locale = (await getLocale()) as Locale;
 
-  const order = await getOrder(orderId)
-  if (!order) notFound()
+  const order = await getOrder(orderId);
+  if (!order) notFound();
 
-  const hasInstallments = order.installments && order.installments.length > 0
+  const hasInstallments = order.installments && order.installments.length > 0;
 
   return (
     <div className="space-y-6">
@@ -123,7 +119,11 @@ export default async function OrderDetailPage({
                               : t("guaranteeExpired")}
                             {" — "}
                             {t("expiresOn", {
-                              date: formatDate(item.guaranteeCard.expiresAt, "dd/MM/yyyy", locale),
+                              date: formatDate(
+                                item.guaranteeCard.expiresAt,
+                                "dd/MM/yyyy",
+                                locale,
+                              ),
                             })}
                           </Badge>
                         </div>
@@ -142,14 +142,20 @@ export default async function OrderDetailPage({
                       {/* AC-M3.2-12: per-item fulfillment */}
                       <div className="space-y-1">
                         <Badge
-                          variant={item.fulfillmentStatus === "DELIVERED" ? "default" : "secondary"}
+                          variant={
+                            item.fulfillmentStatus === "DELIVERED"
+                              ? "default"
+                              : "secondary"
+                          }
                           className="text-xs"
                         >
                           {t(`fulfillment_${item.fulfillmentStatus}`)}
                         </Badge>
                         {item.fulfillmentBranch && (
                           <p className="text-xs text-muted-foreground">
-                            {t("shipsFrom", { city: item.fulfillmentBranch.city })}
+                            {t("shipsFrom", {
+                              city: item.fulfillmentBranch.city,
+                            })}
                           </p>
                         )}
                       </div>
@@ -202,19 +208,31 @@ export default async function OrderDetailPage({
                   <span>{t(`paymentMethod_${order.payment.method}`)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t("paymentStatus")}</span>
-                  <Badge variant={order.payment.status === "SUCCESS" ? "default" : "outline"}>
+                  <span className="text-muted-foreground">
+                    {t("paymentStatus")}
+                  </span>
+                  <Badge
+                    variant={
+                      order.payment.status === "SUCCESS" ? "default" : "outline"
+                    }
+                  >
                     {t(`paymentStatus_${order.payment.status}`)}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("amount")}</span>
-                  <span>{formatCurrency(Number(order.payment.amount), locale)}</span>
+                  <span>
+                    {formatCurrency(Number(order.payment.amount), locale)}
+                  </span>
                 </div>
                 {order.payment.payunitTransactionId && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("transactionId")}</span>
-                    <span className="font-mono text-xs">{order.payment.payunitTransactionId}</span>
+                    <span className="text-muted-foreground">
+                      {t("transactionId")}
+                    </span>
+                    <span className="font-mono text-xs">
+                      {order.payment.payunitTransactionId}
+                    </span>
                   </div>
                 )}
                 {order.payment.paidAt && (
@@ -225,8 +243,12 @@ export default async function OrderDetailPage({
                 )}
                 {order.payment.receiptNumber && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("receiptNumber")}</span>
-                    <span className="font-mono text-xs">{order.payment.receiptNumber}</span>
+                    <span className="text-muted-foreground">
+                      {t("receiptNumber")}
+                    </span>
+                    <span className="font-mono text-xs">
+                      {order.payment.receiptNumber}
+                    </span>
                   </div>
                 )}
               </CardContent>
@@ -251,17 +273,26 @@ export default async function OrderDetailPage({
                   </TableHeader>
                   <TableBody>
                     {order.installments.map((inst) => {
-                      const isPaid = inst.status === "PAID"
-                      const isOverdue = !isPaid && new Date(inst.dueDate) < new Date()
+                      const isPaid = inst.status === "PAID";
+                      const isOverdue =
+                        !isPaid && new Date(inst.dueDate) < new Date();
                       return (
                         <TableRow key={inst.id}>
                           <TableCell>{inst.sequenceNumber}</TableCell>
-                          <TableCell>{formatCurrency(Number(inst.amount), locale)}</TableCell>
-                          <TableCell>{formatDate(inst.dueDate, "dd/MM/yyyy", locale)}</TableCell>
+                          <TableCell>
+                            {formatCurrency(Number(inst.amount), locale)}
+                          </TableCell>
+                          <TableCell>
+                            {formatDate(inst.dueDate, "dd/MM/yyyy", locale)}
+                          </TableCell>
                           <TableCell>
                             <Badge
                               variant={
-                                isPaid ? "default" : isOverdue ? "destructive" : "outline"
+                                isPaid
+                                  ? "default"
+                                  : isOverdue
+                                    ? "destructive"
+                                    : "outline"
                               }
                             >
                               {isPaid
@@ -272,7 +303,7 @@ export default async function OrderDetailPage({
                             </Badge>
                           </TableCell>
                         </TableRow>
-                      )
+                      );
                     })}
                   </TableBody>
                 </Table>
@@ -284,7 +315,7 @@ export default async function OrderDetailPage({
                       order.installments
                         .filter((i) => i.status !== "PAID")
                         .reduce((sum, i) => sum + Number(i.amount), 0),
-                      locale
+                      locale,
                     )}
                   </span>
                 </div>
@@ -299,12 +330,16 @@ export default async function OrderDetailPage({
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("deliveryMethod")}</span>
+                <span className="text-muted-foreground">
+                  {t("deliveryMethod")}
+                </span>
                 <span>{t(`delivery_${order.deliveryMethod}`)}</span>
               </div>
               {order.address && (
                 <div>
-                  <span className="text-muted-foreground block mb-1">{t("address")}</span>
+                  <span className="text-muted-foreground block mb-1">
+                    {t("address")}
+                  </span>
                   <span>
                     {order.address.street}, {order.address.city},{" "}
                     {order.address.region}
@@ -352,5 +387,5 @@ export default async function OrderDetailPage({
         </div>
       </div>
     </div>
-  )
+  );
 }

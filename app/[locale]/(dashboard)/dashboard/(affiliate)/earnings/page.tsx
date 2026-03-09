@@ -1,12 +1,7 @@
-import { getLocale, getTranslations } from "next-intl/server"
-import { getAffiliateEarnings } from "@/actions/affiliate.actions"
-import { formatCurrency, formatDate } from "@/lib/utils"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { getLocale, getTranslations } from "next-intl/server";
+import { getAffiliateEarnings } from "@/actions/affiliate.actions";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,18 +9,31 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { DollarSignIcon, MousePointerClickIcon, TrendingUpIcon, WalletIcon } from "lucide-react"
-import { PayoutButton } from "./payout-button"
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  DollarSignIcon,
+  MousePointerClickIcon,
+  TrendingUpIcon,
+  WalletIcon,
+} from "lucide-react";
+import { PayoutButton } from "./payout-button";
+import { Locale } from "@/lib/constants";
 
 export default async function AffiliateEarningsPage() {
-  const t = await getTranslations("affiliate")
-  const locale = (await getLocale()) as "en" | "fr"
-  const data = await getAffiliateEarnings()
-  if (!data) return null
+  const t = await getTranslations("affiliate");
+  const locale = (await getLocale()) as Locale;
+  const data = await getAffiliateEarnings();
+  if (!data) return null;
 
-  const { profile, pendingBalance, totalEarned, totalPaid, referralCount, totalClicks } = data
+  const {
+    profile,
+    pendingBalance,
+    totalEarned,
+    totalPaid,
+    referralCount,
+    totalClicks,
+  } = data;
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
@@ -38,37 +46,51 @@ export default async function AffiliateEarningsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalEarned")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("totalEarned")}
+            </CardTitle>
             <TrendingUpIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalEarned, locale)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(totalEarned, locale)}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t("pendingBalance")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("pendingBalance")}
+            </CardTitle>
             <WalletIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(pendingBalance, locale)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(pendingBalance, locale)}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalPaid")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("totalPaid")}
+            </CardTitle>
             <DollarSignIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalPaid, locale)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(totalPaid, locale)}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t("referrals")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("referrals")}
+            </CardTitle>
             <MousePointerClickIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -113,8 +135,12 @@ export default async function AffiliateEarningsPage() {
               <TableBody>
                 {profile.referrals.map((ref) => (
                   <TableRow key={ref.id}>
-                    <TableCell className="font-mono text-sm">{ref.link.code}</TableCell>
-                    <TableCell>{formatCurrency(ref.commission.toNumber(), locale)}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {ref.link.code}
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrency(ref.commission.toNumber(), locale)}
+                    </TableCell>
                     <TableCell>
                       <Badge
                         variant={
@@ -128,7 +154,9 @@ export default async function AffiliateEarningsPage() {
                         {t(`referralStatus_${ref.status}`)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{formatDate(ref.createdAt, "dd/MM/yyyy", locale)}</TableCell>
+                    <TableCell>
+                      {formatDate(ref.createdAt, "dd/MM/yyyy", locale)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -137,5 +165,5 @@ export default async function AffiliateEarningsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

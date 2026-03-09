@@ -1,12 +1,7 @@
-import { getLocale, getTranslations } from "next-intl/server"
-import { getMyAffiliateProfile } from "@/actions/affiliate.actions"
-import { formatCurrency, formatDate } from "@/lib/utils"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { getLocale, getTranslations } from "next-intl/server";
+import { getMyAffiliateProfile } from "@/actions/affiliate.actions";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,18 +9,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Locale } from "@/lib/constants";
 
 export default async function AffiliatePayoutsPage() {
-  const t = await getTranslations("affiliate")
-  const locale = (await getLocale()) as "en" | "fr"
-  const profile = await getMyAffiliateProfile()
-  if (!profile) return null
+  const t = await getTranslations("affiliate");
+  const locale = (await getLocale()) as Locale;
+  const profile = await getMyAffiliateProfile();
+  if (!profile) return null;
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <h1 className="text-2xl font-bold tracking-tight">{t("payoutHistory")}</h1>
+      <h1 className="text-2xl font-bold tracking-tight">
+        {t("payoutHistory")}
+      </h1>
 
       <Card>
         <CardHeader>
@@ -74,9 +72,13 @@ export default async function AffiliatePayoutsPage() {
                         {t(`payoutStatus_${payout.status}`)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{formatDate(payout.createdAt, "dd/MM/yyyy", locale)}</TableCell>
                     <TableCell>
-                      {payout.processedAt ? formatDate(payout.processedAt, "dd/MM/yyyy", locale) : "—"}
+                      {formatDate(payout.createdAt, "dd/MM/yyyy", locale)}
+                    </TableCell>
+                    <TableCell>
+                      {payout.processedAt
+                        ? formatDate(payout.processedAt, "dd/MM/yyyy", locale)
+                        : "—"}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -86,5 +88,5 @@ export default async function AffiliatePayoutsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

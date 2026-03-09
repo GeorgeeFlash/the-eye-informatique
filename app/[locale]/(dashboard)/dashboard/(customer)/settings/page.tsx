@@ -1,33 +1,34 @@
-import { getLocale, getTranslations } from "next-intl/server"
-import { getCurrentUser } from "@/lib/auth"
-import { db } from "@/server/db"
+import { getLocale, getTranslations } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth";
+import { db } from "@/server/db";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { ProfileForm } from "./profile-form"
-import { AddressList } from "./address-list"
-import { notFound } from "next/navigation"
+} from "@/components/ui/card";
+import { ProfileForm } from "./profile-form";
+import { AddressList } from "./address-list";
+import { notFound } from "next/navigation";
+import { Locale } from "@/lib/constants";
 
 export async function generateMetadata() {
-  const t = await getTranslations("settings")
-  return { title: t("title") }
+  const t = await getTranslations("settings");
+  return { title: t("title") };
 }
 
 export default async function CustomerSettingsPage() {
-  const t = await getTranslations("settings")
-  const locale = (await getLocale()) as "en" | "fr"
-  const user = await getCurrentUser()
+  const t = await getTranslations("settings");
+  const locale = (await getLocale()) as Locale;
+  const user = await getCurrentUser();
 
-  if (!user) notFound()
+  if (!user) notFound();
 
   const addresses = await db.address.findMany({
     where: { userId: user.id },
     orderBy: { isDefault: "desc" },
-  })
+  });
 
   return (
     <div className="space-y-6">
@@ -47,7 +48,7 @@ export default async function CustomerSettingsPage() {
             defaultValues={{
               name: user.name ?? "",
               phone: user.phone ?? "",
-              preferredLocale: user.preferredLocale as "en" | "fr",
+              preferredLocale: user.preferredLocale as Locale,
             }}
           />
         </CardContent>
@@ -60,10 +61,7 @@ export default async function CustomerSettingsPage() {
           <CardDescription>{t("addressesDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <AddressList
-            addresses={addresses}
-            locale={locale}
-          />
+          <AddressList addresses={addresses} locale={locale} />
         </CardContent>
       </Card>
 
@@ -79,10 +77,14 @@ export default async function CustomerSettingsPage() {
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t("memberSince")}</span>
-            <span>{new Date(user.createdAt).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB")}</span>
+            <span>
+              {new Date(user.createdAt).toLocaleDateString(
+                locale === "fr" ? "fr-FR" : "en-GB",
+              )}
+            </span>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

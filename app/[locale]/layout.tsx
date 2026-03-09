@@ -1,19 +1,21 @@
-import type { Metadata, Viewport } from "next"
-import { geistSans, geistMono } from "@/lib/fonts"
-import { ClerkProvider } from "@clerk/nextjs"
-import { NextIntlClientProvider } from "next-intl"
-import { getMessages } from "next-intl/server"
-import { ThemeProvider } from "next-themes"
-import { Toaster } from "@/components/ui/sonner"
-import { routing } from "@/i18n/routing"
-import { notFound } from "next/navigation"
-import { SerwistProvider } from "@/app/serwist"
-import "../globals.css"
+import type { Metadata, Viewport } from "next";
+import { geistSans, geistMono } from "@/lib/fonts";
+import { ClerkProvider } from "@clerk/nextjs";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/sonner";
+import { routing } from "@/i18n/routing";
+import { notFound } from "next/navigation";
+import { SerwistProvider } from "@/app/serwist";
+import "../globals.css";
+import { Locale } from "@/lib/constants";
 
-const APP_NAME = "The Eye Informatique"
-const APP_DEFAULT_TITLE = "The Eye Informatique"
-const APP_TITLE_TEMPLATE = "%s - The Eye Informatique"
-const APP_DESCRIPTION = "Votre boutique tech au Cameroun — téléphones, ordinateurs, accessoires et réparations."
+const APP_NAME = "The Eye Informatique";
+const APP_DEFAULT_TITLE = "The Eye Informatique";
+const APP_TITLE_TEMPLATE = "%s - The Eye Informatique";
+const APP_DESCRIPTION =
+  "Votre boutique tech au Cameroun — téléphones, ordinateurs, accessoires et réparations.";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
@@ -48,26 +50,26 @@ export const metadata: Metadata = {
     },
     description: APP_DESCRIPTION,
   },
-}
+};
 
 export const viewport: Viewport = {
   themeColor: "#ffffff",
-}
+};
 
 export default async function LocaleLayout({
   children,
   params,
 }: {
-  children: React.ReactNode
-  params: Promise<{ locale: string }>
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params
+  const { locale } = await params;
 
-  if (!routing.locales.includes(locale as "en" | "fr")) {
-    notFound()
+  if (!routing.locales.includes(locale as Locale)) {
+    notFound();
   }
 
-  const messages = await getMessages()
+  const messages = await getMessages();
 
   return (
     <ClerkProvider
@@ -76,8 +78,15 @@ export default async function LocaleLayout({
       signInFallbackRedirectUrl={`/${locale}`}
       signUpFallbackRedirectUrl={`/${locale}`}
     >
-      <html lang={locale} translate="no" className="notranslate" suppressHydrationWarning>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <html
+        lang={locale}
+        translate="no"
+        className="notranslate"
+        suppressHydrationWarning
+      >
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <NextIntlClientProvider messages={messages}>
               <SerwistProvider swUrl="/serwist/sw.js">
@@ -89,5 +98,5 @@ export default async function LocaleLayout({
         </body>
       </html>
     </ClerkProvider>
-  )
+  );
 }

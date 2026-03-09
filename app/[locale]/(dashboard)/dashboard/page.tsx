@@ -1,11 +1,17 @@
-import { getCurrentUser } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { db } from "@/server/db"
-import { getTranslations, getLocale } from "next-intl/server"
-import { StatCard } from "@/components/dashboard/stat-card"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { db } from "@/server/db";
+import { getTranslations, getLocale } from "next-intl/server";
+import { StatCard } from "@/components/dashboard/stat-card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   PackageIcon,
   ShoppingCartIcon,
@@ -14,27 +20,37 @@ import {
   ClockIcon,
   ShieldCheckIcon,
   AlertTriangleIcon,
-} from "lucide-react"
-import { Link } from "@/i18n/navigation"
-import { formatCurrency, formatDate } from "@/lib/utils"
+} from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Locale } from "@/lib/constants";
 
 export async function generateMetadata() {
-  const t = await getTranslations("customerDashboard")
-  return { title: t("welcome", { name: "" }).trim() }
+  const t = await getTranslations("customerDashboard");
+  return { title: t("welcome", { name: "" }).trim() };
 }
 
 export default async function DashboardHomePage() {
-  const user = await getCurrentUser()
-  if (!user) redirect("/sign-in")
+  const user = await getCurrentUser();
+  if (!user) redirect("/sign-in");
 
-  const t = await getTranslations("customerDashboard")
-  const locale = (await getLocale()) as "en" | "fr"
+  const t = await getTranslations("customerDashboard");
+  const locale = (await getLocale()) as Locale;
 
-  const now = new Date()
-  const fourteenDaysFromNow = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
+  const now = new Date();
+  const fourteenDaysFromNow = new Date(
+    now.getTime() + 14 * 24 * 60 * 60 * 1000,
+  );
 
   // Fetch customer data in parallel
-  const [recentOrders, activeRepairs, guaranteeCards, affiliateProfile, totalOrders, expiringGuarantees] = await Promise.all([
+  const [
+    recentOrders,
+    activeRepairs,
+    guaranteeCards,
+    affiliateProfile,
+    totalOrders,
+    expiringGuarantees,
+  ] = await Promise.all([
     db.order.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -77,7 +93,7 @@ export default async function DashboardHomePage() {
         },
       },
     }),
-  ])
+  ]);
 
   return (
     <div className="space-y-8">
@@ -119,16 +135,25 @@ export default async function DashboardHomePage() {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <AlertTriangleIcon className="h-5 w-5 text-amber-500" />
-              <CardTitle className="text-base">{t("guaranteeExpiryWarning")}</CardTitle>
+              <CardTitle className="text-base">
+                {t("guaranteeExpiryWarning")}
+              </CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {expiringGuarantees.map((g) => (
-                <div key={g.id} className="flex items-center justify-between text-sm">
-                  <span>{g.orderItem?.variant?.product?.name ?? t("product")}</span>
+                <div
+                  key={g.id}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <span>
+                    {g.orderItem?.variant?.product?.name ?? t("product")}
+                  </span>
                   <span className="text-muted-foreground">
-                    {t("expiresOn", { date: formatDate(g.expiresAt, "dd/MM/yyyy", locale) })}
+                    {t("expiresOn", {
+                      date: formatDate(g.expiresAt, "dd/MM/yyyy", locale),
+                    })}
                   </span>
                 </div>
               ))}
@@ -155,7 +180,9 @@ export default async function DashboardHomePage() {
           {recentOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <ShoppingCartIcon className="h-12 w-12 text-muted-foreground/50" />
-              <p className="mt-4 text-sm text-muted-foreground">{t("noOrdersYet")}</p>
+              <p className="mt-4 text-sm text-muted-foreground">
+                {t("noOrdersYet")}
+              </p>
               <Button variant="outline" size="sm" className="mt-4" asChild>
                 <Link href="/products">{t("startShopping")}</Link>
               </Button>
@@ -174,7 +201,8 @@ export default async function DashboardHomePage() {
                       <ClockIcon className="h-3 w-3" />
                       {formatDate(order.createdAt, "dd/MM/yyyy", locale)}
                       <span>&middot;</span>
-                      {order.items.length} {order.items.length === 1 ? "item" : "items"}
+                      {order.items.length}{" "}
+                      {order.items.length === 1 ? "item" : "items"}
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -192,7 +220,9 @@ export default async function DashboardHomePage() {
 
       {/* Affiliate Panel — only if user has affiliate profile */}
       {affiliateProfile && affiliateProfile.status !== "REJECTED" && (
-        <Card className={affiliateProfile.status !== "APPROVED" ? "opacity-75" : ""}>
+        <Card
+          className={affiliateProfile.status !== "APPROVED" ? "opacity-75" : ""}
+        >
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{t("affiliatePanel")}</CardTitle>
@@ -209,9 +239,14 @@ export default async function DashboardHomePage() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t("totalEarnings")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("totalEarnings")}
+                  </p>
                   <p className="text-2xl font-bold">
-                    {formatCurrency(Number(affiliateProfile.totalEarned), locale)}
+                    {formatCurrency(
+                      Number(affiliateProfile.totalEarned),
+                      locale,
+                    )}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" asChild>
@@ -244,37 +279,55 @@ export default async function DashboardHomePage() {
         </Card>
       )}
     </div>
-  )
+  );
 }
 
-function OrderStatusBadge({ status, t }: { status: string; t: (key: string) => string }) {
-  const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+function OrderStatusBadge({
+  status,
+  t,
+}: {
+  status: string;
+  t: (key: string) => string;
+}) {
+  const variants: Record<
+    string,
+    "default" | "secondary" | "destructive" | "outline"
+  > = {
     PENDING: "secondary",
     CONFIRMED: "default",
     PROCESSING: "default",
     SHIPPED: "default",
     DELIVERED: "outline",
     CANCELLED: "destructive",
-  }
+  };
 
   return (
     <Badge variant={variants[status] ?? "secondary"} className="text-xs">
       {t(`status_${status}`)}
     </Badge>
-  )
+  );
 }
 
-function AffiliateStatusBadge({ status, t }: { status: string; t: (key: string) => string }) {
-  const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+function AffiliateStatusBadge({
+  status,
+  t,
+}: {
+  status: string;
+  t: (key: string) => string;
+}) {
+  const variants: Record<
+    string,
+    "default" | "secondary" | "destructive" | "outline"
+  > = {
     APPROVED: "default",
     PENDING: "secondary",
     SUSPENDED: "destructive",
     REJECTED: "destructive",
-  }
+  };
 
   return (
     <Badge variant={variants[status] ?? "secondary"}>
       {t(`affiliateStatus_${status}`)}
     </Badge>
-  )
+  );
 }

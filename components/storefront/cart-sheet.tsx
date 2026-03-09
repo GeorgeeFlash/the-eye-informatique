@@ -1,32 +1,37 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { useCart } from "@/hooks/use-cart"
-import { useUiStore } from "@/stores/ui.store"
-import { formatCurrency } from "@/lib/utils"
+import Image from "next/image";
+import { useCart } from "@/hooks/use-cart";
+import { useUiStore } from "@/stores/ui.store";
+import { formatCurrency } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Link } from "@/i18n/navigation"
-import { useTranslations, useLocale } from "next-intl"
-import { MinusIcon, PlusIcon, TrashIcon, ShoppingBagIcon } from "lucide-react"
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { MinusIcon, PlusIcon, TrashIcon, ShoppingBagIcon } from "lucide-react";
+import { Locale } from "@/lib/constants";
 
 export function CartSheet() {
-  const t = useTranslations("cart")
-  const locale = useLocale()
-  const cartSheetOpen = useUiStore((s) => s.cartSheetOpen)
-  const setCartSheetOpen = useUiStore((s) => s.setCartSheetOpen)
-  const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCart()
+  const t = useTranslations("cart");
+  const locale = useLocale() as Locale;
+  const cartSheetOpen = useUiStore((s) => s.cartSheetOpen);
+  const setCartSheetOpen = useUiStore((s) => s.setCartSheetOpen);
+  const { items, removeItem, updateQuantity, totalPrice, totalItems } =
+    useCart();
 
   return (
     <Sheet open={cartSheetOpen} onOpenChange={setCartSheetOpen}>
-      <SheetContent side="right" className="flex w-full flex-col sm:max-w-md p-0">
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col sm:max-w-md p-0"
+      >
         <SheetHeader className="px-6 pt-6 pb-4 border-b">
           <SheetTitle className="flex items-center gap-2">
             <ShoppingBagIcon className="size-5" />
@@ -44,7 +49,9 @@ export function CartSheet() {
             <ShoppingBagIcon className="size-12 text-muted-foreground/50" />
             <div>
               <p className="font-semibold">{t("emptyTitle")}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{t("emptyDescription")}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("emptyDescription")}
+              </p>
             </div>
             <Button asChild onClick={() => setCartSheetOpen(false)}>
               <Link href="/products">{t("continueShopping")}</Link>
@@ -104,7 +111,9 @@ export function CartSheet() {
                             variant="outline"
                             size="icon"
                             className="size-7"
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity - 1)
+                            }
                             aria-label="Decrease quantity"
                           >
                             <MinusIcon className="size-3" />
@@ -116,7 +125,9 @@ export function CartSheet() {
                             variant="outline"
                             size="icon"
                             className="size-7"
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(item.variantId, item.quantity + 1)
+                            }
                             disabled={
                               typeof item.stockAvailable === "number" &&
                               item.quantity >= item.stockAvailable
@@ -129,7 +140,10 @@ export function CartSheet() {
 
                         {/* Line total */}
                         <p className="text-sm font-semibold">
-                          {formatCurrency(item.price * item.quantity, locale as "en" | "fr")}
+                          {formatCurrency(
+                            item.price * item.quantity,
+                            locale as Locale,
+                          )}
                         </p>
                       </div>
                     </div>
@@ -145,7 +159,7 @@ export function CartSheet() {
                   {t("subtotal")} ({t("items", { count: totalItems })})
                 </span>
                 <span className="text-lg font-bold">
-                  {formatCurrency(totalPrice, locale as "en" | "fr")}
+                  {formatCurrency(totalPrice, locale as Locale)}
                 </span>
               </div>
               <Separator />
@@ -172,5 +186,5 @@ export function CartSheet() {
         )}
       </SheetContent>
     </Sheet>
-  )
+  );
 }

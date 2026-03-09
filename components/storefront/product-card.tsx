@@ -1,25 +1,26 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { Link } from "@/i18n/navigation"
-import { useLocale, useTranslations } from "next-intl"
-import { useCart } from "@/hooks/use-cart"
-import { formatCurrency } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { toast } from "sonner"
+import Image from "next/image";
+import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useCart } from "@/hooks/use-cart";
+import { formatCurrency } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { toast } from "sonner";
+import { Locale } from "@/lib/constants";
 
 interface ProductCardProps {
-  id: string
-  name: string
-  slug: string
-  price: number
-  imageUrl?: string
-  condition: "NEW" | "REFURBISHED"
-  inStock: boolean
-  variantId: string
-  variantStock: number
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  imageUrl?: string;
+  condition: "NEW" | "REFURBISHED";
+  inStock: boolean;
+  variantId: string;
+  variantStock: number;
 }
 
 export function ProductCard({
@@ -33,17 +34,18 @@ export function ProductCard({
   variantId,
   variantStock,
 }: ProductCardProps) {
-  const locale = useLocale()
-  const t = useTranslations("product")
-  const { addItem, items } = useCart()
+  const locale = useLocale() as Locale;
+  const t = useTranslations("product");
+  const { addItem, items } = useCart();
 
-  const quantityInCart = items.find((item) => item.variantId === variantId)?.quantity ?? 0
-  const canAddToCart = inStock && quantityInCart < variantStock
+  const quantityInCart =
+    items.find((item) => item.variantId === variantId)?.quantity ?? 0;
+  const canAddToCart = inStock && quantityInCart < variantStock;
 
   const handleAddToCart = () => {
     if (!canAddToCart) {
-      toast.error(t("outOfStock"))
-      return
+      toast.error(t("outOfStock"));
+      return;
     }
 
     addItem({
@@ -56,17 +58,23 @@ export function ProductCard({
       quantity: 1,
       stockAvailable: variantStock,
       imageUrl,
-    })
+    });
 
-    toast.success(t("addedToCart", { name }))
-  }
+    toast.success(t("addedToCart", { name }));
+  };
 
   return (
     <Card className="overflow-hidden">
       <Link href={`/products/${slug}`}>
         <div className="relative aspect-square bg-muted">
           {imageUrl && (
-            <Image src={imageUrl} alt={name} unoptimized fill className="object-cover" />
+            <Image
+              src={imageUrl}
+              alt={name}
+              unoptimized
+              fill
+              className="object-cover"
+            />
           )}
           <Badge className="absolute left-2 top-2" variant="secondary">
             {condition === "NEW" ? t("new") : t("refurbished")}
@@ -77,7 +85,9 @@ export function ProductCard({
         <Link href={`/products/${slug}`}>
           <h3 className="line-clamp-2 font-medium">{name}</h3>
         </Link>
-        <p className="mt-1 text-lg font-bold">{formatCurrency(price, locale as "en" | "fr")}</p>
+        <p className="mt-1 text-lg font-bold">
+          {formatCurrency(price, locale as Locale)}
+        </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button
@@ -89,5 +99,5 @@ export function ProductCard({
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

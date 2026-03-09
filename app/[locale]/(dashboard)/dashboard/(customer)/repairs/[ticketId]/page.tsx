@@ -1,15 +1,11 @@
-import { notFound } from "next/navigation"
-import { getLocale, getTranslations } from "next-intl/server"
-import { getRepairTicket } from "@/actions/repair.actions"
-import { formatDateTime } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { notFound } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getRepairTicket } from "@/actions/repair.actions";
+import { formatDateTime } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Locale } from "@/lib/constants";
 
 const STATUS_VARIANT: Record<
   string,
@@ -21,29 +17,29 @@ const STATUS_VARIANT: Record<
   READY: "default",
   RETURNED: "default",
   CLOSED: "destructive",
-}
+};
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ ticketId: string }>
+  params: Promise<{ ticketId: string }>;
 }) {
-  const { ticketId } = await params
-  const t = await getTranslations("repairs")
-  return { title: `${t("ticket")} — ${ticketId.slice(-8).toUpperCase()}` }
+  const { ticketId } = await params;
+  const t = await getTranslations("repairs");
+  return { title: `${t("ticket")} — ${ticketId.slice(-8).toUpperCase()}` };
 }
 
 export default async function RepairTicketDetailPage({
   params,
 }: {
-  params: Promise<{ ticketId: string }>
+  params: Promise<{ ticketId: string }>;
 }) {
-  const { ticketId } = await params
-  const t = await getTranslations("repairs")
-  const locale = (await getLocale()) as "en" | "fr"
+  const { ticketId } = await params;
+  const t = await getTranslations("repairs");
+  const locale = (await getLocale()) as Locale;
 
-  const ticket = await getRepairTicket(ticketId)
-  if (!ticket) notFound()
+  const ticket = await getRepairTicket(ticketId);
+  if (!ticket) notFound();
 
   return (
     <div className="space-y-6">
@@ -79,7 +75,9 @@ export default async function RepairTicketDetailPage({
             )}
             {ticket.guaranteeCard && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("guaranteeCard")}</span>
+                <span className="text-muted-foreground">
+                  {t("guaranteeCard")}
+                </span>
                 <span className="font-mono text-xs">
                   {ticket.guaranteeCard.serialNumber}
                 </span>
@@ -99,7 +97,9 @@ export default async function RepairTicketDetailPage({
             )}
             <Separator />
             <div>
-              <p className="mb-1 text-muted-foreground">{t("issueDescription")}</p>
+              <p className="mb-1 text-muted-foreground">
+                {t("issueDescription")}
+              </p>
               <p className="whitespace-pre-wrap">{ticket.issueDescription}</p>
             </div>
           </CardContent>
@@ -170,5 +170,5 @@ export default async function RepairTicketDetailPage({
         </Card>
       )}
     </div>
-  )
+  );
 }

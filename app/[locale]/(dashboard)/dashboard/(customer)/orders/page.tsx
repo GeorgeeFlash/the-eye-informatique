@@ -1,16 +1,16 @@
-import { getLocale, getTranslations } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
-import { getCustomerOrders } from "@/actions/order.actions"
-import { formatCurrency, formatDate } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { getCustomerOrders } from "@/actions/order.actions";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -18,34 +18,38 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { PackageIcon } from "lucide-react"
+} from "@/components/ui/table";
+import { PackageIcon } from "lucide-react";
+import { Locale } from "@/lib/constants";
 
 export async function generateMetadata() {
-  const t = await getTranslations("orders")
-  return { title: t("title") }
+  const t = await getTranslations("orders");
+  return { title: t("title") };
 }
 
-const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+const STATUS_VARIANT: Record<
+  string,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
   PENDING: "outline",
   CONFIRMED: "secondary",
   PROCESSING: "secondary",
   SHIPPED: "default",
   DELIVERED: "default",
   CANCELLED: "destructive",
-}
+};
 
 export default async function CustomerOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const { page: pageParam } = await searchParams
-  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1)
-  const t = await getTranslations("orders")
-  const locale = (await getLocale()) as "en" | "fr"
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const t = await getTranslations("orders");
+  const locale = (await getLocale()) as Locale;
 
-  const { orders, totalPages } = await getCustomerOrders(page, 10)
+  const { orders, totalPages } = await getCustomerOrders(page, 10);
 
   return (
     <div className="space-y-6">
@@ -96,16 +100,12 @@ export default async function CustomerOrdersPage({
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={
-                            STATUS_VARIANT[order.status] ?? "outline"
-                          }
+                          variant={STATUS_VARIANT[order.status] ?? "outline"}
                         >
                           {t(`status_${order.status}`)}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        {order._count?.items ?? "-"}
-                      </TableCell>
+                      <TableCell>{order._count?.items ?? "-"}</TableCell>
                       <TableCell className="text-right font-medium">
                         {formatCurrency(Number(order.total), locale)}
                       </TableCell>
@@ -144,5 +144,5 @@ export default async function CustomerOrdersPage({
         </>
       )}
     </div>
-  )
+  );
 }

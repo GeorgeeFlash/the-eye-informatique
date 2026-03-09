@@ -1,16 +1,16 @@
-import { Link } from "@/i18n/navigation"
-import { getLocale, getTranslations } from "next-intl/server"
-import { getRepairTickets } from "@/actions/repair.actions"
-import { formatDate } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getRepairTickets } from "@/actions/repair.actions";
+import { formatDate } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -18,12 +18,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { WrenchIcon, PlusIcon } from "lucide-react"
+} from "@/components/ui/table";
+import { WrenchIcon, PlusIcon } from "lucide-react";
+import { Locale } from "@/lib/constants";
 
 export async function generateMetadata() {
-  const t = await getTranslations("repairs")
-  return { title: t("title") }
+  const t = await getTranslations("repairs");
+  return { title: t("title") };
 }
 
 const STATUS_VARIANT: Record<
@@ -36,19 +37,22 @@ const STATUS_VARIANT: Record<
   READY: "default",
   RETURNED: "default",
   CLOSED: "destructive",
-}
+};
 
 export default async function CustomerRepairsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const { page: pageParam } = await searchParams
-  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1)
-  const t = await getTranslations("repairs")
-  const locale = (await getLocale()) as "en" | "fr"
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const t = await getTranslations("repairs");
+  const locale = (await getLocale()) as Locale;
 
-  const { tickets, totalPages } = await getRepairTickets({ page, pageSize: 10 })
+  const { tickets, totalPages } = await getRepairTickets({
+    page,
+    pageSize: 10,
+  });
 
   return (
     <div className="space-y-6">
@@ -110,11 +114,11 @@ export default async function CustomerRepairsPage({
                           {t(`type_${ticket.requestType}`)}
                         </Badge>
                       </TableCell>
+                      <TableCell>{ticket.product?.name ?? "-"}</TableCell>
                       <TableCell>
-                        {ticket.product?.name ?? "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={STATUS_VARIANT[ticket.status] ?? "outline"}>
+                        <Badge
+                          variant={STATUS_VARIANT[ticket.status] ?? "outline"}
+                        >
                           {t(`status_${ticket.status}`)}
                         </Badge>
                       </TableCell>
@@ -155,5 +159,5 @@ export default async function CustomerRepairsPage({
         </>
       )}
     </div>
-  )
+  );
 }

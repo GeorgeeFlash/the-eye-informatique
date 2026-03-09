@@ -16,11 +16,12 @@ import {
 } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { Locale } from "@/lib/constants"
 
 export default async function AdminDashboardPage() {
   const user = await requireRole(["STAFF", "ADMIN", "CENTRAL_ADMIN"])
   const t = await getTranslations("adminDashboard")
-  const locale = await getLocale() as "en" | "fr"
+  const locale = await getLocale() as Locale
 
   const isCentralAdmin = user.role === "CENTRAL_ADMIN"
   const branchFilter = isCentralAdmin ? {} : { branchId: user.branchId! }

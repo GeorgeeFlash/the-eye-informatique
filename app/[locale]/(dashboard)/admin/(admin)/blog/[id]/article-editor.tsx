@@ -1,85 +1,83 @@
-"use client"
+"use client";
 
-import { useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
-import { useTranslations } from "next-intl"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createArticleSchema,
   updateArticleSchema,
   type CreateArticleValues,
-} from "@/lib/validators/blog.schema"
+} from "@/lib/validators/blog.schema";
 import {
   createArticle,
   updateArticle,
   publishArticle,
   unpublishArticle,
   deleteArticle,
-} from "@/actions/blog.actions"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+} from "@/actions/blog.actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Editor } from "@/components/blog/editor"
-import { toast } from "sonner"
-import { SaveIcon, GlobeIcon, ArchiveIcon } from "lucide-react"
+} from "@/components/ui/select";
+import { Editor } from "@/components/blog/editor";
+import { toast } from "sonner";
+import { SaveIcon, GlobeIcon, ArchiveIcon } from "lucide-react";
+import { Locale } from "@/lib/constants";
 
-type Tag = { id: string; name: string; slug: string }
+type Tag = { id: string; name: string; slug: string };
 
 type Article = {
-  id: string
-  title: string
-  slug: string
-  content: unknown
-  excerpt: string | null
-  coverImageUrl: string | null
-  locale: string
-  status: string
-  tags: Tag[]
-}
+  id: string;
+  title: string;
+  slug: string;
+  content: unknown;
+  excerpt: string | null;
+  coverImageUrl: string | null;
+  locale: string;
+  status: string;
+  tags: Tag[];
+};
 
 export function ArticleEditor({
   article,
   tags,
 }: {
-  article?: Article
-  tags: Tag[]
+  article?: Article;
+  tags: Tag[];
 }) {
-  const t = useTranslations("blog")
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [content, setContent] = useState<unknown>(article?.content ?? "")
+  const t = useTranslations("blog");
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [content, setContent] = useState<unknown>(article?.content ?? "");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
     article?.tags.map((t) => t.id) ?? [],
-  )
+  );
 
-  const isNew = !article
+  const isNew = !article;
 
   const form = useForm<CreateArticleValues>({
-    resolver: zodResolver(isNew ? createArticleSchema : updateArticleSchema) as never,
+    resolver: zodResolver(
+      isNew ? createArticleSchema : updateArticleSchema,
+    ) as never,
     defaultValues: {
       title: article?.title ?? "",
       slug: article?.slug ?? "",
       excerpt: article?.excerpt ?? "",
       coverImageUrl: article?.coverImageUrl ?? "",
-      locale: (article?.locale as "en" | "fr") ?? "en",
+      locale: (article?.locale as Locale) ?? "en",
     },
-  })
+  });
 
   function generateSlug(title: string) {
     return title
@@ -87,68 +85,73 @@ export function ArticleEditor({
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
-      .slice(0, 200)
+      .slice(0, 200);
   }
 
   function onSubmit(values: CreateArticleValues) {
     startTransition(async () => {
-      const data = { ...values, content, tagIds: selectedTagIds }
+      const data = { ...values, content, tagIds: selectedTagIds };
 
       if (isNew) {
-        const result = await createArticle(data)
+        const result = await createArticle(data);
         if (!("success" in result)) {
-          toast.error(t("saveError"))
-          return
+          toast.error(t("saveError"));
+          return;
         }
-        toast.success(t("articleCreated"))
-        router.push(`/admin/blog/${result.articleId}`)
+        toast.success(t("articleCreated"));
+        router.push(`/admin/blog/${result.articleId}`);
       } else {
-        const result = await updateArticle(article.id, data)
+        const result = await updateArticle(article.id, data);
         if (!("success" in result)) {
-          toast.error(t("saveError"))
-          return
+          toast.error(t("saveError"));
+          return;
         }
-        toast.success(t("articleSaved"))
-        router.refresh()
+        toast.success(t("articleSaved"));
+        router.refresh();
       }
-    })
+    });
   }
 
   function handlePublish() {
-    if (!article) return
+    if (!article) return;
     startTransition(async () => {
-      await publishArticle(article.id)
-      toast.success(t("articlePublished"))
-      router.refresh()
-    })
+      await publishArticle(article.id);
+      toast.success(t("articlePublished"));
+      router.refresh();
+    });
   }
 
   function handleUnpublish() {
-    if (!article) return
+    if (!article) return;
     startTransition(async () => {
-      await unpublishArticle(article.id)
-      toast.success(t("articleUnpublished"))
-      router.refresh()
-    })
+      await unpublishArticle(article.id);
+      toast.success(t("articleUnpublished"));
+      router.refresh();
+    });
   }
 
   function handleDelete() {
-    if (!article) return
+    if (!article) return;
     startTransition(async () => {
-      await deleteArticle(article.id)
-      toast.success(t("articleDeleted"))
-      router.push("/admin/blog")
-    })
+      await deleteArticle(article.id);
+      toast.success(t("articleDeleted"));
+      router.push("/admin/blog");
+    });
   }
 
   function toggleTag(tagId: string) {
     setSelectedTagIds((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId],
-    )
+      prev.includes(tagId)
+        ? prev.filter((id) => id !== tagId)
+        : [...prev, tagId],
+    );
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6 lg:grid-cols-3">
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="grid gap-6 lg:grid-cols-3"
+    >
       {/* Main editor */}
       <div className="space-y-6 lg:col-span-2">
         <Card>
@@ -159,8 +162,12 @@ export function ArticleEditor({
                 id="title"
                 {...form.register("title", {
                   onChange: (e) => {
-                    if (isNew || form.getValues("slug") === generateSlug(article?.title ?? "")) {
-                      form.setValue("slug", generateSlug(e.target.value))
+                    if (
+                      isNew ||
+                      form.getValues("slug") ===
+                        generateSlug(article?.title ?? "")
+                    ) {
+                      form.setValue("slug", generateSlug(e.target.value));
                     }
                   },
                 })}
@@ -201,7 +208,11 @@ export function ArticleEditor({
           <CardContent className="space-y-2">
             {article && (
               <div className="mb-4">
-                <Badge variant={article.status === "PUBLISHED" ? "default" : "secondary"}>
+                <Badge
+                  variant={
+                    article.status === "PUBLISHED" ? "default" : "secondary"
+                  }
+                >
                   {t(`status.${article.status}`)}
                 </Badge>
               </div>
@@ -273,7 +284,7 @@ export function ArticleEditor({
           <CardContent>
             <Select
               defaultValue={form.getValues("locale")}
-              onValueChange={(v) => form.setValue("locale", v as "en" | "fr")}
+              onValueChange={(v) => form.setValue("locale", v as Locale)}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -296,7 +307,9 @@ export function ArticleEditor({
               {tags.map((tag) => (
                 <Badge
                   key={tag.id}
-                  variant={selectedTagIds.includes(tag.id) ? "default" : "outline"}
+                  variant={
+                    selectedTagIds.includes(tag.id) ? "default" : "outline"
+                  }
                   className="cursor-pointer"
                   onClick={() => toggleTag(tag.id)}
                 >
@@ -311,5 +324,5 @@ export function ArticleEditor({
         </Card>
       </div>
     </form>
-  )
+  );
 }

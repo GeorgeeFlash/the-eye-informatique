@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { useTransition, useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
-import { useLocale, useTranslations } from "next-intl"
-import { checkoutSchema } from "@/lib/validators/order.schema"
-import { createOrder } from "@/actions/order.actions"
-import { useCart } from "@/hooks/use-cart"
-import { formatCurrency } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useTransition, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { checkoutSchema } from "@/lib/validators/order.schema";
+import { createOrder } from "@/actions/order.actions";
+import { useCart } from "@/hooks/use-cart";
+import { formatCurrency } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -24,55 +24,56 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { toast } from "sonner"
-import { Loader2Icon, StoreIcon, TruckIcon } from "lucide-react"
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { Loader2Icon, StoreIcon, TruckIcon } from "lucide-react";
+import { Locale } from "@/lib/constants";
 
 type Address = {
-  id: string
-  label: string | null
-  street: string
-  city: string
-  region: string
-}
+  id: string;
+  label: string | null;
+  street: string;
+  city: string;
+  region: string;
+};
 
 interface CheckoutFormProps {
-  addresses: Address[]
-  branches: { id: string; name: string; city: string }[]
+  addresses: Address[];
+  branches: { id: string; name: string; city: string }[];
 }
 
 type CheckoutFormValues = {
-  deliveryMethod: "PICKUP" | "DELIVERY"
-  paymentMethod: "MOBILE_MONEY" | "CHECKOUT"
-  installments: boolean
-  addressId?: string
-  branchId?: string
-  notes?: string
-  phone?: string
-  gateway?: "CM_MTNMOMO" | "CM_ORANGE"
-}
+  deliveryMethod: "PICKUP" | "DELIVERY";
+  paymentMethod: "MOBILE_MONEY" | "CHECKOUT";
+  installments: boolean;
+  addressId?: string;
+  branchId?: string;
+  notes?: string;
+  phone?: string;
+  gateway?: "CM_MTNMOMO" | "CM_ORANGE";
+};
 
 export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
-  const t = useTranslations("checkout")
-  const locale = useLocale()
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [serverError, setServerError] = useState<string | null>(null)
-  const [showNewAddress, setShowNewAddress] = useState(false)
+  const t = useTranslations("checkout");
+  const locale = useLocale() as Locale;
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [showNewAddress, setShowNewAddress] = useState(false);
   const [newAddress, setNewAddress] = useState({
     street: "",
     city: "",
     region: "",
     label: "",
-  })
-  const { items, clearCart, totalPrice, totalItems } = useCart()
+  });
+  const { items, clearCart, totalPrice, totalItems } = useCart();
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema) as never,
@@ -84,19 +85,19 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
       phone: "",
       notes: "",
     },
-  })
+  });
 
   // eslint-disable-next-line react-hooks/incompatible-library
-  const deliveryMethod = form.watch("deliveryMethod")
-  const paymentMethod = form.watch("paymentMethod")
-  const installments = form.watch("installments")
+  const deliveryMethod = form.watch("deliveryMethod");
+  const paymentMethod = form.watch("paymentMethod");
+  const installments = form.watch("installments");
 
   function onSubmit(data: CheckoutFormValues) {
-    setServerError(null)
+    setServerError(null);
 
     if (items.length === 0) {
-      toast.error(t("emptyCart"))
-      return
+      toast.error(t("emptyCart"));
+      return;
     }
 
     startTransition(async () => {
@@ -115,20 +116,20 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
               label: newAddress.label || undefined,
             },
           }),
-      }
+      };
 
-      const result = await createOrder(orderData)
+      const result = await createOrder(orderData);
 
       if ("error" in result) {
-        const errorMessages = Object.values(result.error ?? {}).flat()
-        setServerError(errorMessages.join(", "))
-        return
+        const errorMessages = Object.values(result.error ?? {}).flat();
+        setServerError(errorMessages.join(", "));
+        return;
       }
 
-      clearCart()
-      toast.success(t("orderSuccess"))
-      router.push(`/${locale}/dashboard/orders/${result.orderId}`)
-    })
+      clearCart();
+      toast.success(t("orderSuccess"));
+      router.push(`/${locale}/dashboard/orders/${result.orderId}`);
+    });
   }
 
   return (
@@ -197,9 +198,7 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue
-                                placeholder={t("selectBranch")}
-                              />
+                              <SelectValue placeholder={t("selectBranch")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -453,7 +452,10 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
                   <Alert>
                     <AlertDescription>
                       {t("installmentsBreakdown", {
-                        amount: formatCurrency(Math.ceil(totalPrice / 3), locale as "en" | "fr"),
+                        amount: formatCurrency(
+                          Math.ceil(totalPrice / 3),
+                          locale as Locale,
+                        ),
                         months: 3,
                       })}
                     </AlertDescription>
@@ -522,7 +524,9 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
                 <span className="text-muted-foreground">
                   {item.productName} x{item.quantity}
                 </span>
-                <span>{formatCurrency(item.price * item.quantity, locale as "en" | "fr")}</span>
+                <span>
+                  {formatCurrency(item.price * item.quantity, locale as Locale)}
+                </span>
               </div>
             ))}
             <Separator />
@@ -530,7 +534,7 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
               <span className="text-muted-foreground">
                 {t("subtotal")} ({totalItems})
               </span>
-              <span>{formatCurrency(totalPrice, locale as "en" | "fr")}</span>
+              <span>{formatCurrency(totalPrice, locale as Locale)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">{t("shipping")}</span>
@@ -543,11 +547,11 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
             <Separator />
             <div className="flex justify-between font-semibold text-lg">
               <span>{t("total")}</span>
-              <span>{formatCurrency(totalPrice, locale as "en" | "fr")}</span>
+              <span>{formatCurrency(totalPrice, locale as Locale)}</span>
             </div>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

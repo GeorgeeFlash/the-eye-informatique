@@ -1,12 +1,7 @@
-import { getLocale, getTranslations } from "next-intl/server"
-import { getMyAffiliateProfile } from "@/actions/affiliate.actions"
-import { formatDate } from "@/lib/utils"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { getLocale, getTranslations } from "next-intl/server";
+import { getMyAffiliateProfile } from "@/actions/affiliate.actions";
+import { formatDate } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,16 +9,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { APP_URL } from "@/lib/constants"
-import { CreateLinkForm } from "./create-link-form"
-import { DeleteLinkButton } from "./delete-link-button"
+} from "@/components/ui/table";
+import { APP_URL } from "@/lib/constants";
+import { CreateLinkForm } from "./create-link-form";
+import { DeleteLinkButton } from "./delete-link-button";
+import { Locale } from "@/lib/constants";
 
 export default async function AffiliateLinksPage() {
-  const t = await getTranslations("affiliate")
-  const locale = (await getLocale()) as "en" | "fr"
-  const profile = await getMyAffiliateProfile()
-  if (!profile) return null
+  const t = await getTranslations("affiliate");
+  const locale = (await getLocale()) as Locale;
+  const profile = await getMyAffiliateProfile();
+  if (!profile) return null;
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
@@ -61,7 +57,9 @@ export default async function AffiliateLinksPage() {
                       {link.targetUrl}
                     </TableCell>
                     <TableCell>{link.clickCount}</TableCell>
-                    <TableCell>{formatDate(link.createdAt, "dd/MM/yyyy", locale)}</TableCell>
+                    <TableCell>
+                      {formatDate(link.createdAt, "dd/MM/yyyy", locale)}
+                    </TableCell>
                     <TableCell>
                       <DeleteLinkButton linkId={link.id} />
                     </TableCell>
@@ -73,5 +71,5 @@ export default async function AffiliateLinksPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
