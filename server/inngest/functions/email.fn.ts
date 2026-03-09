@@ -39,7 +39,7 @@ export const sendEmail = inngest.createFunction(
     await step.run("send-via-resend", async () => {
       const Component = EMAIL_TEMPLATES[template]
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const react = createElement(Component, props as any)
+      const react = createElement(Component as React.FC<any>, props as any)
       return resend.emails.send({ from: FROM_EMAIL, to, subject, react })
     })
   },

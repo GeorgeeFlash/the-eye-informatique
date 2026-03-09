@@ -3,7 +3,7 @@ import { requireRole } from "@/lib/auth"
 import { ReceiptScanner } from "./receipt-scanner"
 
 export default async function ReceiptScanPage() {
-  await requireRole(["ADMIN", "BRANCH_ADMIN", "STAFF"])
+  await requireRole(["ADMIN", "CENTRAL_ADMIN", "STAFF"])
   const t = await getTranslations("ai")
 
   return (

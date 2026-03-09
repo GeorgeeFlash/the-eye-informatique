@@ -53,7 +53,7 @@ export const installmentDeadlineCheck = inngest.createFunction(
           react: InstallmentReminderEmail({
             customerName: order.user.name ?? "Customer",
             orderId: order.orderNumber,
-            dueDate: installment.dueDate,
+            dueDate: new Date(installment.dueDate),
             amount: Number(installment.amount),
             installmentNumber: installment.sequenceNumber,
             totalInstallments: order._count.installments,

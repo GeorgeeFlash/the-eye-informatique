@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/server/db"
-import { requireAuth, requireRole } from "@/lib/auth"
+import { requireRole } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import {
   createArticleSchema,
@@ -10,6 +10,7 @@ import {
   type UpdateArticleValues,
 } from "@/lib/validators/blog.schema"
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants"
+import { Prisma } from "@/lib/generated/prisma/client"
 
 /* ─── Create ────────────────────────────────────────────── */
 
@@ -42,13 +43,13 @@ export async function updateArticle(id: string, data: UpdateArticleValues) {
   const parsed = updateArticleSchema.safeParse(data)
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors }
 
-  const { tagIds, ...rest } = parsed.data
+  const { tagIds, content, ...rest } = parsed.data
 
   await db.blogArticle.update({
     where: { id },
     data: {
       ...rest,
-      ...(rest.content !== undefined ? { content: rest.content as object } : {}),
+      ...(content !== undefined ? { content: content as Prisma.InputJsonValue } : {}),
       ...(tagIds
         ? { tags: { set: tagIds.map((tid) => ({ id: tid })) } }
         : {}),

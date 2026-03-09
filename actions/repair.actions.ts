@@ -8,7 +8,7 @@ import {
   updateRepairStatusSchema,
   type CreateRepairTicketValues,
 } from "@/lib/validators/repair.schema"
-import type { RepairStatus } from "@prisma/client"
+import type { RepairStatus } from "@/lib/generated/prisma/client"
 
 function revalidateRepairs() {
   revalidatePath("/[locale]/(dashboard)", "layout")

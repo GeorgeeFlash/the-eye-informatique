@@ -2,7 +2,7 @@ import { requireRole } from "@/lib/auth"
 import { db } from "@/server/db"
 
 export async function POST(req: Request) {
-  await requireRole(["ADMIN", "BRANCH_ADMIN", "STAFF"])
+  await requireRole(["ADMIN", "CENTRAL_ADMIN", "STAFF"])
 
   const data = await req.json()
 

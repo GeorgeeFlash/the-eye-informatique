@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/lib/auth"
-import { redirect } from "@/i18n/navigation"
+import { redirect } from "next/navigation"
 import { db } from "@/server/db"
 import { getTranslations } from "next-intl/server"
 import { StatCard } from "@/components/dashboard/stat-card"
@@ -19,7 +19,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 
 export default async function DashboardHomePage() {
   const user = await getCurrentUser()
-  if (!user) redirect("/sign-in")
+  if (!user) redirect("/sign-in") // next/navigation redirect returns never → narrows user type
 
   const t = await getTranslations("customerDashboard")
 

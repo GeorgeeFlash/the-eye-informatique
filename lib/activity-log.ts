@@ -2,6 +2,7 @@
 
 import { db } from "@/server/db"
 import { getCurrentUser } from "@/lib/auth"
+import { Prisma } from "@/lib/generated/prisma/client"
 
 /**
  * Log an activity. Called from server actions & API routes.
@@ -27,7 +28,7 @@ export async function logActivity({
         action,
         entityType: entityType ?? null,
         entityId: entityId ?? null,
-        metadata: metadata ?? undefined,
+        metadata: metadata as Prisma.InputJsonValue | undefined,
       },
     })
   } catch {

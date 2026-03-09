@@ -1,4 +1,4 @@
-import { getCurrentUser, requireRole } from "@/lib/auth"
+import { requireRole } from "@/lib/auth"
 import { db } from "@/server/db"
 import { getTranslations } from "next-intl/server"
 import { StatCard } from "@/components/dashboard/stat-card"
@@ -12,7 +12,6 @@ import {
   ArrowRightIcon,
   ClockIcon,
   UsersIcon,
-  DollarSignIcon,
   BuildingIcon,
 } from "lucide-react"
 import Link from "next/link"
@@ -33,7 +32,7 @@ export default async function AdminDashboardPage() {
       db.repairTicket.count({
         where: { ...branchFilter, status: { notIn: ["CLOSED", "RETURNED"] } },
       }),
-      db.product.count({ where: isCentralAdmin ? {} : { branchId: user.branchId! } }),
+      db.product.count({ where: isCentralAdmin ? {} : { variants: { some: { stockByBranch: { some: { branchId: user.branchId! } } } } } }),
       isCentralAdmin ? db.user.count({ where: { isActive: true } }) : Promise.resolve(0),
       db.order.findMany({
         where: branchFilter,
