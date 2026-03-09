@@ -14,7 +14,7 @@ import {
   UsersIcon,
   BuildingIcon,
 } from "lucide-react"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { formatCurrency, formatDate } from "@/lib/utils"
 
 export default async function AdminDashboardPage() {

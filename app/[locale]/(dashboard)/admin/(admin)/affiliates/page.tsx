@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server"
 import { getAdminAffiliates } from "@/actions/affiliate.actions"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import {
   Card,
   CardContent,

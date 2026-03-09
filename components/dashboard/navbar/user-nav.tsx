@@ -2,7 +2,7 @@
 
 import { useClerk, useUser } from "@clerk/nextjs"
 import { LogOutIcon, SettingsIcon, UserIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,

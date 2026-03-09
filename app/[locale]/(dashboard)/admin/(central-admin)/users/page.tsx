@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { getTranslations, getLocale } from "next-intl/server"
 import { requireRole } from "@/lib/auth"
 import { getUsers } from "@/actions/user.actions"

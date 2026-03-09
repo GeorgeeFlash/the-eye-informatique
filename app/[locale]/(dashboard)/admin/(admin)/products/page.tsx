@@ -31,6 +31,13 @@ export default async function AdminProductsPage({ searchParams }: Props) {
     getCategories(),
   ])
 
+  // Serialize Decimal fields to numbers for client component
+  const serializedProducts = productData.products.map((p) => ({
+    ...p,
+    basePrice: Number(p.basePrice),
+    variants: p.variants.map((v) => ({ ...v, price: Number(v.price) })),
+  }))
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -41,7 +48,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
       </div>
 
       <ProductListClient
-        products={productData.products}
+        products={serializedProducts}
         total={productData.total}
         page={productData.page}
         totalPages={productData.totalPages}

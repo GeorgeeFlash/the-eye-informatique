@@ -2,8 +2,8 @@
 "use client"
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import { useTranslations } from "next-intl"
-import { useTransition, useCallback } from "react"
+import { useTranslations, useLocale } from "next-intl"
+import { useTransition, useCallback, useRef, useEffect } from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTable } from "@/components/dashboard/data-table"
 import { Badge } from "@/components/ui/badge"
@@ -29,11 +29,10 @@ import {
   TrashIcon,
   SearchIcon,
 } from "lucide-react"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { formatCurrency } from "@/lib/utils"
 import { deleteProduct } from "@/actions/product.actions"
-import { useDebounce } from "@/hooks/use-debounce"
 
 type ProductRow = {
   id: string
@@ -41,11 +40,11 @@ type ProductRow = {
   slug: string
   isActive: boolean
   isFeatured: boolean
-  basePrice: unknown // Decimal
+  basePrice: number
   brand: string | null
   category: { id: string; name: string } | null
   images: { url: string }[]
-  variants: { id: string; price: unknown; stock: number; condition: string }[]
+  variants: { id: string; price: number; stock: number; condition: string }[]
 }
 
 type CategoryItem = {
@@ -72,10 +71,18 @@ export function ProductListClient({
   isCentralAdmin,
 }: Props) {
   const t = useTranslations("productAdmin")
+  const locale = useLocale() as "en" | "fr"
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    }
+  }, [])
 
   const updateParams = useCallback(
     (key: string, value: string) => {
@@ -90,12 +97,18 @@ export function ProductListClient({
         router.push(`${pathname}?${params.toString()}`)
       })
     },
-    [router, pathname, searchParams],
+    [router, pathname, searchParams, startTransition],
   )
 
-  const handleSearch = useDebounce((value: string) => {
-    updateParams("search", value)
-  }, 400)
+  const handleSearch = useCallback(
+    (value: string) => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+      debounceTimer.current = setTimeout(() => {
+        updateParams("search", value)
+      }, 400)
+    },
+    [updateParams],
+  )
 
   const handleDelete = async (id: string) => {
     await deleteProduct(id)
@@ -147,7 +160,7 @@ export function ProductListClient({
     {
       id: "price",
       header: t("colPrice"),
-      cell: ({ row }) => formatCurrency(minPrice(row.original.variants), "en"),
+      cell: ({ row }) => formatCurrency(minPrice(row.original.variants), locale),
     },
     {
       id: "stock",
