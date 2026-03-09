@@ -225,6 +225,24 @@ export default async function DashboardHomePage() {
           )}
         </Card>
       )}
+
+      {/* Affiliate CTA — show when user hasn't applied yet */}
+      {!affiliateProfile && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("affiliatePanel")}</CardTitle>
+            <CardDescription>{t("affiliateCta")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard/affiliate-apply">
+                {t("applyNow")}
+                <ArrowRightIcon className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

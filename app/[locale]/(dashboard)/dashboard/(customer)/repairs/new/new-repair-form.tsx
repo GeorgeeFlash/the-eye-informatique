@@ -20,6 +20,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -33,9 +34,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { Loader2Icon } from "lucide-react"
-import { useState, useTransition } from "react"
+import { Loader2Icon, PaperclipIcon, XIcon } from "lucide-react"
+import { useRef, useState, useTransition } from "react"
+
+const MAX_FILES = 5
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
+const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm"
 
 interface GuaranteeOption {
   id: string
@@ -52,6 +58,8 @@ export function NewRepairForm({ guaranteeOptions }: NewRepairFormProps) {
   const t = useTranslations("repairs")
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState("")
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const form = useForm<CreateRepairTicketValues>({
     resolver: zodResolver(createRepairTicketSchema) as never,
@@ -62,10 +70,55 @@ export function NewRepairForm({ guaranteeOptions }: NewRepairFormProps) {
     },
   })
 
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    const remaining = MAX_FILES - selectedFiles.length
+    const toAdd = files.slice(0, remaining)
+
+    for (const file of toAdd) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(t("fileTooLarge", { name: file.name }))
+        return
+      }
+    }
+
+    setSelectedFiles((prev) => [...prev, ...toAdd])
+    // Reset input so re-selecting the same file works
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  function removeFile(index: number) {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
+  }
+
   function onSubmit(values: CreateRepairTicketValues) {
     setServerError("")
     startTransition(async () => {
-      const result = await createRepairTicket(values)
+      // Upload files first if any
+      let uploadedFiles: { url: string; fileName: string; size: number; mimeType: string }[] = []
+
+      if (selectedFiles.length > 0) {
+        const formData = new FormData()
+        for (const file of selectedFiles) {
+          formData.append("files", file)
+        }
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!uploadRes.ok) {
+          const err = await uploadRes.json()
+          setServerError(err.error ?? t("uploadError"))
+          return
+        }
+
+        const data = await uploadRes.json()
+        uploadedFiles = data.files
+      }
+
+      const result = await createRepairTicket(values, uploadedFiles.length > 0 ? uploadedFiles : undefined)
       if (!("success" in result)) {
         const err = result.error
         if (typeof err === "string") {
@@ -185,6 +238,55 @@ export function NewRepairForm({ guaranteeOptions }: NewRepairFormProps) {
                 </FormItem>
               )}
             />
+
+            {/* AC-M4.1-3: File attachments (up to 5 files, max 10 MB each) */}
+            <div className="space-y-2">
+              <FormLabel>{t("attachments")}</FormLabel>
+              <FormDescription>{t("attachmentsDescription")}</FormDescription>
+
+              {selectedFiles.length > 0 && (
+                <div className="space-y-2">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={`${file.name}-${index}`}
+                      className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <PaperclipIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span className="truncate">{file.name}</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0"
+                        onClick={() => removeFile(index)}
+                        disabled={isPending}
+                      >
+                        <XIcon className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {selectedFiles.length < MAX_FILES && (
+                <div>
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={ACCEPTED_TYPES}
+                    multiple
+                    onChange={handleFileSelect}
+                    disabled={isPending}
+                    className="cursor-pointer"
+                  />
+                </div>
+              )}
+            </div>
           </CardContent>
 
           <CardFooter className="flex justify-end gap-2">

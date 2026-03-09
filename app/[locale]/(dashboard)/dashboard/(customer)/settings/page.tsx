@@ -8,9 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { formatDate } from "@/lib/utils"
 import { ProfileForm } from "./profile-form"
+import { AddressList } from "./address-list"
+import { notFound } from "next/navigation"
 
 export async function generateMetadata() {
   const t = await getTranslations("settings")
@@ -21,6 +21,8 @@ export default async function CustomerSettingsPage() {
   const t = await getTranslations("settings")
   const locale = (await getLocale()) as "en" | "fr"
   const user = await getCurrentUser()
+
+  if (!user) notFound()
 
   const addresses = await db.address.findMany({
     where: { userId: user.id },
@@ -51,44 +53,17 @@ export default async function CustomerSettingsPage() {
         </CardContent>
       </Card>
 
-      {/* Saved addresses */}
+      {/* Saved addresses — full CRUD */}
       <Card>
         <CardHeader>
           <CardTitle>{t("addresses")}</CardTitle>
           <CardDescription>{t("addressesDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
-          {addresses.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t("noAddresses")}
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {addresses.map((addr) => (
-                <div
-                  key={addr.id}
-                  className="flex items-start justify-between rounded-md border p-3"
-                >
-                  <div className="space-y-1 text-sm">
-                    {addr.label && (
-                      <p className="font-medium">{addr.label}</p>
-                    )}
-                    <p>
-                      {addr.street}, {addr.city}, {addr.region}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {t("addedOn", {
-                        date: formatDate(addr.createdAt, "dd/MM/yyyy", locale),
-                      })}
-                    </p>
-                  </div>
-                  {addr.isDefault && (
-                    <Badge variant="secondary">{t("default")}</Badge>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+          <AddressList
+            addresses={addresses}
+            locale={locale}
+          />
         </CardContent>
       </Card>
 
@@ -104,7 +79,7 @@ export default async function CustomerSettingsPage() {
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t("memberSince")}</span>
-            <span>{formatDate(user.createdAt, "dd/MM/yyyy", locale)}</span>
+            <span>{new Date(user.createdAt).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB")}</span>
           </div>
         </CardContent>
       </Card>

@@ -11,6 +11,9 @@ export type AuthUser = {
   role: Role
   branchId: string | null
   isActive: boolean
+  phone: string | null
+  preferredLocale: string
+  createdAt: Date
 }
 
 /**
@@ -42,6 +45,9 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       role: true,
       branchId: true,
       isActive: true,
+      phone: true,
+      preferredLocale: true,
+      createdAt: true,
     },
   })
 
@@ -68,6 +74,9 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       role: true,
       branchId: true,
       isActive: true,
+      phone: true,
+      preferredLocale: true,
+      createdAt: true,
     },
   })
 

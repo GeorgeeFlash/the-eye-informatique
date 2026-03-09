@@ -18,7 +18,17 @@ function revalidateRepairs() {
 // createRepairTicket — customer submits a repair/return/exchange request
 // ---------------------------------------------------------------------------
 
-export async function createRepairTicket(data: CreateRepairTicketValues) {
+interface UploadedFile {
+  url: string
+  fileName: string
+  size: number
+  mimeType: string
+}
+
+export async function createRepairTicket(
+  data: CreateRepairTicketValues,
+  attachments?: UploadedFile[],
+) {
   const user = await requireAuth()
 
   const parsed = createRepairTicketSchema.safeParse(data)
@@ -60,6 +70,19 @@ export async function createRepairTicket(data: CreateRepairTicketValues) {
         changedBy: user.id,
       },
     })
+
+    // AC-M4.1-3: Create attachment records for uploaded files
+    if (attachments?.length) {
+      await tx.repairAttachment.createMany({
+        data: attachments.map((file) => ({
+          ticketId: newTicket.id,
+          fileUrl: file.url,
+          fileName: file.fileName,
+          fileSize: file.size,
+          mimeType: file.mimeType,
+        })),
+      })
+    }
 
     return newTicket
   })
