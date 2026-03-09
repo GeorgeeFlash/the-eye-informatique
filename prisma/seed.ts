@@ -40,6 +40,19 @@ async function main() {
     },
   })
 
+  const bamenda = await db.branch.upsert({
+    where: { id: "branch-bamenda" },
+    update: {},
+    create: {
+      id: "branch-bamenda",
+      name: "TEI Bamenda - Head Office",
+      city: "Bamenda",
+      address: "Foncha Junction, Nkwen",
+      phone: "+237 233 111 111",
+      isActive: true,
+    },
+  })
+
   console.log("  ✔ Branches")
 
   // -------------------------------------------------------------------------
@@ -190,14 +203,14 @@ async function main() {
     create: {
       slug: "samsung-galaxy-a55-5g",
       name: "Samsung Galaxy A55 5G",
-      description: "Smartphone Android milieu de gamme avec écran AMOLED 6.6\", appareil photo 50 MP et batterie 5000 mAh.",
+      description: "Mid-range Android smartphone with 6.6\" AMOLED display, 50 MP camera and 5000 mAh battery.",
       basePrice: 245000,
       currency: "XAF",
       categoryId: smartphones.id,
       brand: "Samsung",
-      specs: { ram: "8 Go", storage: "128 Go", screen: "6.6\" AMOLED", battery: "5000 mAh" },
-      metaTitle: "Samsung Galaxy A55 5G - Achat en ligne | The Eye Informatique",
-      metaDescription: "Achetez le Samsung Galaxy A55 5G au Cameroun. Livraison à Yaoundé et Douala.",
+      specs: { ram: "8 GB", storage: "128 GB", screen: "6.6\" AMOLED", battery: "5000 mAh" },
+      metaTitle: "Samsung Galaxy A55 5G - Online Purchase | The Eye Informatique",
+      metaDescription: "Buy the Samsung Galaxy A55 5G in Cameroon. Delivery to Yaoundé, Douala and Bamenda.",
       isActive: true,
       isFeatured: true,
       tags: { connect: [{ slug: "new-arrival" }, { slug: "best-seller" }] },
@@ -224,14 +237,14 @@ async function main() {
     create: {
       slug: "apple-macbook-air-m2",
       name: "Apple MacBook Air M2",
-      description: "Laptop ultra-fin avec puce Apple M2, écran Liquid Retina 13.6\" et autonomie jusqu'à 18 heures.",
+      description: "Ultra-thin laptop with Apple M2 chip, 13.6\" Liquid Retina display and up to 18 hours battery life.",
       basePrice: 895000,
       currency: "XAF",
       categoryId: ordinateurs.id,
       brand: "Apple",
-      specs: { chip: "Apple M2", ram: "8 Go", storage: "256 Go SSD", screen: "13.6\" Liquid Retina", battery: "18h" },
-      metaTitle: "MacBook Air M2 - Achat en ligne | The Eye Informatique",
-      metaDescription: "MacBook Air M2 disponible au Cameroun. Garantie incluse.",
+      specs: { chip: "Apple M2", ram: "8 GB", storage: "256 GB SSD", screen: "13.6\" Liquid Retina", battery: "18h" },
+      metaTitle: "MacBook Air M2 - Online Purchase | The Eye Informatique",
+      metaDescription: "MacBook Air M2 available in Cameroon. Warranty included.",
       isActive: true,
       isFeatured: true,
       tags: { connect: [{ slug: "best-seller" }] },
@@ -556,9 +569,10 @@ async function main() {
 
   for (const variant of allVariants) {
     const totalStock = variant.stock
-    // Split roughly 60% Yaoundé / 40% Douala
-    const ydeStock = Math.round(totalStock * 0.6)
-    const dlaStock = totalStock - ydeStock
+    // Split roughly 40% Yaoundé / 35% Douala / 25% Bamenda
+    const ydeStock = Math.round(totalStock * 0.4)
+    const dlaStock = Math.round(totalStock * 0.35)
+    const bdaStock = totalStock - ydeStock - dlaStock
 
     await db.productStockByBranch.upsert({
       where: { variantId_branchId: { variantId: variant.id, branchId: yaoundeBranch.id } },
@@ -570,6 +584,11 @@ async function main() {
       update: {},
       create: { variantId: variant.id, branchId: douala.id, stock: dlaStock, lowStockThreshold: 3 },
     })
+    await db.productStockByBranch.upsert({
+      where: { variantId_branchId: { variantId: variant.id, branchId: bamenda.id } },
+      update: {},
+      create: { variantId: variant.id, branchId: bamenda.id, stock: bdaStock, lowStockThreshold: 3 },
+    })
   }
 
   console.log("  ✔ ProductStockByBranch")
@@ -578,7 +597,7 @@ async function main() {
   // Summary
   // -------------------------------------------------------------------------
   console.log("\n✅  Seed complete!")
-  console.log("   Branches :", [yaoundeBranch.name, douala.name].join(", "))
+  console.log("   Branches :", [yaoundeBranch.name, douala.name, bamenda.name].join(", "))
   console.log("   Products :", 11, "products seeded")
 }
 
