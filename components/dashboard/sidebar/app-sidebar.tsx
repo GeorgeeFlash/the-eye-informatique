@@ -1,13 +1,6 @@
 import { Link } from "@/i18n/navigation";
+import { BriefcaseIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import {
-  BarChart3Icon,
-  BriefcaseIcon,
-  LayoutDashboardIcon,
-  ServerIcon,
-  SettingsIcon,
-  ShoppingCartIcon,
-} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -35,12 +28,12 @@ export function AppSidebar({
     {
       title: t("overview"),
       url: "/admin",
-      icon: LayoutDashboardIcon,
+      icon: "layout-dashboard",
     },
     {
       title: t("storeManagement"),
       url: "/admin/orders",
-      icon: ShoppingCartIcon,
+      icon: "shopping-cart",
       items: [
         { title: t("orders"), url: "/admin/orders" },
         { title: t("products"), url: "/admin/products" },
@@ -51,7 +44,7 @@ export function AppSidebar({
     {
       title: t("insights"),
       url: "/admin/analytics",
-      icon: BarChart3Icon,
+      icon: "bar-chart",
       items: [
         { title: t("analytics"), url: "/admin/analytics" },
         { title: t("blog"), url: "/admin/blog" },
@@ -64,7 +57,7 @@ export function AppSidebar({
     {
       title: t("system"),
       url: "/admin/users",
-      icon: ServerIcon,
+      icon: "server",
       items: [
         { title: t("users"), url: "/admin/users" },
         { title: t("branches"), url: "/admin/branches" },
@@ -79,7 +72,7 @@ export function AppSidebar({
     {
       title: t("settings"),
       url: "/admin/settings",
-      icon: SettingsIcon,
+      icon: "settings",
     },
   ];
 

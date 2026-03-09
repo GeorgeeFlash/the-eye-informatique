@@ -1,13 +1,6 @@
 import { Link } from "@/i18n/navigation";
+import { PackageSearchIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import {
-  BellIcon,
-  GitBranchIcon,
-  LayoutDashboardIcon,
-  PackageIcon,
-  PackageSearchIcon,
-  SettingsIcon,
-} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -35,12 +28,12 @@ export function CustomerSidebar({
     {
       title: t("overview"),
       url: "/dashboard",
-      icon: LayoutDashboardIcon,
+      icon: "layout-dashboard",
     },
     {
       title: t("myServices"),
       url: "/dashboard/orders",
-      icon: PackageIcon,
+      icon: "package",
       items: [
         { title: t("orders"), url: "/dashboard/orders" },
         { title: t("repairs"), url: "/dashboard/repairs" },
@@ -50,12 +43,12 @@ export function CustomerSidebar({
     {
       title: t("notifications"),
       url: "/dashboard/notifications",
-      icon: BellIcon,
+      icon: "bell",
     },
     {
       title: t("browseProducts"),
       url: "/products",
-      icon: PackageSearchIcon,
+      icon: "package-search",
     },
   ];
 
@@ -63,7 +56,7 @@ export function CustomerSidebar({
     {
       title: t("affiliateProgram"),
       url: "/dashboard/earnings",
-      icon: GitBranchIcon,
+      icon: "git-branch",
       items: [
         { title: t("earnings"), url: "/dashboard/earnings" },
         { title: t("myLinks"), url: "/dashboard/links" },
@@ -76,7 +69,7 @@ export function CustomerSidebar({
     {
       title: t("settings"),
       url: "/dashboard/settings",
-      icon: SettingsIcon,
+      icon: "settings",
     },
   ];
 

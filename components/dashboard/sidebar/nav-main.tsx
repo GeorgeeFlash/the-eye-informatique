@@ -1,12 +1,38 @@
-"use client"
+"use client";
 
-import { Link, usePathname } from "@/i18n/navigation"
-import { ChevronRightIcon, type LucideIcon } from "lucide-react"
+import { Link, usePathname } from "@/i18n/navigation";
+import {
+  BarChart3Icon,
+  BellIcon,
+  BriefcaseIcon,
+  ChevronRightIcon,
+  GitBranchIcon,
+  LayoutDashboardIcon,
+  type LucideIcon,
+  PackageIcon,
+  PackageSearchIcon,
+  ServerIcon,
+  SettingsIcon,
+  ShoppingCartIcon,
+} from "lucide-react";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  "layout-dashboard": LayoutDashboardIcon,
+  "shopping-cart": ShoppingCartIcon,
+  "bar-chart": BarChart3Icon,
+  server: ServerIcon,
+  settings: SettingsIcon,
+  bell: BellIcon,
+  package: PackageIcon,
+  "package-search": PackageSearchIcon,
+  "git-branch": GitBranchIcon,
+  briefcase: BriefcaseIcon,
+};
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -16,17 +42,23 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 export type NavItem = {
-  title: string
-  url: string
-  icon: LucideIcon
-  items?: { title: string; url: string }[]
-}
+  title: string;
+  url: string;
+  icon: string;
+  items?: { title: string; url: string }[];
+};
 
-export function NavMain({ items, label }: { items: NavItem[]; label?: string }) {
-  const pathname = usePathname()
+export function NavMain({
+  items,
+  label,
+}: {
+  items: NavItem[];
+  label?: string;
+}) {
+  const pathname = usePathname();
 
   return (
     <SidebarGroup>
@@ -37,16 +69,23 @@ export function NavMain({ items, label }: { items: NavItem[]; label?: string }) 
             <Collapsible
               key={item.title}
               asChild
-              defaultOpen={item.items.some((sub) => pathname.startsWith(sub.url))}
+              defaultOpen={item.items.some((sub) =>
+                pathname.startsWith(sub.url),
+              )}
               className="group/collapsible"
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    isActive={item.items.some((sub) => pathname.startsWith(sub.url))}
+                    isActive={item.items.some((sub) =>
+                      pathname.startsWith(sub.url),
+                    )}
                   >
-                    <item.icon />
+                    {(() => {
+                      const Icon = ICON_MAP[item.icon];
+                      return Icon ? <Icon /> : null;
+                    })()}
                     <span>{item.title}</span>
                     <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   </SidebarMenuButton>
@@ -55,7 +94,10 @@ export function NavMain({ items, label }: { items: NavItem[]; label?: string }) 
                   <SidebarMenuSub>
                     {item.items.map((sub) => (
                       <SidebarMenuSubItem key={sub.title}>
-                        <SidebarMenuSubButton asChild isActive={pathname === sub.url}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname === sub.url}
+                        >
                           <Link href={sub.url}>
                             <span>{sub.title}</span>
                           </Link>
@@ -68,16 +110,23 @@ export function NavMain({ items, label }: { items: NavItem[]; label?: string }) 
             </Collapsible>
           ) : (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild tooltip={item.title} isActive={pathname === item.url}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                isActive={pathname === item.url}
+              >
                 <Link href={item.url}>
-                  <item.icon />
+                  {(() => {
+                    const Icon = ICON_MAP[item.icon];
+                    return Icon ? <Icon /> : null;
+                  })()}
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          )
+          ),
         )}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }
