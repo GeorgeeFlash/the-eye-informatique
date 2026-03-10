@@ -39,6 +39,9 @@ export const ROUTES = {
   checkout: "/checkout",
   blog: "/blog",
   guarantee: "/guarantee",
+  about: "/about",
+  contact: "/contact",
+  affiliate: "/affiliate",
   signIn: "/sign-in",
   signUp: "/sign-up",
   dashboard: {
@@ -47,4 +50,13 @@ export const ROUTES = {
     affiliate: "/affiliate",
     customer: "/customer",
   },
+} as const
+
+// Social links
+export const SOCIAL_LINKS = {
+  facebook: "https://facebook.com/theeyeinformatique",
+  instagram: "https://instagram.com/theeyeinformatique",
+  twitter: "https://x.com/theeyeinfo",
+  whatsapp: "https://wa.me/237000000000",
+  tiktok: "https://tiktok.com/@theeyeinformatique",
 } as const

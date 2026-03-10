@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { SerwistProvider } from "@/app/serwist";
+import { SanityLive } from "@/sanity/lib/live"
 import "../globals.css";
 import { Locale } from "@/lib/constants";
 
@@ -93,6 +94,7 @@ export default async function LocaleLayout({
                 {children}
               </SerwistProvider>
               <Toaster richColors />
+              <SanityLive />
             </NextIntlClientProvider>
           </ThemeProvider>
         </body>

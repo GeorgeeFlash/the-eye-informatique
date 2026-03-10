@@ -96,6 +96,11 @@ export async function getCategories() {
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     include: {
       _count: { select: { products: true } },
+      products: {
+        take: 1,
+        where: { isActive: true },
+        select: { images: { take: 1, orderBy: { sortOrder: "asc" }, select: { url: true, alt: true } } },
+      },
     },
   })
 }
