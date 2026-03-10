@@ -57,6 +57,7 @@ export const SOCIAL_LINKS = {
   facebook: "https://facebook.com/theeyeinformatique",
   instagram: "https://instagram.com/theeyeinformatique",
   twitter: "https://x.com/theeyeinfo",
+  // TODO: Replace with the actual business WhatsApp number before deployment
   whatsapp: "https://wa.me/237000000000",
   tiktok: "https://tiktok.com/@theeyeinformatique",
 } as const

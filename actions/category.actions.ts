@@ -98,6 +98,7 @@ export async function getCategories() {
       _count: { select: { products: true } },
       products: {
         take: 1,
+        orderBy: { createdAt: "asc" },
         where: { isActive: true },
         select: { images: { take: 1, orderBy: { sortOrder: "asc" }, select: { url: true, alt: true } } },
       },

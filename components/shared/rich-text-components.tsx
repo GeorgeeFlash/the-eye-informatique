@@ -36,12 +36,25 @@ function textFromChildren(children: ReactNode): string {
 }
 
 export function slugifyHeading(value: string): string {
-  return value
+  const normalized = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // strip diacritics
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
+
+  if (!normalized) {
+    // Fallback for headings that are entirely non-ASCII/special characters
+    const hash = Array.from(value).reduce(
+      (acc, ch) => acc + ch.charCodeAt(0),
+      0,
+    );
+    return `heading-${hash}`;
+  }
+
+  return normalized;
 }
 
 export function extractTocFromPortableText(content: unknown): TocItem[] {

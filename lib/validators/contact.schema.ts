@@ -10,7 +10,7 @@ export const contactFormSchema = z.object({
     .regex(CM_PHONE_REGEX, "Invalid Cameroon phone number")
     .optional()
     .or(z.literal("")),
-  subject: z.string().min(3, "Subject is required").max(200),
+  subject: z.string().min(3, "Subject must be at least 3 characters").max(200),
   message: z.string().min(10, "Message must be at least 10 characters").max(2000),
 })
 

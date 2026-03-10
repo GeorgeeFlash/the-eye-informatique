@@ -35,7 +35,7 @@ export const blockType = defineType({
                 type: "url",
                 title: "URL",
                 validation: (r) =>
-                  r.uri({ allowRelative: true, scheme: ["http", "https", "mailto", "tel"] }),
+                  r.uri({ allowRelative: true, scheme: ["http", "https", "mailto", "tel"] }).required(),
               },
               {
                 name: "openInNewTab",

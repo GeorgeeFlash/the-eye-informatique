@@ -10,7 +10,13 @@ import {
 
 export async function generateStaticParams() {
   const pages = await client.fetch(LEGAL_PAGES_LIST_QUERY);
-  return (pages ?? []).map((page: { slug: string }) => ({ slug: page.slug }));
+  const locales = ["en", "fr"];
+  return locales.flatMap((locale) =>
+    (pages ?? []).map((page: { slug: string }) => ({
+      locale,
+      slug: page.slug,
+    })),
+  );
 }
 
 export default async function LegalPage({
@@ -26,11 +32,13 @@ export default async function LegalPage({
 
   if (!page) notFound();
 
-  const toc = extractTocFromPortableText(page.content);
+  const toc = page.content ? extractTocFromPortableText(page.content) : [];
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_280px]">
+      <div
+        className={`mx-auto grid max-w-6xl gap-10${toc.length > 0 ? " lg:grid-cols-[1fr_280px]" : ""}`}
+      >
         <article className="min-w-0">
           <h1 className="mb-2 text-3xl font-bold tracking-tight">
             {page.title}

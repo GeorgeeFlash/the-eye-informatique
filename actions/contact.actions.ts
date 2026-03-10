@@ -47,9 +47,14 @@ export async function submitContactForm(formData: {
   }
 
   // Save to DB
-  await db.contactSubmission.create({
-    data: { name, email, phone: phone || null, subject, message },
-  })
+  try {
+    await db.contactSubmission.create({
+      data: { name, email, phone: phone || null, subject, message },
+    })
+  } catch (err) {
+    console.error("[contact] Failed to save contact submission:", err)
+    return { error: "Unable to save contact request, please try again later" }
+  }
 
   // Send email notification
   try {
@@ -60,8 +65,9 @@ export async function submitContactForm(formData: {
       subject: `[Contact] ${subject}`,
       react: ContactSubmissionEmail({ name, email, phone, subject, message }),
     })
-  } catch {
+  } catch (err) {
     // Email failure shouldn't block form submission — record is already saved
+    console.error("[contact] Contact email send failed:", err)
   }
 
   return { success: true }

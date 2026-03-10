@@ -69,7 +69,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Mission */}
-      {data.mission && (
+      {data.mission && data.mission.body && (
         <section className="py-16">
           <div className="container mx-auto px-4">
             <h2 className="mb-6 text-center text-2xl font-bold">
@@ -91,7 +91,7 @@ export default async function AboutPage() {
             </h2>
             <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2 md:items-center">
               <div className="prose prose-lg dark:prose-invert max-w-none">
-                <PortableText value={data.story.body} />
+                {data.story.body && <PortableText value={data.story.body} />}
               </div>
               {data.story.image && (
                 <div className="overflow-hidden rounded-xl border bg-card">

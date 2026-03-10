@@ -29,7 +29,7 @@ export const aboutPage = defineType({
       fields: [
         defineField({ name: "title", title: "Title", type: "string" }),
         defineField({ name: "body", title: "Body", type: "blockContent" }),
-        defineField({ name: "image", title: "Story Image", type: "image", options: { hotspot: true } }),
+        defineField({ name: "image", title: "Mission Image", type: "image", options: { hotspot: true } }),
       ],
     }),
     defineField({
