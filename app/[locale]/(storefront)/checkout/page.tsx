@@ -1,25 +1,27 @@
-import { redirect } from "next/navigation"
-import { getTranslations } from "next-intl/server"
-import { getCurrentUser } from "@/lib/auth"
-import { getUserAddresses } from "@/actions/order.actions"
-import { getBranches } from "@/actions/user.actions"
-import { CheckoutForm } from "@/components/storefront/checkout-form"
+import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth";
+import { getUserAddresses } from "@/actions/order.actions";
+import { getBranches } from "@/actions/user.actions";
+import { getSetting } from "@/actions/settings.actions";
+import { CheckoutForm } from "@/components/storefront/checkout-form";
 
 export async function generateMetadata() {
-  const t = await getTranslations("checkout")
-  return { title: t("title") }
+  const t = await getTranslations("checkout");
+  return { title: t("title") };
 }
 
 export default async function CheckoutPage() {
-  const user = await getCurrentUser()
-  if (!user) redirect("/sign-in")
+  const user = await getCurrentUser();
+  if (!user) redirect("/sign-in");
 
-  const [addresses, branches] = await Promise.all([
+  const [addresses, branches, installmentCount] = await Promise.all([
     getUserAddresses(),
     getBranches(),
-  ])
+    getSetting<number>("installmentCount", 3),
+  ]);
 
-  const t = await getTranslations("checkout")
+  const t = await getTranslations("checkout");
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -33,7 +35,8 @@ export default async function CheckoutPage() {
           region: a.region,
         }))}
         branches={branches}
+        installmentCount={installmentCount}
       />
     </div>
-  )
+  );
 }

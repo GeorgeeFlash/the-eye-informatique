@@ -13,6 +13,8 @@ const ALLOWED_MIME_TYPES = [
   "video/webm",
 ]
 
+const ALLOWED_FOLDERS = ["repairs", "products"] as const
+
 export async function POST(request: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -21,14 +23,20 @@ export async function POST(request: NextRequest) {
 
   const formData = await request.formData()
   const files = formData.getAll("files") as File[]
+  const folder = (formData.get("folder") as string) ?? "repairs"
+
+  if (!ALLOWED_FOLDERS.includes(folder as (typeof ALLOWED_FOLDERS)[number])) {
+    return NextResponse.json({ error: "Invalid folder" }, { status: 400 })
+  }
 
   if (!files.length) {
     return NextResponse.json({ error: "No files provided" }, { status: 400 })
   }
 
-  if (files.length > 5) {
+  const maxFiles = folder === "products" ? 10 : 5
+  if (files.length > maxFiles) {
     return NextResponse.json(
-      { error: "Maximum 5 files allowed" },
+      { error: `Maximum ${maxFiles} files allowed` },
       { status: 400 },
     )
   }
@@ -50,7 +58,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const blob = await put(`repairs/${userId}/${Date.now()}-${file.name}`, file, {
+    const prefix = folder === "products"
+      ? `products/${Date.now()}`
+      : `repairs/${userId}/${Date.now()}`
+
+    const blob = await put(`${prefix}-${file.name}`, file, {
       access: "public",
       addRandomSuffix: true,
     })

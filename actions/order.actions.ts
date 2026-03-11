@@ -8,6 +8,7 @@ import { z } from "zod"
 import type { OrderStatus } from "@/lib/generated/prisma/client"
 import { Prisma } from "@/lib/generated/prisma/client"
 import { calculateShippingFee } from "@/lib/shipping"
+import { getSetting } from "@/actions/settings.actions"
 import { createCheckoutSession } from "@/lib/payment"
 
 // ---------------------------------------------------------------------------
@@ -118,6 +119,7 @@ export async function createOrder(data: CreateOrderInput) {
   const errors: string[] = []
   let subtotal = 0
   let totalShipping = 0
+  const interCityFee = await getSetting<number>("interCityShippingFee", 2500)
 
   const lineItems: {
     variantId: string
@@ -153,7 +155,7 @@ export async function createOrder(data: CreateOrderInput) {
 
     // Shipping fee per line (delivery only)
     if (parsed.data.deliveryMethod === "DELIVERY" && customerCity) {
-      totalShipping += calculateShippingFee(customerCity, stockRecord.branch.city)
+      totalShipping += calculateShippingFee(customerCity, stockRecord.branch.city, interCityFee)
     }
 
     lineItems.push({
@@ -232,7 +234,7 @@ export async function createOrder(data: CreateOrderInput) {
 
     // Create installment records if requested
     if (parsed.data.installments) {
-      const installmentCount = 3
+      const installmentCount = await getSetting<number>("installmentCount", 3)
       const installmentAmount = Math.ceil(total / installmentCount)
 
       for (let i = 0; i < installmentCount; i++) {

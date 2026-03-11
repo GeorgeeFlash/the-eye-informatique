@@ -17,12 +17,15 @@ export async function createCheckoutSession(params: {
     ? `/dashboard/orders/${params.orderId}?installment=paid`
     : `/dashboard/orders/${params.orderId}?payment=complete`
 
+  const isDevelopment = process.env.NODE_ENV === "development"
+  const notifyUrlOnDevelopment = `https://drake-whole-poorly.ngrok-free.app/api/webhooks/payunit`
+
   const result = await initiatePayment({
     totalAmount: params.amount,
     orderId: params.installmentId ?? params.orderId,
     gateway: params.gateway,
     returnUrl: `${APP_URL}${returnPath}`,
-    notifyUrl: `${APP_URL}/api/webhooks/payunit`,
+    notifyUrl: isDevelopment ? notifyUrlOnDevelopment : `${APP_URL}/api/webhooks/payunit`,
     customerName: params.customerName,
     customerEmail: params.customerEmail,
     description: params.installmentId

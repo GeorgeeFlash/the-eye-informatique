@@ -13,7 +13,7 @@ import type { Role } from "@/lib/types"
 // ---------------------------------------------------------------------------
 const completeRegistrationSchema = z.object({
   applyAsAffiliate: z.boolean().default(false),
-  branchId: z.string().cuid().optional(),
+  branchId: z.string().min(1).optional(),
   acceptedTerms: z.boolean().refine((v) => v === true, {
     message: "You must accept the terms and privacy policy",
   }),
@@ -96,9 +96,9 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
 const VALID_ROLES: Role[] = ["CUSTOMER", "AFFILIATE", "STAFF", "ADMIN", "CENTRAL_ADMIN"]
 
 const assignRoleSchema = z.object({
-  userId: z.string().cuid(),
+  userId: z.string().min(1),
   role: z.enum(["CUSTOMER", "AFFILIATE", "STAFF", "ADMIN", "CENTRAL_ADMIN"]),
-  branchId: z.string().cuid().optional(),
+  branchId: z.string().min(1).optional(),
 })
 
 export async function assignRole(data: z.infer<typeof assignRoleSchema>) {
@@ -137,7 +137,7 @@ export async function assignRole(data: z.infer<typeof assignRoleSchema>) {
 // Add User Remark — Staff+ only (AC-M1.2-9)
 // ---------------------------------------------------------------------------
 const addRemarkSchema = z.object({
-  userId: z.string().cuid(),
+  userId: z.string().min(1),
   text: z.string().min(1).max(2000),
 })
 

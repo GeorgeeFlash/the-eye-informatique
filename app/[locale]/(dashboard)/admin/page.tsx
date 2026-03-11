@@ -1,10 +1,16 @@
-import { requireRole } from "@/lib/auth"
-import { db } from "@/server/db"
-import { getTranslations, getLocale } from "next-intl/server"
-import { StatCard } from "@/components/dashboard/stat-card"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { requireRole } from "@/lib/auth";
+import { db } from "@/server/db";
+import { getTranslations, getLocale } from "next-intl/server";
+import { StatCard } from "@/components/dashboard/stat-card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   PackageIcon,
   ShoppingCartIcon,
@@ -13,46 +19,70 @@ import {
   ClockIcon,
   UsersIcon,
   BuildingIcon,
-} from "lucide-react"
-import { Link } from "@/i18n/navigation"
-import { formatCurrency, formatDate } from "@/lib/utils"
-import { Locale } from "@/lib/constants"
+  AlertTriangleIcon,
+} from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Locale } from "@/lib/constants";
+import { getLowStockProducts } from "@/actions/product.actions";
 
 export default async function AdminDashboardPage() {
-  const user = await requireRole(["STAFF", "ADMIN", "CENTRAL_ADMIN"])
-  const t = await getTranslations("adminDashboard")
-  const locale = await getLocale() as Locale
+  const user = await requireRole(["STAFF", "ADMIN", "CENTRAL_ADMIN"]);
+  const t = await getTranslations("adminDashboard");
+  const locale = (await getLocale()) as Locale;
 
-  const isCentralAdmin = user.role === "CENTRAL_ADMIN"
-  const branchFilter = isCentralAdmin ? {} : { branchId: user.branchId! }
+  const isCentralAdmin = user.role === "CENTRAL_ADMIN";
+  const branchFilter = isCentralAdmin ? {} : { branchId: user.branchId! };
 
   // Fetch admin KPIs in parallel
-  const [orderCount, pendingOrders, openRepairs, totalProducts, totalUsers, recentOrders, branches] =
-    await Promise.all([
-      db.order.count({ where: branchFilter }),
-      db.order.count({ where: { ...branchFilter, status: "PENDING" } }),
-      db.repairTicket.count({
-        where: { ...branchFilter, status: { notIn: ["CLOSED", "RETURNED"] } },
-      }),
-      db.product.count({ where: isCentralAdmin ? {} : { variants: { some: { stockByBranch: { some: { branchId: user.branchId! } } } } } }),
-      isCentralAdmin ? db.user.count({ where: { isActive: true } }) : Promise.resolve(0),
-      db.order.findMany({
-        where: branchFilter,
-        orderBy: { createdAt: "desc" },
-        take: 5,
-        select: {
-          id: true,
-          orderNumber: true,
-          status: true,
-          total: true,
-          createdAt: true,
-          user: { select: { name: true, email: true } },
-        },
-      }),
-      isCentralAdmin
-        ? db.branch.findMany({ where: { isActive: true }, select: { id: true, name: true, city: true } })
-        : Promise.resolve([]),
-    ])
+  const [
+    orderCount,
+    pendingOrders,
+    openRepairs,
+    totalProducts,
+    totalUsers,
+    recentOrders,
+    branches,
+    lowStockProducts,
+  ] = await Promise.all([
+    db.order.count({ where: branchFilter }),
+    db.order.count({ where: { ...branchFilter, status: "PENDING" } }),
+    db.repairTicket.count({
+      where: { ...branchFilter, status: { notIn: ["CLOSED", "RETURNED"] } },
+    }),
+    db.product.count({
+      where: isCentralAdmin
+        ? {}
+        : {
+            variants: {
+              some: { stockByBranch: { some: { branchId: user.branchId! } } },
+            },
+          },
+    }),
+    isCentralAdmin
+      ? db.user.count({ where: { isActive: true } })
+      : Promise.resolve(0),
+    db.order.findMany({
+      where: branchFilter,
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        orderNumber: true,
+        status: true,
+        total: true,
+        createdAt: true,
+        user: { select: { name: true, email: true } },
+      },
+    }),
+    isCentralAdmin
+      ? db.branch.findMany({
+          where: { isActive: true },
+          select: { id: true, name: true, city: true },
+        })
+      : Promise.resolve([]),
+    getLowStockProducts(isCentralAdmin ? undefined : user.branchId!),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -113,9 +143,63 @@ export default async function AdminDashboardPage() {
                   <BuildingIcon className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm font-medium">{branch.name}</p>
-                    <p className="text-xs text-muted-foreground">{branch.city}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {branch.city}
+                    </p>
                   </div>
                 </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Low Stock Alerts */}
+      {lowStockProducts.length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangleIcon className="h-5 w-5 text-amber-500" />
+              <div>
+                <CardTitle>{t("lowStockAlerts")}</CardTitle>
+                <CardDescription>
+                  {t("lowStockAlertsDesc", { count: lowStockProducts.length })}
+                </CardDescription>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/admin/products">
+                {t("viewAll")}
+                <ArrowRightIcon className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {lowStockProducts.slice(0, 10).map((record) => (
+                <Link
+                  key={`${record.variantId}-${record.branchId}`}
+                  href={`/admin/products/${record.variant.product.id}`}
+                  className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent/50"
+                >
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">
+                      {record.variant.product.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("sku")}: {record.variant.sku}
+                      {isCentralAdmin && (
+                        <>
+                          <span className="mx-1">&middot;</span>
+                          {record.branch.name}
+                        </>
+                      )}
+                    </p>
+                  </div>
+                  <Badge variant="destructive" className="text-xs">
+                    {record.stock} / {record.lowStockThreshold}
+                  </Badge>
+                </Link>
               ))}
             </div>
           </CardContent>
@@ -138,7 +222,9 @@ export default async function AdminDashboardPage() {
         </CardHeader>
         <CardContent>
           {recentOrders.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">{t("noOrders")}</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              {t("noOrders")}
+            </p>
           ) : (
             <div className="space-y-3">
               {recentOrders.map((order) => (
@@ -161,7 +247,9 @@ export default async function AdminDashboardPage() {
                       {formatCurrency(Number(order.total), locale)}
                     </span>
                     <Badge
-                      variant={order.status === "PENDING" ? "secondary" : "default"}
+                      variant={
+                        order.status === "PENDING" ? "secondary" : "default"
+                      }
                       className="text-xs"
                     >
                       {order.status}
@@ -174,5 +262,5 @@ export default async function AdminDashboardPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

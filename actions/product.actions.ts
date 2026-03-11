@@ -1,17 +1,22 @@
 "use server"
 
 import { db } from "@/server/db"
+import { Prisma } from "@/lib/generated/prisma"
 import { requireRole, canManageBranch, type AuthUser } from "@/lib/auth"
-import { productSchema, productVariantSchema } from "@/lib/validators/product.schema"
+import { productSchema, productSchemaBase, productVariantSchema } from "@/lib/validators/product.schema"
 import { sanitizeHtml } from "@/lib/sanitize"
 import { slugify } from "@/lib/utils"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
-import { Prisma } from "@/lib/generated/prisma/client"
 
 // ---------------------------------------------------------------------------
 // Schemas for multi-step creation
 // ---------------------------------------------------------------------------
+
+const featureValueInput = z.object({
+  featureFieldId: z.string().cuid(),
+  value: z.string(),
+})
 
 const createProductInput = productSchema.extend({
   variants: z.array(productVariantSchema).min(1, "At least one variant is required"),
@@ -22,13 +27,14 @@ const createProductInput = productSchema.extend({
       sortOrder: z.coerce.number().int().nonnegative().default(0),
       isPrimary: z.boolean().default(false),
     }),
-  ),
+  ).min(1, "At least one image is required"),
   branchId: z.string().cuid().optional(),
+  featureValues: z.array(featureValueInput).optional(),
 })
 
 type CreateProductInput = z.infer<typeof createProductInput>
 
-const updateProductInput = productSchema.partial().extend({
+const updateProductInput = productSchemaBase.partial().extend({
   images: z
     .array(
       z.object({
@@ -40,6 +46,7 @@ const updateProductInput = productSchema.partial().extend({
       }),
     )
     .optional(),
+  featureValues: z.array(featureValueInput).optional(),
 })
 
 type UpdateProductInput = z.infer<typeof updateProductInput>
@@ -75,7 +82,7 @@ export async function createProduct(data: CreateProductInput) {
   const parsed = createProductInput.safeParse(data)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
-  const { variants, images, branchId: inputBranchId, description, ...productData } = parsed.data
+  const { variants, images, branchId: inputBranchId, description, featureValues, ...productData } = parsed.data
 
   // Determine which branch to assign stock to
   const branchId = user.role === "CENTRAL_ADMIN" ? inputBranchId : user.branchId
@@ -94,7 +101,6 @@ export async function createProduct(data: CreateProductInput) {
         ...productData,
         slug,
         description: sanitizedDesc,
-        specs: productData.specs as Prisma.InputJsonValue | undefined,
       },
     })
 
@@ -134,6 +140,17 @@ export async function createProduct(data: CreateProductInput) {
       })
     }
 
+    // Create feature values
+    if (featureValues && featureValues.length > 0) {
+      await tx.productFeatureValue.createMany({
+        data: featureValues.map((fv) => ({
+          productId: p.id,
+          featureFieldId: fv.featureFieldId,
+          value: fv.value,
+        })),
+      })
+    }
+
     return p
   })
 
@@ -152,7 +169,7 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
   const parsed = updateProductInput.safeParse(data)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
-  const { images, description, slug, ...fields } = parsed.data
+  const { images, description, slug, featureValues, ...fields } = parsed.data
 
   // Slug uniqueness check if changing
   if (slug) {
@@ -165,14 +182,12 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
   const sanitizedDesc = description !== undefined ? (description ? sanitizeHtml(description) : null) : undefined
 
   await db.$transaction(async (tx) => {
-    const { specs, ...rest } = fields
     await tx.product.update({
       where: { id },
       data: {
-        ...rest,
+        ...fields,
         ...(slug && { slug }),
         ...(sanitizedDesc !== undefined && { description: sanitizedDesc }),
-        ...(specs !== undefined && { specs: specs as Prisma.InputJsonValue | undefined }),
       },
     })
 
@@ -187,6 +202,20 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
             alt: img.alt ?? null,
             sortOrder: img.sortOrder,
             isPrimary: img.isPrimary,
+          })),
+        })
+      }
+    }
+
+    // Replace feature values if provided
+    if (featureValues) {
+      await tx.productFeatureValue.deleteMany({ where: { productId: id } })
+      if (featureValues.length > 0) {
+        await tx.productFeatureValue.createMany({
+          data: featureValues.map((fv) => ({
+            productId: id,
+            featureFieldId: fv.featureFieldId,
+            value: fv.value,
           })),
         })
       }
@@ -350,8 +379,11 @@ export async function getProduct(id: string) {
       images: { orderBy: { sortOrder: "asc" } },
       variants: {
         include: {
-          stockByBranch: { include: { branch: { select: { id: true, name: true } } } },
+          stockByBranch: { include: { branch: { select: { id: true, name: true, city: true } } } },
         },
+      },
+      featureValues: {
+        include: { featureField: true },
       },
     },
   })
@@ -365,8 +397,11 @@ export async function getProductBySlug(slug: string) {
       images: { orderBy: { sortOrder: "asc" } },
       variants: {
         include: {
-          stockByBranch: { include: { branch: { select: { id: true, name: true } } } },
+          stockByBranch: { include: { branch: { select: { id: true, name: true, city: true } } } },
         },
+      },
+      featureValues: {
+        include: { featureField: true },
       },
       reviews: {
         where: { status: "APPROVED" },
@@ -385,6 +420,7 @@ interface GetProductsParams {
   isActive?: boolean
   isFeatured?: boolean
   condition?: "NEW" | "REFURBISHED"
+  featureFilters?: Record<string, string>
   page?: number
   pageSize?: number
 }
@@ -396,6 +432,7 @@ export async function getProducts({
   isActive,
   isFeatured,
   condition,
+  featureFilters,
   page = 1,
   pageSize = 20,
 }: GetProductsParams = {}) {
@@ -408,7 +445,17 @@ export async function getProducts({
     where.OR = [
       { name: { contains: search, mode: "insensitive" } },
       { brand: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
     ]
+  }
+
+  // Feature value filters (featureFieldId → value)
+  if (featureFilters && Object.keys(featureFilters).length > 0) {
+    where.AND = Object.entries(featureFilters).map(([featureFieldId, value]) => ({
+      featureValues: {
+        some: { featureFieldId, value },
+      },
+    }))
   }
 
   // Condition filter: products that have at least one variant with given condition
@@ -465,4 +512,28 @@ export async function getLowStockProducts(branchId?: string) {
 
   // Filter in JS for stock <= threshold comparison
   return lowStockRecords.filter((r) => r.stock <= r.lowStockThreshold)
+}
+
+/**
+ * Get consolidated stock across all branches for the inventory view.
+ */
+export async function getConsolidatedStock(branchId?: string) {
+  const records = await db.productStockByBranch.findMany({
+    where: branchId ? { branchId } : {},
+    include: {
+      variant: {
+        include: {
+          product: { select: { id: true, name: true, slug: true, isActive: true } },
+        },
+      },
+      branch: { select: { id: true, name: true } },
+    },
+    orderBy: [
+      { variant: { product: { name: "asc" } } },
+      { variant: { sku: "asc" } },
+      { branch: { name: "asc" } },
+    ],
+  })
+
+  return records
 }

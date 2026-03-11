@@ -8,7 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { SerwistProvider } from "@/app/serwist";
-import { SanityLive } from "@/sanity/lib/live"
+import { SanityLive } from "@/sanity/lib/live";
+import { CartSyncProvider } from "@/components/shared/cart-sync-provider";
 import "../globals.css";
 import { Locale } from "@/lib/constants";
 
@@ -77,7 +78,7 @@ export default async function LocaleLayout({
       signInUrl={`/${locale}/sign-in`}
       signUpUrl={`/${locale}/sign-up`}
       signInFallbackRedirectUrl={`/${locale}`}
-      signUpFallbackRedirectUrl={`/${locale}`}
+      signUpFallbackRedirectUrl={`/${locale}/complete-registration`}
     >
       <html
         lang={locale}
@@ -91,7 +92,7 @@ export default async function LocaleLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <NextIntlClientProvider messages={messages}>
               <SerwistProvider swUrl="/serwist/sw.js">
-                {children}
+                <CartSyncProvider>{children}</CartSyncProvider>
               </SerwistProvider>
               <Toaster richColors />
               <SanityLive />

@@ -170,6 +170,14 @@ export function CartSheet() {
                   className="w-full"
                   onClick={() => setCartSheetOpen(false)}
                 >
+                  <Link href="/cart">{t("viewFullCart")}</Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  className="w-full"
+                  onClick={() => setCartSheetOpen(false)}
+                >
                   <Link href="/checkout">{t("checkout")}</Link>
                 </Button>
                 <Button

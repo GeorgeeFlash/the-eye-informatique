@@ -1,7 +1,8 @@
 // Shipping fee calculation for Tei Store
 // Simple city-based logic: same city = free, different city = flat fee
 
-const INTER_CITY_FEE = 2500 // XAF — configurable per admin in the future
+/** Default inter-city shipping fee (XAF). Can be overridden via Setting model. */
+export const DEFAULT_INTER_CITY_FEE = 2500
 
 /**
  * Calculate shipping fee based on customer city vs fulfilling branch city.
@@ -10,9 +11,10 @@ const INTER_CITY_FEE = 2500 // XAF — configurable per admin in the future
 export function calculateShippingFee(
   customerCity: string,
   branchCity: string,
+  interCityFee: number = DEFAULT_INTER_CITY_FEE,
 ): number {
   if (normalize(customerCity) === normalize(branchCity)) return 0
-  return INTER_CITY_FEE
+  return interCityFee
 }
 
 function normalize(city: string): string {
@@ -26,11 +28,12 @@ function normalize(city: string): string {
 export function calculateOrderShipping(
   customerCity: string,
   branchCities: string[],
+  interCityFee: number = DEFAULT_INTER_CITY_FEE,
 ): number {
   const uniqueBranches = [...new Set(branchCities.map(normalize))]
   const normalizedCustomer = normalize(customerCity)
   return uniqueBranches.reduce(
-    (total, bc) => total + (bc === normalizedCustomer ? 0 : INTER_CITY_FEE),
+    (total, bc) => total + (bc === normalizedCustomer ? 0 : interCityFee),
     0,
   )
 }

@@ -3,6 +3,7 @@
 import { db } from "@/server/db"
 import { requireRole } from "@/lib/auth"
 import { categorySchema } from "@/lib/validators/category.schema"
+import { featureFieldSchema } from "@/lib/validators/category.schema"
 import { slugify } from "@/lib/utils"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -104,4 +105,88 @@ export async function getCategories() {
       },
     },
   })
+}
+
+/**
+ * Returns a single category with its feature field definitions.
+ */
+export async function getCategoryWithFeatureFields(id: string) {
+  return db.category.findUnique({
+    where: { id },
+    include: {
+      featureFields: { orderBy: { sortOrder: "asc" } },
+      _count: { select: { products: true } },
+    },
+  })
+}
+
+/**
+ * Returns just the feature fields for a given category (for the product form).
+ */
+export async function getFeatureFieldsByCategory(categoryId: string) {
+  return db.categoryFeatureField.findMany({
+    where: { categoryId },
+    orderBy: { sortOrder: "asc" },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Feature Field CRUD
+// ---------------------------------------------------------------------------
+
+export async function createFeatureField(
+  categoryId: string,
+  data: z.infer<typeof featureFieldSchema>,
+) {
+  await requireRole(["CENTRAL_ADMIN"])
+
+  const parsed = featureFieldSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.flatten() }
+
+  const field = await db.categoryFeatureField.create({
+    data: {
+      categoryId,
+      name: parsed.data.name,
+      type: parsed.data.type,
+      options: parsed.data.type === "DROPDOWN" ? parsed.data.options : undefined,
+      sortOrder: parsed.data.sortOrder,
+      isRequired: parsed.data.isRequired,
+    },
+  })
+
+  revalidatePath("/admin/categories")
+  return { success: true, data: field }
+}
+
+export async function updateFeatureField(
+  id: string,
+  data: z.infer<typeof featureFieldSchema>,
+) {
+  await requireRole(["CENTRAL_ADMIN"])
+
+  const parsed = featureFieldSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.flatten() }
+
+  const field = await db.categoryFeatureField.update({
+    where: { id },
+    data: {
+      name: parsed.data.name,
+      type: parsed.data.type,
+      options: parsed.data.type === "DROPDOWN" ? parsed.data.options : undefined,
+      sortOrder: parsed.data.sortOrder,
+      isRequired: parsed.data.isRequired,
+    },
+  })
+
+  revalidatePath("/admin/categories")
+  return { success: true, data: field }
+}
+
+export async function deleteFeatureField(id: string) {
+  await requireRole(["CENTRAL_ADMIN"])
+
+  await db.categoryFeatureField.delete({ where: { id } })
+
+  revalidatePath("/admin/categories")
+  return { success: true }
 }

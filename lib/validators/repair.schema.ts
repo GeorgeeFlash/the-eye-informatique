@@ -3,9 +3,9 @@ import { z } from "zod"
 export const createRepairTicketSchema = z.object({
   requestType: z.enum(["EXCHANGE", "REPAIR", "RETURN"]),
   issueDescription: z.string().min(10, "Please describe the issue in detail"),
-  productId: z.string().cuid().optional(),
-  guaranteeCardId: z.string().cuid().optional(),
-  branchId: z.string().cuid().optional(),
+  productId: z.string().min(1).optional(),
+  guaranteeCardId: z.string().min(1).optional(),
+  branchId: z.string().min(1).optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).default("MEDIUM"),
 })
 

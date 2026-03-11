@@ -79,6 +79,11 @@ export function ProductCard({
           <Badge className="absolute left-2 top-2" variant="secondary">
             {condition === "NEW" ? t("new") : t("refurbished")}
           </Badge>
+          {!inStock && (
+            <Badge className="absolute right-2 top-2" variant="destructive">
+              {t("outOfStock")}
+            </Badge>
+          )}
         </div>
       </Link>
       <CardContent className="p-4">

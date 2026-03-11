@@ -242,15 +242,15 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 **Acceptance Criteria**
 
-- [ ] AC-M1.1-1: Registration supports social sign-in via Google and Facebook. A new user signing in via a social provider for the first time is automatically registered as a Customer.
-- [ ] AC-M1.1-2: Registration supports email and password. On email registration, a verification code is sent to the registered email address and the user must enter the code to verify their account.
-- [ ] AC-M1.1-3: The registration form includes an optional "Apply as Affiliate" toggle. When enabled, a branch selector becomes visible and required before the form can be submitted.
-- [ ] AC-M1.1-4: On successful registration without the affiliate toggle, the user is assigned the Customer role and directed to the customer dashboard.
-- [ ] AC-M1.1-5: On successful registration with the affiliate toggle, the user is assigned the Customer role and an Affiliate application status of "Pending". The Affiliate panel is visible on their dashboard but locked with a "Pending approval" notice.
-- [ ] AC-M1.1-6: Registering with an email address already associated with an existing account returns a clear error message; no duplicate account is created.
-- [ ] AC-M1.1-7: Email verification must be completed before the user can proceed to checkout. Unverified users can browse products and add items to cart.
-- [ ] AC-M1.1-8: User role assignments (Customer, Affiliate, Moderator, Branch Admin, Central Admin) are stored and managed in the platform's own database, independent of the authentication provider.
-- [ ] AC-M1.1-9: During registration, the user must accept the platform's privacy notice and terms of service via an explicit action. Registration cannot complete without acceptance.
+- [x] AC-M1.1-1: Registration supports social sign-in via Google and Facebook. A new user signing in via a social provider for the first time is automatically registered as a Customer.
+- [x] AC-M1.1-2: Registration supports email and password. On email registration, a verification code is sent to the registered email address and the user must enter the code to verify their account.
+- [x] AC-M1.1-3: The registration form includes an optional "Apply as Affiliate" toggle. When enabled, user is redirected to affiliate apply form after signing up. 
+- [x] AC-M1.1-4: On successful registration without the affiliate toggle, the user is assigned the Customer role and directed to the shop home.
+- [x] AC-M1.1-5: On successful registration with the affiliate toggle, the user is assigned the Customer role and an Affiliate application status of "Pending". The Affiliate panel is visible on their dashboard but locked with a "Pending approval" notice.
+- [x] AC-M1.1-6: Registering with an email address already associated with an existing account returns a clear error message; no duplicate account is created.
+- [x] AC-M1.1-7: Email verification must be completed before the user can proceed to checkout. Unverified users can browse products and add items to cart.
+- [x] AC-M1.1-8: User role assignments (Customer, Affiliate, Moderator, Branch Admin, Central Admin) are stored and managed in the platform's own database, independent of the authentication provider.
+- [x] AC-M1.1-9: During registration, the user must accept the platform's privacy notice and terms of service via an explicit action. Registration cannot complete without acceptance.
 
 ---
 
@@ -265,14 +265,14 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 **Acceptance Criteria**
 
-- [ ] AC-M1.2-1: Customer and Affiliate roles share a single customer-facing dashboard. Customers see: active orders, cart, saved/favourited items, and account settings. The Affiliate panel is hidden unless the user holds an approved Affiliate role.
-- [ ] AC-M1.2-2: A user holding both Customer and Affiliate roles sees all Customer sections plus an Affiliate panel containing: commission earnings summary, promotional link management, payout preference, and performance statistics. This panel is read-only and locked if affiliate status is "Pending".
-- [ ] AC-M1.2-3: Moderators, Employees, Branch Admins, and Central Admins use a separate administration dashboard, distinct from the customer-facing dashboard.
+- [x] AC-M1.2-1: Customer and Affiliate roles share a single customer-facing dashboard. Customers see: active orders, cart, saved/favourited items, and account settings. The Affiliate panel is hidden unless the user holds an approved Affiliate role.
+- [x] AC-M1.2-2: A user holding both Customer and Affiliate roles sees all Customer sections plus an Affiliate panel containing: commission earnings summary, promotional link management, payout preference, and performance statistics. This panel is read-only and locked if affiliate status is "Pending".
+- [x] AC-M1.2-3: Moderators, Employees, Branch Admins, and Central Admins use a separate administration dashboard, distinct from the customer-facing dashboard.
 - [ ] AC-M1.2-4: A Moderator/Employee administration dashboard includes: product management tools, blog tools, receipt scanning, and AI-assisted product creation for their assigned branch. No data from other branches is visible.
 - [ ] AC-M1.2-5: A Branch Admin dashboard includes all Moderator sections plus: branch-level sales analytics, affiliate management for their branch, staff management, shipping fee configuration, and knowledge base uploads scoped to their branch.
 - [ ] AC-M1.2-6: A Central Admin dashboard provides: cross-branch analytics, all-branch product views, user management across the system, system-wide broadcast tools, global knowledge base management, staff role management, activity log viewer, and AI analytics.
 - [ ] AC-M1.2-7: A Central Admin can change the role of any staff member directly from the staff listing page in the administration dashboard. The role change takes effect on the staff member's next request.
-- [ ] AC-M1.2-8: Navigating directly to a dashboard URL reserved for a role the authenticated user does not hold returns an "Access Denied" response — not a blank page or a data leak.
+- [x] AC-M1.2-8: Navigating directly to a dashboard URL reserved for a role the authenticated user does not hold returns an "Access Denied" response — not a blank page or a data leak.
 - [ ] AC-M1.2-9: A Moderator, Branch Admin, or Central Admin can view and add internal text remarks on any user's profile. Remarks display the author's name, role, and a timestamp. Remarks are never visible to the user whose profile they are attached to.
 
 ---

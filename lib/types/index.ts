@@ -86,6 +86,9 @@ export interface CartItem {
   // Snapshot of known stock for this variant when item is added/updated.
   stockAvailable?: number
   imageUrl?: string
+  /** Branch that fulfils this item (from stockByBranch). */
+  branchId?: string
+  branchCity?: string
 }
 
 // ---------------------------------------------------------------------------

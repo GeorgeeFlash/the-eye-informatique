@@ -21,7 +21,7 @@ async function main() {
       id: "branch-yaounde",
       name: "TEI Yaoundé - Siège",
       city: "Yaoundé",
-      address: "Avenue Kennedy, Centre-ville",
+      address: "Kennedy Avenue, City Center",
       phone: "+237 222 000 000",
       isActive: true,
     },
@@ -34,7 +34,7 @@ async function main() {
       id: "branch-douala",
       name: "TEI Douala",
       city: "Douala",
-      address: "Rue de la Joie, Akwa",
+      address: "Joy Street, Akwa",
       phone: "+237 233 000 000",
       isActive: true,
     },
@@ -65,15 +65,15 @@ async function main() {
   })
 
   const ordinateurs = await db.category.upsert({
-    where: { slug: "ordinateurs" },
+    where: { slug: "computers" },
     update: {},
-    create: { name: "Ordinateurs", slug: "ordinateurs", sortOrder: 2 },
+    create: { name: "Computers", slug: "computers", sortOrder: 2 },
   })
 
   const accessoires = await db.category.upsert({
-    where: { slug: "accessoires" },
+    where: { slug: "accessories" },
     update: {},
-    create: { name: "Accessoires", slug: "accessoires", sortOrder: 3 },
+    create: { name: "Accessories", slug: "accessories", sortOrder: 3 },
   })
 
   const audio = await db.category.upsert({
@@ -83,7 +83,7 @@ async function main() {
   })
 
   // Sub-categories — Smartphones
-  await db.category.upsert({
+  const smartphonesAndroid = await db.category.upsert({
     where: { slug: "smartphones-android" },
     update: {},
     create: { name: "Android", slug: "smartphones-android", parentId: smartphones.id, sortOrder: 1 },
@@ -94,13 +94,13 @@ async function main() {
     create: { name: "iPhone", slug: "smartphones-iphone", parentId: smartphones.id, sortOrder: 2 },
   })
   await db.category.upsert({
-    where: { slug: "tablettes" },
+    where: { slug: "tablets" },
     update: {},
-    create: { name: "Tablettes", slug: "tablettes", parentId: smartphones.id, sortOrder: 3 },
+    create: { name: "Tablets", slug: "tablets", parentId: smartphones.id, sortOrder: 3 },
   })
 
   // Sub-categories — Ordinateurs
-  await db.category.upsert({
+  const laptops = await db.category.upsert({
     where: { slug: "laptops" },
     update: {},
     create: { name: "Laptops", slug: "laptops", parentId: ordinateurs.id, sortOrder: 1 },
@@ -111,31 +111,57 @@ async function main() {
     create: { name: "Desktops", slug: "desktops", parentId: ordinateurs.id, sortOrder: 2 },
   })
 
-  // Sub-categories — Accessoires
+  // Sub-categories — Accessories
   await db.category.upsert({
-    where: { slug: "chargeurs-cables" },
+    where: { slug: "chargers-cables" },
     update: {},
-    create: { name: "Chargeurs & Câbles", slug: "chargeurs-cables", parentId: accessoires.id, sortOrder: 1 },
+    create: { name: "Chargers & Cables", slug: "chargers-cables", parentId: accessoires.id, sortOrder: 1 },
   })
   await db.category.upsert({
-    where: { slug: "coques-protections" },
+    where: { slug: "cases-protections" },
     update: {},
-    create: { name: "Coques & Protections", slug: "coques-protections", parentId: accessoires.id, sortOrder: 2 },
+    create: { name: "Cases & Screen Protectors", slug: "cases-protections", parentId: accessoires.id, sortOrder: 2 },
   })
 
   // Sub-categories — Audio
-  await db.category.upsert({
-    where: { slug: "ecouteurs" },
+  const ecouteurs = await db.category.upsert({
+    where: { slug: "earphones" },
     update: {},
-    create: { name: "Écouteurs", slug: "ecouteurs", parentId: audio.id, sortOrder: 1 },
+    create: { name: "Earphones", slug: "earphones", parentId: audio.id, sortOrder: 1 },
   })
-  await db.category.upsert({
-    where: { slug: "haut-parleurs" },
+  const hautParleurs = await db.category.upsert({
+    where: { slug: "speakers" },
     update: {},
-    create: { name: "Haut-parleurs", slug: "haut-parleurs", parentId: audio.id, sortOrder: 2 },
+    create: { name: "Speakers", slug: "speakers", parentId: audio.id, sortOrder: 2 },
   })
 
   console.log("  ✔ Categories")
+
+  // -------------------------------------------------------------------------
+  // 2b. CategoryFeatureFields — structured attributes per sub-category
+  // -------------------------------------------------------------------------
+
+  // Smartphones — Android
+  await db.categoryFeatureField.upsert({ where: { id: "ff-and-screen" }, update: {}, create: { id: "ff-and-screen", categoryId: smartphonesAndroid.id, name: "Screen Size", type: "TEXT", sortOrder: 1 } })
+  await db.categoryFeatureField.upsert({ where: { id: "ff-and-ram" }, update: {}, create: { id: "ff-and-ram", categoryId: smartphonesAndroid.id, name: "RAM", type: "DROPDOWN", options: ["4GB", "6GB", "8GB", "12GB", "16GB"], sortOrder: 2 } })
+  await db.categoryFeatureField.upsert({ where: { id: "ff-and-storage" }, update: {}, create: { id: "ff-and-storage", categoryId: smartphonesAndroid.id, name: "Storage", type: "DROPDOWN", options: ["64GB", "128GB", "256GB", "512GB"], sortOrder: 3 } })
+  await db.categoryFeatureField.upsert({ where: { id: "ff-and-battery" }, update: {}, create: { id: "ff-and-battery", categoryId: smartphonesAndroid.id, name: "Battery", type: "TEXT", sortOrder: 4 } })
+
+  // Laptops
+  await db.categoryFeatureField.upsert({ where: { id: "ff-lap-cpu" }, update: {}, create: { id: "ff-lap-cpu", categoryId: laptops.id, name: "Processor", type: "TEXT", sortOrder: 1 } })
+  await db.categoryFeatureField.upsert({ where: { id: "ff-lap-ram" }, update: {}, create: { id: "ff-lap-ram", categoryId: laptops.id, name: "RAM", type: "DROPDOWN", options: ["8GB", "16GB", "32GB", "64GB"], sortOrder: 2 } })
+  await db.categoryFeatureField.upsert({ where: { id: "ff-lap-storage" }, update: {}, create: { id: "ff-lap-storage", categoryId: laptops.id, name: "Storage", type: "DROPDOWN", options: ["256GB", "512GB", "1TB", "2TB"], sortOrder: 3 } })
+  await db.categoryFeatureField.upsert({ where: { id: "ff-lap-display" }, update: {}, create: { id: "ff-lap-display", categoryId: laptops.id, name: "Screen Size", type: "TEXT", sortOrder: 4 } })
+
+  // Earphones
+  await db.categoryFeatureField.upsert({ where: { id: "ff-ecu-conn" }, update: {}, create: { id: "ff-ecu-conn", categoryId: ecouteurs.id, name: "Connectivity", type: "DROPDOWN", options: ["Wired", "Bluetooth", "Wireless"], sortOrder: 1 } })
+  await db.categoryFeatureField.upsert({ where: { id: "ff-ecu-nc" }, update: {}, create: { id: "ff-ecu-nc", categoryId: ecouteurs.id, name: "Noise Cancellation", type: "DROPDOWN", options: ["Yes", "No"], sortOrder: 2 } })
+
+  // Speakers
+  await db.categoryFeatureField.upsert({ where: { id: "ff-hp-conn" }, update: {}, create: { id: "ff-hp-conn", categoryId: hautParleurs.id, name: "Connectivity", type: "DROPDOWN", options: ["Bluetooth", "Wired", "Wi-Fi"], sortOrder: 1 } })
+  await db.categoryFeatureField.upsert({ where: { id: "ff-hp-battery" }, update: {}, create: { id: "ff-hp-battery", categoryId: hautParleurs.id, name: "Battery Life", type: "TEXT", sortOrder: 2 } })
+
+  console.log("  ✔ Feature Fields")
 
   // -------------------------------------------------------------------------
   // 3. Tags
@@ -150,18 +176,18 @@ async function main() {
   const tagNew = await db.tag.upsert({
     where: { slug: "new-arrival" },
     update: {},
-    create: { name: "Nouveauté", slug: "new-arrival" },
+    create: { name: "New Arrival", slug: "new-arrival" },
   })
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tagBestSeller = await db.tag.upsert({
     where: { slug: "best-seller" },
     update: {},
-    create: { name: "Meilleure vente", slug: "best-seller" },
+    create: { name: "Best Seller", slug: "best-seller" },
   })
   await db.tag.upsert({
     where: { slug: "refurbished" },
     update: {},
-    create: { name: "Reconditionné", slug: "refurbished" },
+    create: { name: "Refurbished", slug: "refurbished" },
   })
 
   console.log("  ✔ Tags")
@@ -206,9 +232,8 @@ async function main() {
       description: "Mid-range Android smartphone with 6.6\" AMOLED display, 50 MP camera and 5000 mAh battery.",
       basePrice: 245000,
       currency: "XAF",
-      categoryId: smartphones.id,
+      categoryId: smartphonesAndroid.id,
       brand: "Samsung",
-      specs: { ram: "8 GB", storage: "128 GB", screen: "6.6\" AMOLED", battery: "5000 mAh" },
       metaTitle: "Samsung Galaxy A55 5G - Online Purchase | The Eye Informatique",
       metaDescription: "Buy the Samsung Galaxy A55 5G in Cameroon. Delivery to Yaoundé, Douala and Bamenda.",
       isActive: true,
@@ -217,14 +242,14 @@ async function main() {
       images: {
         create: [
           { url: "https://placehold.co/800x800/1a1a2e/FFFFFF?text=Galaxy+A55", alt: "Samsung Galaxy A55 5G", isPrimary: true, sortOrder: 0 },
-          { url: "https://placehold.co/800x800/16213e/FFFFFF?text=Galaxy+A55+Side", alt: "Samsung Galaxy A55 5G côté", isPrimary: false, sortOrder: 1 },
+          { url: "https://placehold.co/800x800/16213e/FFFFFF?text=Galaxy+A55+Side", alt: "Samsung Galaxy A55 5G side", isPrimary: false, sortOrder: 1 },
         ],
       },
       variants: {
         create: [
-          { sku: "SAM-A55-BLK-128", color: "Noir Awesome", condition: "NEW", stock: 20, price: 245000, weight: 0.213 },
-          { sku: "SAM-A55-BLU-128", color: "Bleu Awesome", condition: "NEW", stock: 15, price: 245000, weight: 0.213 },
-          { sku: "SAM-A55-BLK-128-REF", color: "Noir Awesome", condition: "REFURBISHED", stock: 8, price: 195000, weight: 0.213 },
+          { sku: "SAM-A55-BLK-128", color: "Awesome Black", condition: "NEW", stock: 20, price: 245000, weight: 0.213 },
+          { sku: "SAM-A55-BLU-128", color: "Awesome Blue", condition: "NEW", stock: 15, price: 245000, weight: 0.213 },
+          { sku: "SAM-A55-BLK-128-REF", color: "Awesome Black", condition: "REFURBISHED", stock: 8, price: 195000, weight: 0.213 },
         ],
       },
     },
@@ -240,9 +265,8 @@ async function main() {
       description: "Ultra-thin laptop with Apple M2 chip, 13.6\" Liquid Retina display and up to 18 hours battery life.",
       basePrice: 895000,
       currency: "XAF",
-      categoryId: ordinateurs.id,
+      categoryId: laptops.id,
       brand: "Apple",
-      specs: { chip: "Apple M2", ram: "8 GB", storage: "256 GB SSD", screen: "13.6\" Liquid Retina", battery: "18h" },
       metaTitle: "MacBook Air M2 - Online Purchase | The Eye Informatique",
       metaDescription: "MacBook Air M2 available in Cameroon. Warranty included.",
       isActive: true,
@@ -255,9 +279,9 @@ async function main() {
       },
       variants: {
         create: [
-          { sku: "MBA-M2-SLV-256", color: "Argent", condition: "NEW", stock: 10, price: 895000, weight: 1.24 },
-          { sku: "MBA-M2-STG-256", color: "Gris sidéral", condition: "NEW", stock: 7, price: 895000, weight: 1.24 },
-          { sku: "MBA-M2-SLV-256-REF", color: "Argent", condition: "REFURBISHED", stock: 4, price: 720000, weight: 1.24 },
+          { sku: "MBA-M2-SLV-256", color: "Silver", condition: "NEW", stock: 10, price: 895000, weight: 1.24 },
+          { sku: "MBA-M2-STG-256", color: "Space Gray", condition: "NEW", stock: 7, price: 895000, weight: 1.24 },
+          { sku: "MBA-M2-SLV-256-REF", color: "Silver", condition: "REFURBISHED", stock: 4, price: 720000, weight: 1.24 },
         ],
       },
     },
@@ -269,30 +293,29 @@ async function main() {
     update: {},
     create: {
       slug: "apple-airpods-pro-2",
-      name: "Apple AirPods Pro 2ème génération",
-      description: "Écouteurs sans fil avec réduction active du bruit adaptative et audio spatial personnalisé.",
+      name: "Apple AirPods Pro 2nd Generation",
+      description: "Wireless earphones with adaptive active noise cancellation and personalized spatial audio.",
       basePrice: 155000,
       currency: "XAF",
-      categoryId: audio.id,
+      categoryId: ecouteurs.id,
       brand: "Apple",
-      specs: { connectivity: "Bluetooth 5.3", anc: "Oui", battery: "6h (30h avec boîtier)" },
-      metaTitle: "AirPods Pro 2 - Achat en ligne | The Eye Informatique",
-      metaDescription: "Apple AirPods Pro 2ème génération disponibles au Cameroun.",
+      metaTitle: "AirPods Pro 2nd Gen - Buy Online | The Eye Informatique",
+      metaDescription: "Apple AirPods Pro 2nd Generation available in Cameroon.",
       isActive: true,
       isFeatured: false,
       tags: { connect: [{ slug: "promo" }] },
       images: {
         create: [
-          { url: `${baseAssetUrl}/earphones_a_1.webp`, alt: "Apple AirPods Pro 2 vue 1", isPrimary: true, sortOrder: 0 },
-          { url: `${baseAssetUrl}/earphones_a_2.webp`, alt: "Apple AirPods Pro 2 vue 2", isPrimary: false, sortOrder: 1 },
-          { url: `${baseAssetUrl}/earphones_a_3.webp`, alt: "Apple AirPods Pro 2 vue 3", isPrimary: false, sortOrder: 2 },
-          { url: `${baseAssetUrl}/earphones_a_4.webp`, alt: "Apple AirPods Pro 2 vue 4", isPrimary: false, sortOrder: 3 },
+          { url: `${baseAssetUrl}/earphones_a_1.webp`, alt: "Apple AirPods Pro 2 view 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/earphones_a_2.webp`, alt: "Apple AirPods Pro 2 view 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/earphones_a_3.webp`, alt: "Apple AirPods Pro 2 view 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/earphones_a_4.webp`, alt: "Apple AirPods Pro 2 view 4", isPrimary: false, sortOrder: 3 },
         ],
       },
       variants: {
         create: [
-          { sku: "APP-PRO2-WHT", color: "Blanc", condition: "NEW", stock: 25, price: 155000, weight: 0.061 },
-          { sku: "APP-PRO2-WHT-REF", color: "Blanc", condition: "REFURBISHED", stock: 6, price: 119000, weight: 0.061 },
+          { sku: "APP-PRO2-WHT", color: "White", condition: "NEW", stock: 25, price: 155000, weight: 0.061 },
+          { sku: "APP-PRO2-WHT-REF", color: "White", condition: "REFURBISHED", stock: 6, price: 119000, weight: 0.061 },
         ],
       },
     },
@@ -305,30 +328,29 @@ async function main() {
     update: {},
     create: {
       slug: "earphones-standard",
-      name: "Écouteurs Standard",
-      description: "Écouteurs filaires de qualité avec driver haute performance et confort optimal.",
+      name: "Standard Earphones",
+      description: "Quality wired earphones with high-performance driver and optimal comfort.",
       basePrice: 45000,
       currency: "XAF",
-      categoryId: audio.id,
+      categoryId: ecouteurs.id,
       brand: "Audio Pro",
-      specs: { connectivity: "Filaire", impedance: "32Ω", frequency: "20Hz-20kHz" },
-      metaTitle: "Écouteurs Standard - Achat en ligne | The Eye Informatique",
-      metaDescription: "Écouteurs filaires au meilleur prix au Cameroun.",
+      metaTitle: "Standard Earphones - Buy Online | The Eye Informatique",
+      metaDescription: "Wired earphones at the best price in Cameroon.",
       isActive: true,
       isFeatured: false,
       tags: { connect: [{ slug: "best-seller" }] },
       images: {
         create: [
-          { url: `${baseAssetUrl}/earphones_b_1.webp`, alt: "Écouteurs Standard vue 1", isPrimary: true, sortOrder: 0 },
-          { url: `${baseAssetUrl}/earphones_b_2.webp`, alt: "Écouteurs Standard vue 2", isPrimary: false, sortOrder: 1 },
-          { url: `${baseAssetUrl}/earphones_b_3.webp`, alt: "Écouteurs Standard vue 3", isPrimary: false, sortOrder: 2 },
-          { url: `${baseAssetUrl}/earphones_b_4.webp`, alt: "Écouteurs Standard vue 4", isPrimary: false, sortOrder: 3 },
+          { url: `${baseAssetUrl}/earphones_b_1.webp`, alt: "Standard Earphones view 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/earphones_b_2.webp`, alt: "Standard Earphones view 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/earphones_b_3.webp`, alt: "Standard Earphones view 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/earphones_b_4.webp`, alt: "Standard Earphones view 4", isPrimary: false, sortOrder: 3 },
         ],
       },
       variants: {
         create: [
-          { sku: "EARPH-STD-BLK", color: "Noir", condition: "NEW", stock: 15, price: 45000, weight: 0.08 },
-          { sku: "EARPH-STD-WHT", color: "Blanc", condition: "NEW", stock: 12, price: 45000, weight: 0.08 },
+          { sku: "EARPH-STD-BLK", color: "Black", condition: "NEW", stock: 15, price: 45000, weight: 0.08 },
+          { sku: "EARPH-STD-WHT", color: "White", condition: "NEW", stock: 12, price: 45000, weight: 0.08 },
         ],
       },
     },
@@ -340,30 +362,29 @@ async function main() {
     update: {},
     create: {
       slug: "earphones-premium",
-      name: "Écouteurs Premium",
-      description: "Écouteurs sans fil haut de gamme avec technologie noise-cancelling.",
+      name: "Premium Earphones",
+      description: "High-end wireless earphones with noise-cancelling technology.",
       basePrice: 125000,
       currency: "XAF",
-      categoryId: audio.id,
+      categoryId: ecouteurs.id,
       brand: "Premium Audio",
-      specs: { connectivity: "Bluetooth 5.0", anc: "Oui", battery: "8h" },
-      metaTitle: "Écouteurs Premium - Achat en ligne | The Eye Informatique",
-      metaDescription: "Écouteurs sans fil premium avec réduction de bruit au Cameroun.",
+      metaTitle: "Premium Earphones - Buy Online | The Eye Informatique",
+      metaDescription: "Premium wireless earphones with noise cancellation in Cameroon.",
       isActive: true,
       isFeatured: true,
       tags: { connect: [{ slug: "new-arrival" }] },
       images: {
         create: [
-          { url: `${baseAssetUrl}/earphones_c_1.webp`, alt: "Écouteurs Premium vue 1", isPrimary: true, sortOrder: 0 },
-          { url: `${baseAssetUrl}/earphones_c_2.webp`, alt: "Écouteurs Premium vue 2", isPrimary: false, sortOrder: 1 },
-          { url: `${baseAssetUrl}/earphones_c_3.webp`, alt: "Écouteurs Premium vue 3", isPrimary: false, sortOrder: 2 },
-          { url: `${baseAssetUrl}/earphones_c_4.webp`, alt: "Écouteurs Premium vue 4", isPrimary: false, sortOrder: 3 },
+          { url: `${baseAssetUrl}/earphones_c_1.webp`, alt: "Premium Earphones view 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/earphones_c_2.webp`, alt: "Premium Earphones view 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/earphones_c_3.webp`, alt: "Premium Earphones view 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/earphones_c_4.webp`, alt: "Premium Earphones view 4", isPrimary: false, sortOrder: 3 },
         ],
       },
       variants: {
         create: [
-          { sku: "EARPH-PREM-BLK", color: "Noir", condition: "NEW", stock: 18, price: 125000, weight: 0.085 },
-          { sku: "EARPH-PREM-SLV", color: "Argent", condition: "NEW", stock: 12, price: 125000, weight: 0.085 },
+          { sku: "EARPH-PREM-BLK", color: "Black", condition: "NEW", stock: 18, price: 125000, weight: 0.085 },
+          { sku: "EARPH-PREM-SLV", color: "Silver", condition: "NEW", stock: 12, price: 125000, weight: 0.085 },
         ],
       },
     },
@@ -376,30 +397,29 @@ async function main() {
     update: {},
     create: {
       slug: "headphones-sport",
-      name: "Casque Sport",
-      description: "Casque audio filaire confortable pour les séances de sport avec prise renforcée.",
+      name: "Sport Headphones",
+      description: "Comfortable wired sport headphones with reinforced jack for workout sessions.",
       basePrice: 55000,
       currency: "XAF",
-      categoryId: audio.id,
+      categoryId: ecouteurs.id,
       brand: "Sport Audio",
-      specs: { connectivity: "Filaire", weight: "150g", impedance: "32Ω" },
-      metaTitle: "Casque Sport - Achat en ligne | The Eye Informatique",
-      metaDescription: "Casque audio sport au Cameroun - confortable et durable.",
+      metaTitle: "Sport Headphones - Buy Online | The Eye Informatique",
+      metaDescription: "Sport headphones in Cameroon - comfortable and durable.",
       isActive: true,
       isFeatured: false,
       tags: { connect: [{ slug: "new-arrival" }] },
       images: {
         create: [
-          { url: `${baseAssetUrl}/headphones_a_1.webp`, alt: "Casque Sport vue 1", isPrimary: true, sortOrder: 0 },
-          { url: `${baseAssetUrl}/headphones_a_2.webp`, alt: "Casque Sport vue 2", isPrimary: false, sortOrder: 1 },
-          { url: `${baseAssetUrl}/headphones_a_3.webp`, alt: "Casque Sport vue 3", isPrimary: false, sortOrder: 2 },
-          { url: `${baseAssetUrl}/headphones_a_4.webp`, alt: "Casque Sport vue 4", isPrimary: false, sortOrder: 3 },
+          { url: `${baseAssetUrl}/headphones_a_1.webp`, alt: "Sport Headphones view 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/headphones_a_2.webp`, alt: "Sport Headphones view 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/headphones_a_3.webp`, alt: "Sport Headphones view 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/headphones_a_4.webp`, alt: "Sport Headphones view 4", isPrimary: false, sortOrder: 3 },
         ],
       },
       variants: {
         create: [
-          { sku: "HEAD-SPORT-BLK", color: "Noir", condition: "NEW", stock: 20, price: 55000, weight: 0.15 },
-          { sku: "HEAD-SPORT-BLU", color: "Bleu", condition: "NEW", stock: 16, price: 55000, weight: 0.15 },
+          { sku: "HEAD-SPORT-BLK", color: "Black", condition: "NEW", stock: 20, price: 55000, weight: 0.15 },
+          { sku: "HEAD-SPORT-BLU", color: "Blue", condition: "NEW", stock: 16, price: 55000, weight: 0.15 },
         ],
       },
     },
@@ -411,30 +431,29 @@ async function main() {
     update: {},
     create: {
       slug: "headphones-gaming",
-      name: "Casque Gaming",
-      description: "Casque de gaming sans fil avec son surround 7.1 et microphone détachable.",
+      name: "Gaming Headset",
+      description: "Wireless gaming headset with 7.1 surround sound and detachable microphone.",
       basePrice: 185000,
       currency: "XAF",
-      categoryId: audio.id,
+      categoryId: ecouteurs.id,
       brand: "Gaming Gear",
-      specs: { connectivity: "Wireless 2.4GHz", sound: "7.1 Surround", mic: "Oui" },
-      metaTitle: "Casque Gaming - Achat en ligne | The Eye Informatique",
-      metaDescription: "Casque gaming sans fil au Cameroun - expérience immersive.",
+      metaTitle: "Gaming Headset - Buy Online | The Eye Informatique",
+      metaDescription: "Wireless gaming headset in Cameroon - immersive experience.",
       isActive: true,
       isFeatured: true,
       tags: { connect: [{ slug: "best-seller" }] },
       images: {
         create: [
-          { url: `${baseAssetUrl}/headphones_b_1.webp`, alt: "Casque Gaming vue 1", isPrimary: true, sortOrder: 0 },
-          { url: `${baseAssetUrl}/headphones_b_2.webp`, alt: "Casque Gaming vue 2", isPrimary: false, sortOrder: 1 },
-          { url: `${baseAssetUrl}/headphones_b_3.webp`, alt: "Casque Gaming vue 3", isPrimary: false, sortOrder: 2 },
-          { url: `${baseAssetUrl}/headphones_b_4.webp`, alt: "Casque Gaming vue 4", isPrimary: false, sortOrder: 3 },
+          { url: `${baseAssetUrl}/headphones_b_1.webp`, alt: "Gaming Headset view 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/headphones_b_2.webp`, alt: "Gaming Headset view 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/headphones_b_3.webp`, alt: "Gaming Headset view 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/headphones_b_4.webp`, alt: "Gaming Headset view 4", isPrimary: false, sortOrder: 3 },
         ],
       },
       variants: {
         create: [
-          { sku: "HEAD-GAME-BLK", color: "Noir", condition: "NEW", stock: 14, price: 185000, weight: 0.32 },
-          { sku: "HEAD-GAME-RED", color: "Noir & Rouge", condition: "NEW", stock: 11, price: 185000, weight: 0.32 },
+          { sku: "HEAD-GAME-BLK", color: "Black", condition: "NEW", stock: 14, price: 185000, weight: 0.32 },
+          { sku: "HEAD-GAME-RED", color: "Black & Red", condition: "NEW", stock: 11, price: 185000, weight: 0.32 },
         ],
       },
     },
@@ -446,30 +465,29 @@ async function main() {
     update: {},
     create: {
       slug: "headphones-studio",
-      name: "Casque Studio",
-      description: "Casque de monitoring professionnel pour studio d'enregistrement et production audio.",
+      name: "Studio Headphones",
+      description: "Professional monitoring headphones for recording studio and audio production.",
       basePrice: 275000,
       currency: "XAF",
-      categoryId: audio.id,
+      categoryId: ecouteurs.id,
       brand: "Pro Audio",
-      specs: { connectivity: "Filaire", frequency: "5Hz-40kHz", impedance: "32Ω" },
-      metaTitle: "Casque Studio - Achat en ligne | The Eye Informatique",
-      metaDescription: "Casque audio studio professionnel au Cameroun.",
+      metaTitle: "Studio Headphones - Buy Online | The Eye Informatique",
+      metaDescription: "Professional studio headphones in Cameroon.",
       isActive: true,
       isFeatured: true,
       tags: { connect: [{ slug: "best-seller" }] },
       images: {
         create: [
-          { url: `${baseAssetUrl}/headphones_c_1.webp`, alt: "Casque Studio vue 1", isPrimary: true, sortOrder: 0 },
-          { url: `${baseAssetUrl}/headphones_c_2.webp`, alt: "Casque Studio vue 2", isPrimary: false, sortOrder: 1 },
-          { url: `${baseAssetUrl}/headphones_c_3.webp`, alt: "Casque Studio vue 3", isPrimary: false, sortOrder: 2 },
-          { url: `${baseAssetUrl}/headphones_c_4.webp`, alt: "Casque Studio vue 4", isPrimary: false, sortOrder: 3 },
+          { url: `${baseAssetUrl}/headphones_c_1.webp`, alt: "Studio Headphones view 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/headphones_c_2.webp`, alt: "Studio Headphones view 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/headphones_c_3.webp`, alt: "Studio Headphones view 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/headphones_c_4.webp`, alt: "Studio Headphones view 4", isPrimary: false, sortOrder: 3 },
         ],
       },
       variants: {
         create: [
-          { sku: "HEAD-STUDIO-WHT", color: "Blanc", condition: "NEW", stock: 9, price: 275000, weight: 0.25 },
-          { sku: "HEAD-STUDIO-GRY", color: "Gris", condition: "NEW", stock: 7, price: 275000, weight: 0.25 },
+          { sku: "HEAD-STUDIO-WHT", color: "White", condition: "NEW", stock: 9, price: 275000, weight: 0.25 },
+          { sku: "HEAD-STUDIO-GRY", color: "Gray", condition: "NEW", stock: 7, price: 275000, weight: 0.25 },
         ],
       },
     },
@@ -482,30 +500,29 @@ async function main() {
     update: {},
     create: {
       slug: "portable-speaker",
-      name: "Haut-parleur Portable",
-      description: "Haut-parleur Bluetooth portable avec LED RGB et batterie longue durée.",
+      name: "Portable Speaker",
+      description: "Portable Bluetooth speaker with RGB LED and long-lasting battery.",
       basePrice: 95000,
       currency: "XAF",
-      categoryId: audio.id,
+      categoryId: hautParleurs.id,
       brand: "Portable Sound",
-      specs: { connectivity: "Bluetooth 5.0", power: "20W", battery: "12h" },
-      metaTitle: "Haut-parleur Portable - Achat en ligne | The Eye Informatique",
-      metaDescription: "Haut-parleur Bluetooth portable au Cameroun avec LED RGB.",
+      metaTitle: "Portable Speaker - Buy Online | The Eye Informatique",
+      metaDescription: "Portable Bluetooth speaker in Cameroon with RGB LED.",
       isActive: true,
       isFeatured: true,
       tags: { connect: [{ slug: "new-arrival" }] },
       images: {
         create: [
-          { url: `${baseAssetUrl}/speaker1.webp`, alt: "Haut-parleur Portable vue 1", isPrimary: true, sortOrder: 0 },
-          { url: `${baseAssetUrl}/speaker2.webp`, alt: "Haut-parleur Portable vue 2", isPrimary: false, sortOrder: 1 },
-          { url: `${baseAssetUrl}/speaker3.webp`, alt: "Haut-parleur Portable vue 3", isPrimary: false, sortOrder: 2 },
-          { url: `${baseAssetUrl}/speaker4.webp`, alt: "Haut-parleur Portable vue 4", isPrimary: false, sortOrder: 3 },
+          { url: `${baseAssetUrl}/speaker1.webp`, alt: "Portable Speaker view 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/speaker2.webp`, alt: "Portable Speaker view 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/speaker3.webp`, alt: "Portable Speaker view 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/speaker4.webp`, alt: "Portable Speaker view 4", isPrimary: false, sortOrder: 3 },
         ],
       },
       variants: {
         create: [
-          { sku: "SPEAK-PORT-BLK", color: "Noir", condition: "NEW", stock: 22, price: 95000, weight: 0.58 },
-          { sku: "SPEAK-PORT-BLU", color: "Bleu", condition: "NEW", stock: 18, price: 95000, weight: 0.58 },
+          { sku: "SPEAK-PORT-BLK", color: "Black", condition: "NEW", stock: 22, price: 95000, weight: 0.58 },
+          { sku: "SPEAK-PORT-BLU", color: "Blue", condition: "NEW", stock: 18, price: 95000, weight: 0.58 },
         ],
       },
     },
@@ -518,31 +535,30 @@ async function main() {
     update: {},
     create: {
       slug: "smartwatch-fitness",
-      name: "Montre Connectée Fitness",
-      description: "Smartwatch avec suivi de la fréquence cardiaque, compteur de pas et notifications.",
+      name: "Fitness Smartwatch",
+      description: "Smartwatch with heart rate monitoring, step counter and notifications.",
       basePrice: 75000,
       currency: "XAF",
       categoryId: accessoires.id,
       brand: "Fitness Tech",
-      specs: { screen: "1.4\" AMOLED", battery: "5 jours", waterproof: "50m" },
-      metaTitle: "Montre Connectée Fitness - Achat en ligne | The Eye Informatique",
-      metaDescription: "Smartwatch fitness moins cher au Cameroun - suivi santé complet.",
+      metaTitle: "Fitness Smartwatch - Buy Online | The Eye Informatique",
+      metaDescription: "Affordable fitness smartwatch in Cameroon - complete health tracking.",
       isActive: true,
       isFeatured: true,
       tags: { connect: [{ slug: "new-arrival" }, { slug: "best-seller" }] },
       images: {
         create: [
-          { url: `${baseAssetUrl}/watch_1.webp`, alt: "Montre Connectée Fitness vue 1", isPrimary: true, sortOrder: 0 },
-          { url: `${baseAssetUrl}/watch_2.webp`, alt: "Montre Connectée Fitness vue 2", isPrimary: false, sortOrder: 1 },
-          { url: `${baseAssetUrl}/watch_3.webp`, alt: "Montre Connectée Fitness vue 3", isPrimary: false, sortOrder: 2 },
-          { url: `${baseAssetUrl}/watch_4.webp`, alt: "Montre Connectée Fitness vue 4", isPrimary: false, sortOrder: 3 },
+          { url: `${baseAssetUrl}/watch_1.webp`, alt: "Fitness Smartwatch view 1", isPrimary: true, sortOrder: 0 },
+          { url: `${baseAssetUrl}/watch_2.webp`, alt: "Fitness Smartwatch view 2", isPrimary: false, sortOrder: 1 },
+          { url: `${baseAssetUrl}/watch_3.webp`, alt: "Fitness Smartwatch view 3", isPrimary: false, sortOrder: 2 },
+          { url: `${baseAssetUrl}/watch_4.webp`, alt: "Fitness Smartwatch view 4", isPrimary: false, sortOrder: 3 },
         ],
       },
       variants: {
         create: [
-          { sku: "WATCH-FIT-BLK", color: "Noir", condition: "NEW", stock: 26, price: 75000, weight: 0.042 },
-          { sku: "WATCH-FIT-BLU", color: "Bleu", condition: "NEW", stock: 19, price: 75000, weight: 0.042 },
-          { sku: "WATCH-FIT-RED", color: "Rouge", condition: "NEW", stock: 15, price: 75000, weight: 0.042 },
+          { sku: "WATCH-FIT-BLK", color: "Black", condition: "NEW", stock: 26, price: 75000, weight: 0.042 },
+          { sku: "WATCH-FIT-BLU", color: "Blue", condition: "NEW", stock: 19, price: 75000, weight: 0.042 },
+          { sku: "WATCH-FIT-RED", color: "Red", condition: "NEW", stock: 15, price: 75000, weight: 0.042 },
         ],
       },
     },
@@ -550,6 +566,52 @@ async function main() {
   })
 
   console.log("  ✔ Products")
+
+  // -------------------------------------------------------------------------
+  // 5b. ProductFeatureValues — structured attributes for seeded products
+  // -------------------------------------------------------------------------
+
+  // Samsung Galaxy A55 5G
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "ff-and-screen" } }, update: {}, create: { productId: samsung.id, featureFieldId: "ff-and-screen", value: "6.6\"" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "ff-and-ram" } }, update: {}, create: { productId: samsung.id, featureFieldId: "ff-and-ram", value: "8GB" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "ff-and-storage" } }, update: {}, create: { productId: samsung.id, featureFieldId: "ff-and-storage", value: "128GB" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "ff-and-battery" } }, update: {}, create: { productId: samsung.id, featureFieldId: "ff-and-battery", value: "5000 mAh" } })
+
+  // Apple MacBook Air M2
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "ff-lap-cpu" } }, update: {}, create: { productId: macbook.id, featureFieldId: "ff-lap-cpu", value: "Apple M2" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "ff-lap-ram" } }, update: {}, create: { productId: macbook.id, featureFieldId: "ff-lap-ram", value: "8GB" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "ff-lap-storage" } }, update: {}, create: { productId: macbook.id, featureFieldId: "ff-lap-storage", value: "256GB" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "ff-lap-display" } }, update: {}, create: { productId: macbook.id, featureFieldId: "ff-lap-display", value: "13.6\"" } })
+
+  // Apple AirPods Pro 2nd Generation
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: airpods.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: airpods.id, featureFieldId: "ff-ecu-conn", value: "Bluetooth" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: airpods.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: airpods.id, featureFieldId: "ff-ecu-nc", value: "Yes" } })
+
+  // Standard Earphones
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_b.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: earphones_b.id, featureFieldId: "ff-ecu-conn", value: "Wired" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_b.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: earphones_b.id, featureFieldId: "ff-ecu-nc", value: "No" } })
+
+  // Premium Earphones
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_c.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: earphones_c.id, featureFieldId: "ff-ecu-conn", value: "Bluetooth" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_c.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: earphones_c.id, featureFieldId: "ff-ecu-nc", value: "Yes" } })
+
+  // Sport Headphones
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_a.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: headphones_a.id, featureFieldId: "ff-ecu-conn", value: "Wired" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_a.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: headphones_a.id, featureFieldId: "ff-ecu-nc", value: "No" } })
+
+  // Gaming Headset
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_b.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: headphones_b.id, featureFieldId: "ff-ecu-conn", value: "Bluetooth" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_b.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: headphones_b.id, featureFieldId: "ff-ecu-nc", value: "No" } })
+
+  // Studio Headphones
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_c.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: headphones_c.id, featureFieldId: "ff-ecu-conn", value: "Wired" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_c.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: headphones_c.id, featureFieldId: "ff-ecu-nc", value: "No" } })
+
+  // Portable Speaker
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: speaker.id, featureFieldId: "ff-hp-conn" } }, update: {}, create: { productId: speaker.id, featureFieldId: "ff-hp-conn", value: "Bluetooth" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: speaker.id, featureFieldId: "ff-hp-battery" } }, update: {}, create: { productId: speaker.id, featureFieldId: "ff-hp-battery", value: "12 hours" } })
+
+  console.log("  ✔ Feature Values")
 
   // -------------------------------------------------------------------------
   // 6. ProductStockByBranch — per-branch inventory for each variant
@@ -598,7 +660,7 @@ async function main() {
   // -------------------------------------------------------------------------
   console.log("\n✅  Seed complete!")
   console.log("   Branches :", [yaoundeBranch.name, douala.name, bamenda.name].join(", "))
-  console.log("   Products :", 11, "products seeded")
+  console.log("   Products :", 10, "products seeded with feature values")
 }
 
 main()

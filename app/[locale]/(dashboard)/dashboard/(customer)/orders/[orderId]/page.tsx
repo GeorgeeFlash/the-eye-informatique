@@ -257,70 +257,121 @@ export default async function OrderDetailPage({
 
           {/* Installment info — AC-M3.2-8, CON-3.5 */}
           {hasInstallments && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("installments")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>#</TableHead>
-                      <TableHead>{t("amount")}</TableHead>
-                      <TableHead>{t("dueDate")}</TableHead>
-                      <TableHead>{t("status")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {order.installments.map((inst) => {
-                      const isPaid = inst.status === "PAID";
-                      const isOverdue =
-                        !isPaid && new Date(inst.dueDate) < new Date();
-                      return (
-                        <TableRow key={inst.id}>
-                          <TableCell>{inst.sequenceNumber}</TableCell>
-                          <TableCell>
-                            {formatCurrency(Number(inst.amount), locale)}
-                          </TableCell>
-                          <TableCell>
-                            {formatDate(inst.dueDate, "dd/MM/yyyy", locale)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                isPaid
-                                  ? "default"
+            <>
+              {/* Balance summary card */}
+              {(() => {
+                const paid = order.installments
+                  .filter((i) => i.status === "PAID")
+                  .reduce((s, i) => s + Number(i.amount), 0);
+                const outstanding = order.installments
+                  .filter((i) => i.status !== "PAID")
+                  .reduce((s, i) => s + Number(i.amount), 0);
+                const nextDue = order.installments
+                  .filter((i) => i.status !== "PAID")
+                  .sort(
+                    (a, b) =>
+                      new Date(a.dueDate).getTime() -
+                      new Date(b.dueDate).getTime(),
+                  )[0];
+                return (
+                  <Card>
+                    <CardContent className="grid grid-cols-3 gap-4 p-4 text-center">
+                      <div>
+                        <p className="text-xs text-muted-foreground">
+                          {t("totalPaid")}
+                        </p>
+                        <p className="mt-1 text-lg font-semibold text-green-600">
+                          {formatCurrency(paid, locale)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">
+                          {t("outstandingBalance")}
+                        </p>
+                        <p className="mt-1 text-lg font-semibold text-orange-600">
+                          {formatCurrency(outstanding, locale)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">
+                          {t("nextPaymentDue")}
+                        </p>
+                        <p className="mt-1 text-lg font-semibold">
+                          {nextDue
+                            ? formatDate(nextDue.dueDate, "dd/MM/yyyy", locale)
+                            : "—"}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("installments")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>{t("amount")}</TableHead>
+                        <TableHead>{t("dueDate")}</TableHead>
+                        <TableHead>{t("status")}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {order.installments.map((inst) => {
+                        const isPaid = inst.status === "PAID";
+                        const isOverdue =
+                          !isPaid && new Date(inst.dueDate) < new Date();
+                        return (
+                          <TableRow key={inst.id}>
+                            <TableCell>{inst.sequenceNumber}</TableCell>
+                            <TableCell>
+                              {formatCurrency(Number(inst.amount), locale)}
+                            </TableCell>
+                            <TableCell>
+                              {formatDate(inst.dueDate, "dd/MM/yyyy", locale)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  isPaid
+                                    ? "default"
+                                    : isOverdue
+                                      ? "destructive"
+                                      : "outline"
+                                }
+                              >
+                                {isPaid
+                                  ? t("installmentPaid")
                                   : isOverdue
-                                    ? "destructive"
-                                    : "outline"
-                              }
-                            >
-                              {isPaid
-                                ? t("installmentPaid")
-                                : isOverdue
-                                  ? t("installmentOverdue")
-                                  : t("installmentPending")}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-                {/* Outstanding balance */}
-                <div className="mt-4 flex justify-between border-t pt-3 text-sm font-medium">
-                  <span>{t("outstandingBalance")}</span>
-                  <span>
-                    {formatCurrency(
-                      order.installments
-                        .filter((i) => i.status !== "PAID")
-                        .reduce((sum, i) => sum + Number(i.amount), 0),
-                      locale,
-                    )}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                                    ? t("installmentOverdue")
+                                    : t("installmentPending")}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                  {/* Outstanding balance */}
+                  <div className="mt-4 flex justify-between border-t pt-3 text-sm font-medium">
+                    <span>{t("outstandingBalance")}</span>
+                    <span>
+                      {formatCurrency(
+                        order.installments
+                          .filter((i) => i.status !== "PAID")
+                          .reduce((sum, i) => sum + Number(i.amount), 0),
+                        locale,
+                      )}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
           )}
 
           {/* Delivery info */}

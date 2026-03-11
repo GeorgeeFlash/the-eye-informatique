@@ -43,6 +43,9 @@ type ProductRow = {
   isFeatured: boolean;
   basePrice: number;
   brand: string | null;
+  commissionType: string | null;
+  commissionValue: number | null;
+  createdAt: string | Date;
   category: { id: string; name: string } | null;
   images: { url: string }[];
   variants: { id: string; price: number; stock: number; condition: string }[];
@@ -188,6 +191,38 @@ export function ProductListClient({
           {row.original.isActive ? t("active") : t("archived")}
         </Badge>
       ),
+    },
+    {
+      id: "commission",
+      header: t("colCommission"),
+      cell: ({ row }) => {
+        const { commissionType, commissionValue } = row.original;
+        if (!commissionType || !commissionValue)
+          return (
+            <span className="text-xs text-muted-foreground">
+              {t("defaultCommission")}
+            </span>
+          );
+        return (
+          <Badge variant="outline" className="text-xs">
+            {commissionType === "PERCENTAGE"
+              ? `${commissionValue}%`
+              : formatCurrency(commissionValue, locale)}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: t("colDate"),
+      cell: ({ row }) => {
+        const d = new Date(row.original.createdAt);
+        return (
+          <span className="text-xs text-muted-foreground">
+            {d.toLocaleDateString(locale)}
+          </span>
+        );
+      },
     },
     {
       id: "actions",

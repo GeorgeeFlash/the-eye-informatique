@@ -1,34 +1,34 @@
-import { notFound } from "next/navigation"
-import { getProductBySlug } from "@/actions/product.actions"
-import { ProductGallery } from "@/components/storefront/product-gallery"
-import { ProductDetails } from "@/components/storefront/product-details"
-import type { Metadata } from "next"
+import { notFound } from "next/navigation";
+import { getProductBySlug } from "@/actions/product.actions";
+import { ProductGallery } from "@/components/storefront/product-gallery";
+import { ProductDetails } from "@/components/storefront/product-details";
+import type { Metadata } from "next";
 
 interface Props {
-  params: Promise<{ productSlug: string }>
+  params: Promise<{ productSlug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { productSlug } = await params
-  const product = await getProductBySlug(productSlug)
-  if (!product) return {}
+  const { productSlug } = await params;
+  const product = await getProductBySlug(productSlug);
+  if (!product) return {};
   return {
     title: product.name,
     description: product.description?.slice(0, 160) ?? "",
-  }
+  };
 }
 
 export default async function ProductDetailPage({ params }: Props) {
-  const { productSlug } = await params
+  const { productSlug } = await params;
 
-  const product = await getProductBySlug(productSlug)
-  if (!product) notFound()
+  const product = await getProductBySlug(productSlug);
+  if (!product) notFound();
 
   const images = product.images.map((img) => ({
     url: img.url,
     altText: img.alt ?? product.name,
     position: img.sortOrder,
-  }))
+  }));
 
   // Serialize Decimal fields to plain numbers for client components
   const serializedProduct = {
@@ -50,7 +50,12 @@ export default async function ProductDetailPage({ params }: Props) {
       stockByBranch: v.stockByBranch,
     })),
     reviews: product.reviews,
-  }
+    featureValues:
+      product.featureValues?.map((fv) => ({
+        featureFieldName: fv.featureField.name,
+        value: fv.value,
+      })) ?? [],
+  };
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
@@ -62,5 +67,5 @@ export default async function ProductDetailPage({ params }: Props) {
         <ProductDetails product={serializedProduct} />
       </div>
     </div>
-  )
+  );
 }

@@ -34,7 +34,7 @@ type Variant = {
   weight: number | null;
   stockByBranch: {
     stock: number;
-    branch: { id: string; name: string };
+    branch: { id: string; name: string; city: string };
   }[];
 };
 
@@ -52,6 +52,10 @@ type ProductData = {
     rating: number;
     comment: string | null;
     user: { name: string | null };
+  }[];
+  featureValues?: {
+    featureFieldName: string;
+    value: string;
   }[];
 };
 
@@ -244,6 +248,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           const quantityToAdd = Math.min(quantity, availableToAdd);
 
+          // Pick the branch with the most stock for this variant
+          const topBranch = selectedVariant.stockByBranch
+            .filter((s) => s.stock > 0)
+            .sort((a, b) => b.stock - a.stock)[0];
+
           addItem({
             variantId: selectedVariant.id,
             productId: product.id,
@@ -259,6 +268,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             quantity: quantityToAdd,
             stockAvailable: selectedVariant.stock,
             imageUrl: undefined,
+            branchId: topBranch?.branch.id,
+            branchCity: topBranch?.branch.city,
           });
 
           toast.success(t("addedToCart", { name: product.name }));
@@ -278,6 +289,30 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               __html: sanitizeHtml(product.description),
             }}
           />
+        </div>
+      )}
+
+      {/* Specifications / Feature Values */}
+      {product.featureValues && product.featureValues.length > 0 && (
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">{t("specifications")}</h2>
+          <div className="rounded-lg border">
+            <table className="w-full text-sm">
+              <tbody>
+                {product.featureValues.map((fv, i) => (
+                  <tr
+                    key={fv.featureFieldName}
+                    className={i % 2 === 0 ? "bg-muted/50" : ""}
+                  >
+                    <td className="px-4 py-2 font-medium text-muted-foreground w-1/3">
+                      {fv.featureFieldName}
+                    </td>
+                    <td className="px-4 py-2">{fv.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

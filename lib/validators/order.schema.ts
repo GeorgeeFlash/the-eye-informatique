@@ -10,8 +10,8 @@ export const addressSchema = z.object({
 
 export const checkoutSchema = z.object({
   deliveryMethod: z.enum(["PICKUP", "DELIVERY"]),
-  addressId: z.string().cuid().optional(),
-  branchId: z.string().cuid().optional(),
+  addressId: z.string().min(1).optional(),
+  branchId: z.string().min(1).optional(),
   notes: z.string().optional(),
   paymentMethod: z.enum(["MOBILE_MONEY", "CHECKOUT"]),
   phone: z.string().optional(),

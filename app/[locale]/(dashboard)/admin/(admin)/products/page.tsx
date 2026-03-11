@@ -1,24 +1,24 @@
-import { requireRole } from "@/lib/auth"
-import { getProducts } from "@/actions/product.actions"
-import { getCategories } from "@/actions/category.actions"
-import { getTranslations } from "next-intl/server"
-import { ProductListClient } from "./product-list-client"
+import { requireRole } from "@/lib/auth";
+import { getProducts } from "@/actions/product.actions";
+import { getCategories } from "@/actions/category.actions";
+import { getTranslations } from "next-intl/server";
+import { ProductListClient } from "./product-list-client";
 
 interface Props {
   searchParams: Promise<{
-    search?: string
-    categoryId?: string
-    page?: string
-  }>
+    search?: string;
+    categoryId?: string;
+    page?: string;
+  }>;
 }
 
 export default async function AdminProductsPage({ searchParams }: Props) {
-  const user = await requireRole(["STAFF", "ADMIN", "CENTRAL_ADMIN"])
-  const t = await getTranslations("productAdmin")
-  const params = await searchParams
+  const user = await requireRole(["STAFF", "ADMIN", "CENTRAL_ADMIN"]);
+  const t = await getTranslations("productAdmin");
+  const params = await searchParams;
 
-  const page = Number(params.page) || 1
-  const branchId = user.role === "CENTRAL_ADMIN" ? null : user.branchId
+  const page = Number(params.page) || 1;
+  const branchId = user.role === "CENTRAL_ADMIN" ? null : user.branchId;
 
   const [productData, categories] = await Promise.all([
     getProducts({
@@ -29,14 +29,16 @@ export default async function AdminProductsPage({ searchParams }: Props) {
       pageSize: 20,
     }),
     getCategories(),
-  ])
+  ]);
 
   // Serialize Decimal fields to numbers for client component
   const serializedProducts = productData.products.map((p) => ({
     ...p,
     basePrice: Number(p.basePrice),
+    commissionValue: p.commissionValue ? Number(p.commissionValue) : null,
+    createdAt: p.createdAt.toISOString(),
     variants: p.variants.map((v) => ({ ...v, price: Number(v.price) })),
-  }))
+  }));
 
   return (
     <div className="space-y-6">
@@ -56,5 +58,5 @@ export default async function AdminProductsPage({ searchParams }: Props) {
         isCentralAdmin={user.role === "CENTRAL_ADMIN"}
       />
     </div>
-  )
+  );
 }

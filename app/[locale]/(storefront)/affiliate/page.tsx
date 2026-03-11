@@ -69,7 +69,7 @@ export default async function AffiliateLandingPage() {
           )}
           <div className="mt-8 flex justify-center gap-4">
             <Button asChild size="lg">
-              <Link href="/dashboard">
+              <Link href="/dashboard/affiliate-apply">
                 {data.cta?.buttonLabel ?? t("applyNow")}
               </Link>
             </Button>
@@ -201,7 +201,7 @@ export default async function AffiliateLandingPage() {
               </p>
             )}
             <Button asChild size="lg" className="mt-6">
-              <Link href={data.cta.buttonHref ?? "/dashboard"}>
+              <Link href={data.cta.buttonHref ?? "/dashboard/affiliate-apply"}>
                 {data.cta.buttonLabel ?? t("applyNow")}
                 <ArrowRightIcon className="ml-2 size-4" />
               </Link>

@@ -33,8 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2Icon, StoreIcon, TruckIcon } from "lucide-react";
+import { Loader2Icon, MapPinIcon, StoreIcon, TruckIcon } from "lucide-react";
 import { Locale } from "@/lib/constants";
+import { calculateOrderShipping } from "@/lib/shipping";
 
 type Address = {
   id: string;
@@ -47,6 +48,7 @@ type Address = {
 interface CheckoutFormProps {
   addresses: Address[];
   branches: { id: string; name: string; city: string }[];
+  installmentCount: number;
 }
 
 type CheckoutFormValues = {
@@ -60,7 +62,11 @@ type CheckoutFormValues = {
   gateway?: "CM_MTNMOMO" | "CM_ORANGE";
 };
 
-export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
+export function CheckoutForm({
+  addresses,
+  branches,
+  installmentCount,
+}: CheckoutFormProps) {
   const t = useTranslations("checkout");
   const locale = useLocale() as Locale;
   const router = useRouter();
@@ -91,6 +97,17 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
   const deliveryMethod = form.watch("deliveryMethod");
   const paymentMethod = form.watch("paymentMethod");
   const installments = form.watch("installments");
+  const selectedAddressId = form.watch("addressId");
+
+  // Compute shipping fee when delivery is chosen and address is selected
+  const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
+  const branchCities = items
+    .map((i) => i.branchCity)
+    .filter((c): c is string => Boolean(c));
+  const shippingFee =
+    deliveryMethod === "DELIVERY" && selectedAddress && branchCities.length > 0
+      ? calculateOrderShipping(selectedAddress.city, branchCities)
+      : 0;
 
   function onSubmit(data: CheckoutFormValues) {
     setServerError(null);
@@ -453,10 +470,10 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
                     <AlertDescription>
                       {t("installmentsBreakdown", {
                         amount: formatCurrency(
-                          Math.ceil(totalPrice / 3),
+                          Math.ceil(totalPrice / installmentCount),
                           locale as Locale,
                         ),
-                        months: 3,
+                        months: installmentCount,
                       })}
                     </AlertDescription>
                   </Alert>
@@ -517,16 +534,24 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
           </CardHeader>
           <CardContent className="space-y-3">
             {items.map((item) => (
-              <div
-                key={item.variantId}
-                className="flex justify-between text-sm"
-              >
-                <span className="text-muted-foreground">
-                  {item.productName} x{item.quantity}
-                </span>
-                <span>
-                  {formatCurrency(item.price * item.quantity, locale as Locale)}
-                </span>
+              <div key={item.variantId} className="space-y-0.5">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {item.productName} x{item.quantity}
+                  </span>
+                  <span>
+                    {formatCurrency(
+                      item.price * item.quantity,
+                      locale as Locale,
+                    )}
+                  </span>
+                </div>
+                {item.branchCity && (
+                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <MapPinIcon className="size-3" />
+                    {t("shipsFrom", { city: item.branchCity })}
+                  </p>
+                )}
               </div>
             ))}
             <Separator />
@@ -538,16 +563,22 @@ export function CheckoutForm({ addresses, branches }: CheckoutFormProps) {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">{t("shipping")}</span>
-              <span className="text-muted-foreground">
+              <span>
                 {deliveryMethod === "PICKUP"
                   ? t("free")
-                  : t("calculatedAtOrder")}
+                  : shippingFee > 0
+                    ? formatCurrency(shippingFee, locale as Locale)
+                    : selectedAddress
+                      ? t("free")
+                      : t("selectAddressForShipping")}
               </span>
             </div>
             <Separator />
             <div className="flex justify-between font-semibold text-lg">
               <span>{t("total")}</span>
-              <span>{formatCurrency(totalPrice, locale as Locale)}</span>
+              <span>
+                {formatCurrency(totalPrice + shippingFee, locale as Locale)}
+              </span>
             </div>
           </CardContent>
         </Card>
