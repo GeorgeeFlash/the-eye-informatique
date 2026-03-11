@@ -325,7 +325,12 @@ export async function createOrder(data: CreateOrderInput) {
     }
   } catch {
     // Order is created — payment can be retried
-    return { success: true, orderId: order.id, orderNumber: order.orderNumber }
+    return {
+      success: true,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      paymentWarning: "Payment initiation failed. You can retry from your order page.",
+    }
   }
 }
 

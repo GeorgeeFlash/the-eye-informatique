@@ -1,22 +1,11 @@
 "use server"
 
-import arcjet, { slidingWindow, request as arcjetRequest } from "@arcjet/next"
 import { db } from "@/server/db"
 import { resend, FROM_EMAIL } from "@/server/resend"
 import { contactFormSchema } from "@/lib/validators/contact.schema"
 import { ContactSubmissionEmail } from "@/components/email/contact-submission"
 import { stripHtml } from "@/lib/sanitize"
-
-const ajContact = arcjet({
-  key: process.env.ARCJET_KEY!,
-  rules: [
-    slidingWindow({
-      mode: "LIVE",
-      interval: "1h",
-      max: 3,
-    }),
-  ],
-})
+import { contactFormRateLimit, getIpFromHeaders } from "@/lib/rate-limit"
 
 export async function submitContactForm(formData: {
   name: string
@@ -26,9 +15,9 @@ export async function submitContactForm(formData: {
   message: string
 }) {
   // Rate limit
-  const req = await arcjetRequest()
-  const decision = await ajContact.protect(req)
-  if (decision.isDenied()) {
+  const ip = await getIpFromHeaders()
+  const { success } = await contactFormRateLimit.limit(ip)
+  if (!success) {
     return { error: "Too many submissions. Please try again later." }
   }
 

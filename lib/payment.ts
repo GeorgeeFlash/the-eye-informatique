@@ -124,7 +124,11 @@ async function processInstallmentPayment(
   if (result.status === "SUCCESS") {
     await db.installment.update({
       where: { id: installment.id },
-      data: { status: "PAID", paidAt: new Date() },
+      data: {
+        status: "PAID",
+        paidAt: new Date(),
+        receiptNumber: `REC-INST-${Date.now().toString(36).toUpperCase()}`,
+      },
     })
 
     // Check if all installments are now paid

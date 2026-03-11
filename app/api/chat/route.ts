@@ -1,7 +1,14 @@
 import { streamText } from "ai"
 import { gemini } from "@/server/ai/provider"
+import { aiRateLimit, getIp } from "@/lib/rate-limit"
 
 export async function POST(req: Request) {
+  const ip = getIp(req)
+  const { success } = await aiRateLimit.limit(ip)
+  if (!success) {
+    return Response.json({ error: "Too many requests" }, { status: 429 })
+  }
+
   const { messages } = await req.json()
 
   const result = streamText({

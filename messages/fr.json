@@ -205,6 +205,7 @@
     "transactionId": "ID de transaction",
     "paidAt": "Payé le",
     "receiptNumber": "Reçu n°",
+    "retryPayment": "Réessayer le paiement",
     "paymentMethod_PAYUNIT": "PayUnit",
     "paymentMethod_CASH": "Espèces",
     "paymentMethod_MOBILE_MONEY": "Argent Mobile",

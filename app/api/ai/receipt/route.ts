@@ -1,8 +1,18 @@
 import { generateObject } from "ai"
 import { gemini } from "@/server/ai/provider"
 import { z } from "zod"
+import { requireRole } from "@/lib/auth"
+import { aiRateLimit, getIp } from "@/lib/rate-limit"
 
 export async function POST(req: Request) {
+  await requireRole(["STAFF", "ADMIN", "CENTRAL_ADMIN"])
+
+  const ip = getIp(req)
+  const { success } = await aiRateLimit.limit(ip)
+  if (!success) {
+    return Response.json({ error: "Too many requests" }, { status: 429 })
+  }
+
   const formData = await req.formData()
   const image = formData.get("image") as File | null
 

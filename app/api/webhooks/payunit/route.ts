@@ -16,7 +16,6 @@ export async function POST(req: Request) {
     const payload = (await req.json()) as {
       transaction_id?: string
       status?: string
-      signature?: string
     }
 
     const transactionId = payload.transaction_id

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { ArrowLeftIcon, DownloadIcon } from "lucide-react";
 import { Locale } from "@/lib/constants";
+import { RetryPaymentButton } from "@/components/storefront/retry-payment-button";
 
 export async function generateMetadata({
   params,
@@ -242,6 +243,16 @@ export default async function OrderDetailPage({
                     <span className="font-mono text-xs">
                       {order.payment.receiptNumber}
                     </span>
+                  </div>
+                )}
+                {(order.payment.status === "FAILED" ||
+                  (order.payment.status === "PENDING" &&
+                    order.status === "PENDING")) && (
+                  <div className="pt-2">
+                    <RetryPaymentButton
+                      orderId={order.id}
+                      label={t("retryPayment")}
+                    />
                   </div>
                 )}
               </CardContent>

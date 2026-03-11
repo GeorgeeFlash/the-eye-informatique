@@ -205,6 +205,7 @@
     "transactionId": "Transaction ID",
     "paidAt": "Paid At",
     "receiptNumber": "Receipt #",
+    "retryPayment": "Retry Payment",
     "paymentMethod_PAYUNIT": "PayUnit",
     "paymentMethod_CASH": "Cash",
     "paymentMethod_MOBILE_MONEY": "Mobile Money",

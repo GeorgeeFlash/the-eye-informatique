@@ -1,44 +1,9 @@
-import arcjet, { shield, detectBot, slidingWindow, fixedWindow } from "@arcjet/next"
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 import createIntlMiddleware from "next-intl/middleware"
 import { routing } from "@/i18n/routing"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-
-// ---------------------------------------------------------------------------
-// Arcjet — global rules applied to every request
-// ---------------------------------------------------------------------------
-const aj = arcjet({
-  key: process.env.ARCJET_KEY!,
-  rules: [
-    shield({ mode: "LIVE" }),
-    detectBot({
-      mode: "LIVE",
-      // Allow search engines AND verified webhook senders (e.g. Svix / Clerk)
-      allow: ["CATEGORY:SEARCH_ENGINE", "CATEGORY:MONITOR"],
-    }),
-    slidingWindow({
-      mode: "LIVE",
-      interval: "60s",
-      max: 120,
-    }),
-  ],
-})
-
-// ---------------------------------------------------------------------------
-// Arcjet — stricter limits for auth & checkout endpoints
-// ---------------------------------------------------------------------------
-const ajAuth = arcjet({
-  key: process.env.ARCJET_KEY!,
-  rules: [
-    shield({ mode: "LIVE" }),
-    fixedWindow({
-      mode: "LIVE",
-      window: "60s",
-      max: 10,
-    }),
-  ],
-})
+import { globalRateLimit, authRateLimit, getIp } from "@/lib/rate-limit"
 
 // ---------------------------------------------------------------------------
 // next-intl — locale resolution middleware
@@ -63,10 +28,12 @@ const isAuthRoute = createRouteMatcher([
 const isApiRoute = createRouteMatcher(["/api/(.*)", "/trpc/(.*)"])
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-  // 1a. Arcjet — stricter rate limits on auth endpoints
+  const ip = getIp(req)
+
+  // 1a. Stricter rate limits on auth endpoints
   if (isAuthRoute(req)) {
-    const authDecision = await ajAuth.protect(req)
-    if (authDecision.isDenied()) {
+    const { success } = await authRateLimit.limit(ip)
+    if (!success) {
       return NextResponse.json(
         { error: "Too many attempts. Please wait before retrying." },
         { status: 429 },
@@ -74,14 +41,13 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     }
   }
 
-  // 1b. Arcjet — global shield, bot detection, rate limiting
-  // Skip bot detection for webhook endpoints (Svix / third-party senders)
+  // 1b. Global rate limiting (skip webhook endpoints)
   if (!req.nextUrl.pathname.startsWith("/api/webhooks")) {
-    const decision = await aj.protect(req)
-    if (decision.isDenied()) {
+    const { success } = await globalRateLimit.limit(ip)
+    if (!success) {
       return NextResponse.json(
-        { error: decision.reason.isRateLimit() ? "Too Many Requests" : "Forbidden" },
-        { status: decision.reason.isRateLimit() ? 429 : 403 },
+        { error: "Too Many Requests" },
+        { status: 429 },
       )
     }
   }
