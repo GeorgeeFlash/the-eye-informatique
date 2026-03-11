@@ -144,8 +144,15 @@ export function CheckoutForm({
       }
 
       clearCart();
-      toast.success(t("orderSuccess"));
-      router.push(`/${locale}/dashboard/orders/${result.orderId}`);
+
+      // Redirect to PayUnit payment page if available, otherwise go to order page
+      if ("redirectUrl" in result && result.redirectUrl) {
+        toast.success(t("orderSuccess"));
+        window.location.href = result.redirectUrl;
+      } else {
+        toast.success(result.paymentWarning ?? t("orderSuccess"));
+        router.push(`/${locale}/dashboard/orders/${result.orderId}`);
+      }
     });
   }
 

@@ -218,13 +218,6 @@ export async function createOrder(data: CreateOrderInput) {
             fulfillmentBranchId: li.fulfillmentBranchId,
           })),
         },
-        statusHistory: {
-          create: {
-            status: "PENDING",
-            changedBy: user.id,
-            note: "Order placed",
-          },
-        },
         payment: {
           create: {
             method: parsed.data.paymentMethod,
@@ -233,6 +226,19 @@ export async function createOrder(data: CreateOrderInput) {
             status: "PENDING",
           },
         },
+      },
+    })
+
+    // Create the initial status history entry separately so the Order row is
+    // guaranteed to exist before the FK-constrained child row is inserted.
+    // (With @prisma/adapter-pg / Prisma 6 driver adapters the nested-create
+    //  ordering is not guaranteed, which previously caused an FK violation.)
+    await tx.orderStatusHistory.create({
+      data: {
+        orderId: newOrder.id,
+        status: "PENDING",
+        changedBy: user.id,
+        note: "Order placed",
       },
     })
 
@@ -356,6 +362,7 @@ export async function getOrder(orderId: string) {
           fulfillmentBranch: { select: { id: true, name: true, city: true } },
         },
       },
+      user: { select: { name: true, email: true, phone: true } },
       payment: true,
       installments: { orderBy: { sequenceNumber: "asc" } },
       address: true,
@@ -477,28 +484,29 @@ export async function updateOrderStatus(
   }
   const newFulfillmentStatus = fulfillmentStatusMap[status]
 
-  await db.$transaction([
-    db.order.update({
-      where: { id: orderId },
-      data: { status },
-    }),
-    db.orderStatusHistory.create({
-      data: {
-        orderId,
-        status,
-        note,
-        changedBy: user.id,
-      },
-    }),
-    ...(newFulfillmentStatus
-      ? [
-          db.orderItem.updateMany({
-            where: { orderId },
-            data: { fulfillmentStatus: newFulfillmentStatus },
-          }),
-        ]
-      : []),
-  ])
+  await db.$transaction(
+    async (tx) => {
+      await tx.order.update({
+        where: { id: orderId },
+        data: { status },
+      })
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId,
+          status,
+          note,
+          changedBy: user.id,
+        },
+      })
+      if (newFulfillmentStatus) {
+        await tx.orderItem.updateMany({
+          where: { orderId },
+          data: { fulfillmentStatus: newFulfillmentStatus },
+        })
+      }
+    },
+    { timeout: 30000 },
+  )
 
   logActivity({
     action: "ORDER_STATUS_CHANGED",
