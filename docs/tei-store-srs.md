@@ -837,7 +837,7 @@ The following are confirmed out of scope for all releases covered by this SRS:
 - [ ] AC-M11.2-2: The chat responds to questions about products (availability, specifications, pricing), platform policies (returns, repairs, delivery), and general guidance (how to order, how to pay).
 - [ ] AC-M11.2-3: The chat clearly identifies itself as an AI assistant, not a human agent.
 - [ ] AC-M11.2-4: When the chat cannot answer a question or has low confidence, it advises the user to contact support. The chat does not fabricate information.
-- [ ] AC-M11.2-5: Chat conversations are not stored beyond the active session unless the user is authenticated and opts in to saving chat history.
+- [ ] AC-M11.2-5: Chat conversations are not stored beyond the active session.
 - [ ] AC-M11.2-6: The chat does not reveal internal business data, staff notes, admin analytics, or other users' information under any circumstances.
 
 ---
