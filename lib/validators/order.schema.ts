@@ -17,10 +17,7 @@ export const checkoutSchema = z.object({
   phone: z.string().optional(),
   gateway: z.enum(["CM_MTNMOMO", "CM_ORANGE"]).optional(),
   installments: z.boolean().default(false),
-}).refine(
-  (data) => data.deliveryMethod === "PICKUP" || !!data.addressId,
-  { message: "Address required for delivery", path: ["addressId"] },
-)
+})
 
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>
 export type AddressFormValues = z.infer<typeof addressSchema>

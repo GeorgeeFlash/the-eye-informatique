@@ -55,46 +55,52 @@ export async function POST(req: Request) {
       })
 
       if (order?.user?.email) {
-        // Generate guarantee certificate PDF
-        const guaranteeElement = createElement(GuaranteeCertificate, {
-          customerName: order.user.name ?? "Customer",
-          orderNumber: order.orderNumber,
-          purchaseDate: order.createdAt.toISOString(),
-          items: order.items.map((i) => ({
-            productName: i.variant?.product?.name ?? "Product",
-            variant: i.variant?.color ?? undefined,
-            quantity: i.quantity,
-          })),
-          locale: "en",
-        })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pdfBuffer = await renderToBuffer(guaranteeElement as any)
+        // Send confirmation email in background — do not let email failures
+        // break the webhook response since payment is already processed.
+        try {
+          const guaranteeElement = createElement(GuaranteeCertificate, {
+            customerName: order.user.name ?? "Customer",
+            orderNumber: order.orderNumber,
+            purchaseDate: order.createdAt.toISOString(),
+            items: order.items.map((i) => ({
+              productName: i.variant?.product?.name ?? "Product",
+              variant: i.variant?.color ?? undefined,
+              quantity: i.quantity,
+            })),
+            locale: "en",
+          })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pdfBuffer = await renderToBuffer(guaranteeElement as any)
 
-        await inngest.send({
-          name: "email/send",
-          data: {
-            to: order.user.email,
-            subject: `Order ${order.orderNumber} — Payment Confirmed`,
-            template: "order-confirmation",
-            props: {
-              customerName: order.user.name ?? "Customer",
-              orderId: order.orderNumber,
-              items: order.items.map((i) => ({
-                name: i.variant?.product?.name ?? "Product",
-                quantity: i.quantity,
-                price: Number(i.unitPrice),
-              })),
-              total: Number(order.total),
-              deliveryMethod: order.deliveryMethod,
-            },
-            attachments: [
-              {
-                filename: `guarantee-${order.orderNumber}.pdf`,
-                content: Buffer.from(pdfBuffer).toString("base64"),
+          await inngest.send({
+            name: "email/send",
+            data: {
+              to: order.user.email,
+              subject: `Order ${order.orderNumber} — Payment Confirmed`,
+              template: "order-confirmation",
+              props: {
+                customerName: order.user.name ?? "Customer",
+                orderId: order.orderNumber,
+                items: order.items.map((i) => ({
+                  name: i.variant?.product?.name ?? "Product",
+                  quantity: i.quantity,
+                  price: Number(i.unitPrice),
+                })),
+                total: Number(order.total),
+                deliveryMethod: order.deliveryMethod,
               },
-            ],
-          },
-        })
+              attachments: [
+                {
+                  filename: `guarantee-${order.orderNumber}.pdf`,
+                  content: Buffer.from(pdfBuffer).toString("base64"),
+                },
+              ],
+            },
+          })
+        } catch (emailError) {
+          console.error("Failed to send confirmation email:", emailError)
+          // Payment is already processed — email can be resent manually
+        }
       }
     }
 

@@ -132,6 +132,8 @@
     "processing": "Traitement...",
     "orderSuccess": "Commande passée avec succès !",
     "emptyCart": "Votre panier est vide",
+    "addressRequired": "Veuillez sélectionner une adresse de livraison",
+    "fillNewAddress": "Veuillez remplir tous les champs d'adresse (rue, ville, région)",
     "shipsFrom": "Expédié depuis {city}",
     "selectAddressForShipping": "Sélectionnez une adresse pour calculer la livraison"
   },

@@ -117,6 +117,25 @@ export function CheckoutForm({
       return;
     }
 
+    // Validate delivery address: either existing address selected or new address entered
+    if (
+      data.deliveryMethod === "DELIVERY" &&
+      !data.addressId &&
+      !showNewAddress
+    ) {
+      setServerError(t("addressRequired"));
+      return;
+    }
+
+    if (
+      data.deliveryMethod === "DELIVERY" &&
+      showNewAddress &&
+      (!newAddress.street || !newAddress.city || !newAddress.region)
+    ) {
+      setServerError(t("fillNewAddress"));
+      return;
+    }
+
     startTransition(async () => {
       const orderData = {
         ...data,

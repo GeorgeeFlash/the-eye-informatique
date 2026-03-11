@@ -132,6 +132,8 @@
     "processing": "Processing...",
     "orderSuccess": "Order placed successfully!",
     "emptyCart": "Your cart is empty",
+    "addressRequired": "Please select a delivery address",
+    "fillNewAddress": "Please fill in all address fields (street, city, region)",
     "shipsFrom": "Ships from {city}",
     "selectAddressForShipping": "Select an address to calculate shipping"
   },
