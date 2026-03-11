@@ -1,4 +1,4 @@
-import { redirect } from "@/i18n/navigation"
+import { redirect } from "next/navigation"
 
 export default async function CompleteRegistrationPage({
   searchParams,

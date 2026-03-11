@@ -23,11 +23,19 @@ export async function createCheckoutSession(params: {
     ? "https://drake-whole-poorly.ngrok-free.app"
     : APP_URL
 
+  // In development, PayUnit redirects the browser to the ngrok domain where the
+  // Clerk session cookie doesn't exist. Using the public /api/payment-return
+  // route lets ngrok receive the redirect and immediately bounce the browser
+  // back to APP_URL (localhost:3000) where the user is authenticated.
+  const returnUrl = isDevelopment
+    ? `${baseUrl}/api/payment-return?orderId=${params.orderId}${params.installmentId ? `&installmentId=${params.installmentId}` : ""}`
+    : `${APP_URL}${returnPath}`
+
   const result = await initiatePayment({
     totalAmount: params.amount,
     orderId: params.installmentId ?? params.orderId,
     gateway: params.gateway,
-    returnUrl: `${baseUrl}${returnPath}`,
+    returnUrl,
     notifyUrl: `${baseUrl}/api/webhooks/payunit`,
     customerName: params.customerName,
     customerEmail: params.customerEmail,
