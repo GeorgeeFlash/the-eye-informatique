@@ -1,11 +1,16 @@
 import { z } from "zod"
 
+const coverImageUrlSchema = z
+  .string()
+  .transform((v) => (v === "" ? undefined : v))
+  .pipe(z.string().url().optional())
+
 export const createArticleSchema = z.object({
   title: z.string().min(3).max(200),
   slug: z.string().min(3).max(200).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-  content: z.unknown(),
+  content: z.unknown().optional(),
   excerpt: z.string().max(500).optional(),
-  coverImageUrl: z.string().url().optional(),
+  coverImageUrl: coverImageUrlSchema,
   locale: z.enum(["en", "fr"]).default("en"),
   tagIds: z.array(z.string()).optional(),
 })
@@ -15,7 +20,7 @@ export const updateArticleSchema = z.object({
   slug: z.string().min(3).max(200).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
   content: z.unknown().optional(),
   excerpt: z.string().max(500).optional(),
-  coverImageUrl: z.string().url().optional().nullable(),
+  coverImageUrl: coverImageUrlSchema.optional(),
   locale: z.enum(["en", "fr"]).optional(),
   tagIds: z.array(z.string()).optional(),
 })

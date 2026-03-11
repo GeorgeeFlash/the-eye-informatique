@@ -116,7 +116,7 @@ export default async function AdminBlogPage({
                   <TableHead>{t("titleLabel")}</TableHead>
                   <TableHead>{t("author")}</TableHead>
                   <TableHead>{t("statusLabel")}</TableHead>
-                  <TableHead>{t("views")}</TableHead>
+                  <TableHead>{t("viewsLabel")}</TableHead>
                   <TableHead>{t("date")}</TableHead>
                 </TableRow>
               </TableHeader>

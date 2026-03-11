@@ -576,6 +576,7 @@
     "empty": "Aucun article trouvé.",
     "backToBlog": "Retour au Blog",
     "views": "{count} vues",
+    "viewsLabel": "Vues",
     "readMore": "Lire la suite",
     "newArticle": "Nouvel Article",
     "editArticle": "Modifier l'Article",
