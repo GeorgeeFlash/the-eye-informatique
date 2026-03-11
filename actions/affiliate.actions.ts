@@ -11,6 +11,23 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { APP_URL, DEFAULT_PAGE_SIZE } from "@/lib/constants"
 import { createDisbursement, confirmDisbursement } from "@/server/payunit"
+import { inngest } from "@/server/inngest/client"
+import type { AuthUser } from "@/lib/auth"
+import { payoutPreferenceSchema } from "@/lib/validators/affiliate.schema"
+
+// ─── Helper: verify admin can access this affiliate ─────────────────
+
+async function verifyBranchAccess(admin: AuthUser, profileId: string) {
+  if (admin.role === "ADMIN" && admin.branchId) {
+    const profile = await db.affiliateProfile.findUnique({
+      where: { id: profileId },
+      select: { branchId: true },
+    })
+    if (profile?.branchId !== admin.branchId) {
+      throw new Error("Access denied")
+    }
+  }
+}
 
 // ─── Customer: Apply ─────────────────────────────────────────────────
 
@@ -29,6 +46,7 @@ export async function applyForAffiliate(
     if (existing.status === "PENDING") return { error: "Application already pending." }
     if (existing.status === "APPROVED") return { error: "Already an affiliate." }
     if (existing.status === "SUSPENDED") return { error: "Your affiliate account has been suspended. Please contact support." }
+    if (existing.status === "REVOKED") return { error: "Your affiliate account has been permanently revoked." }
     if (
       existing.status === "REJECTED" &&
       existing.rejectedAt &&
@@ -45,6 +63,7 @@ export async function applyForAffiliate(
         status: "PENDING",
         payoutMethod: parsed.data.payoutMethod,
         payoutPhone: parsed.data.payoutPhone,
+        branchId: parsed.data.branchId,
         rejectionReason: null,
         rejectedAt: null,
       },
@@ -55,6 +74,7 @@ export async function applyForAffiliate(
         userId: user.id,
         payoutMethod: parsed.data.payoutMethod,
         payoutPhone: parsed.data.payoutPhone,
+        branchId: parsed.data.branchId,
         status: "PENDING",
       },
     })
@@ -218,29 +238,73 @@ export async function requestPayout() {
   return { success: true }
 }
 
+// ─── Customer: Update payout preference ─────────────────────────────
+
+export async function updatePayoutPreference(
+  data: z.infer<typeof payoutPreferenceSchema>,
+) {
+  const user = await requireAuth()
+  const parsed = payoutPreferenceSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.flatten() }
+
+  const profile = await db.affiliateProfile.findUnique({
+    where: { userId: user.id },
+  })
+  if (!profile || profile.status !== "APPROVED") {
+    return { error: "Affiliate profile not approved." }
+  }
+
+  await db.affiliateProfile.update({
+    where: { id: profile.id },
+    data: { payoutPreference: parsed.data.preference },
+  })
+
+  revalidatePath("/[locale]/(dashboard)/dashboard/(affiliate)/payouts")
+  return { success: true }
+}
+
 // ─── Admin: List affiliates ─────────────────────────────────────────
 
 export async function getAdminAffiliates({
   page = 1,
   pageSize = DEFAULT_PAGE_SIZE,
   status,
+  sortBy = "createdAt",
+  sortOrder = "desc",
+  branchId,
 }: {
   page?: number
   pageSize?: number
   status?: string
+  sortBy?: "createdAt" | "totalEarned" | "status"
+  sortOrder?: "asc" | "desc"
+  branchId?: string
 } = {}) {
-  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
+  const admin = await requireRole(["ADMIN", "CENTRAL_ADMIN"])
 
-  const where = status ? { status: status as never } : {}
+  // Build where clause with branch scoping
+  const where: Record<string, unknown> = {}
+  if (status) where.status = status
+
+  if (admin.role === "ADMIN" && admin.branchId) {
+    // Branch admin sees only their branch's affiliates
+    where.branchId = admin.branchId
+  } else if (branchId) {
+    // Central admin can filter by branch
+    where.branchId = branchId
+  }
+
+  const orderBy = { [sortBy]: sortOrder }
 
   const [affiliates, total] = await Promise.all([
     db.affiliateProfile.findMany({
       where,
       include: {
         user: { select: { name: true, email: true } },
+        branch: { select: { name: true, city: true } },
         _count: { select: { referrals: true, links: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy,
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
@@ -253,12 +317,13 @@ export async function getAdminAffiliates({
 // ─── Admin: Get affiliate detail ────────────────────────────────────
 
 export async function getAdminAffiliateDetail(profileId: string) {
-  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
+  const admin = await requireRole(["ADMIN", "CENTRAL_ADMIN"])
 
-  return db.affiliateProfile.findUnique({
+  const profile = await db.affiliateProfile.findUnique({
     where: { id: profileId },
     include: {
       user: { select: { name: true, email: true } },
+      branch: { select: { name: true, city: true } },
       links: { orderBy: { createdAt: "desc" } },
       referrals: {
         include: { link: true, order: { select: { id: true, total: true, createdAt: true } } },
@@ -267,12 +332,20 @@ export async function getAdminAffiliateDetail(profileId: string) {
       payouts: { orderBy: { createdAt: "desc" } },
     },
   })
+
+  // Branch admin can only view their branch's affiliates
+  if (admin.role === "ADMIN" && admin.branchId && profile?.branchId !== admin.branchId) {
+    throw new Error("Access denied")
+  }
+
+  return profile
 }
 
 // ─── Admin: Approve ─────────────────────────────────────────────────
 
 export async function approveAffiliate(profileId: string) {
-  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
+  const admin = await requireRole(["ADMIN", "CENTRAL_ADMIN"])
+  await verifyBranchAccess(admin, profileId)
 
   const profile = await db.affiliateProfile.update({
     where: { id: profileId },
@@ -288,6 +361,21 @@ export async function approveAffiliate(profileId: string) {
     link: "/dashboard/affiliate/links",
   })
 
+  // Send welcome email
+  await inngest.send({
+    name: "email/send",
+    data: {
+      to: profile.user.email,
+      subject: "Welcome to the Affiliate Program!",
+      template: "affiliate-welcome" as const,
+      props: {
+        affiliateName: profile.user.name ?? "Affiliate",
+        commissionRate: Number(profile.commissionRate) * 100,
+        dashboardUrl: `${APP_URL}/dashboard/affiliate/links`,
+      },
+    },
+  })
+
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/affiliates")
   return { success: true }
 }
@@ -295,7 +383,8 @@ export async function approveAffiliate(profileId: string) {
 // ─── Admin: Reject ──────────────────────────────────────────────────
 
 export async function rejectAffiliate(profileId: string, reason?: string) {
-  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
+  const admin = await requireRole(["ADMIN", "CENTRAL_ADMIN"])
+  await verifyBranchAccess(admin, profileId)
 
   const profile = await db.affiliateProfile.update({
     where: { id: profileId },
@@ -321,7 +410,8 @@ export async function rejectAffiliate(profileId: string, reason?: string) {
 // ─── Admin: Suspend ─────────────────────────────────────────────────
 
 export async function suspendAffiliate(profileId: string, reason: string) {
-  await requireRole(["ADMIN", "CENTRAL_ADMIN"])
+  const admin = await requireRole(["ADMIN", "CENTRAL_ADMIN"])
+  await verifyBranchAccess(admin, profileId)
 
   const profile = await db.affiliateProfile.update({
     where: { id: profileId },
@@ -338,6 +428,38 @@ export async function suspendAffiliate(profileId: string, reason: string) {
     type: "AFFILIATE_APPLICATION",
     title: "Affiliate account suspended",
     body: `Your affiliate account has been suspended. Reason: ${reason}`,
+  })
+
+  revalidatePath("/[locale]/(dashboard)/admin/(admin)/affiliates")
+  return { success: true }
+}
+
+// ─── Admin: Revoke (terminal) ───────────────────────────────────────
+
+export async function revokeAffiliate(profileId: string, reason: string) {
+  const admin = await requireRole(["ADMIN", "CENTRAL_ADMIN"])
+  await verifyBranchAccess(admin, profileId)
+
+  const profile = await db.affiliateProfile.update({
+    where: { id: profileId },
+    data: {
+      status: "REVOKED",
+      suspensionReason: reason,
+      revokedAt: new Date(),
+    },
+    include: { user: true },
+  })
+
+  // Deactivate all promotional links by deleting them
+  await db.affiliateLink.deleteMany({
+    where: { affiliateId: profileId },
+  })
+
+  await createNotification({
+    userId: profile.userId,
+    type: "AFFILIATE_APPLICATION",
+    title: "Affiliate account revoked",
+    body: `Your affiliate account has been permanently revoked. Reason: ${reason}`,
   })
 
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/affiliates")
@@ -365,40 +487,86 @@ export async function trackAffiliateClick(code: string) {
 
 // ─── Internal: Record referral from order ───────────────────────────
 
-export async function recordReferral(
-  orderId: string,
-  affiliateId: string,
-  linkId: string,
-  orderTotal: number,
-) {
-  const profile = await db.affiliateProfile.findUnique({
-    where: { id: affiliateId },
+/**
+ * Called after payment confirmation. Finds the PENDING AffiliateReferral
+ * on the order, calculates commission per line item using product-level
+ * rates with fallback to the affiliate's default rate, then confirms it.
+ */
+export async function confirmReferralCommission(orderId: string) {
+  const referral = await db.affiliateReferral.findUnique({
+    where: { orderId },
+    include: {
+      affiliate: { select: { id: true, userId: true, status: true, commissionRate: true, payoutPreference: true } },
+    },
   })
-  if (!profile || profile.status !== "APPROVED") return
 
-  const commission = orderTotal * profile.commissionRate.toNumber()
+  if (!referral || referral.status !== "PENDING") return
+  if (!referral.affiliate || referral.affiliate.status !== "APPROVED") return
+
+  // Fetch order line items with product commission info
+  const orderItems = await db.orderItem.findMany({
+    where: { orderId },
+    include: {
+      variant: {
+        include: {
+          product: { select: { commissionType: true, commissionValue: true } },
+        },
+      },
+    },
+  })
+
+  const affiliateRate = referral.affiliate.commissionRate.toNumber()
+
+  // Calculate commission per line item
+  let totalCommission = 0
+  for (const item of orderItems) {
+    const lineTotal = Number(item.total)
+    const product = item.variant?.product
+
+    if (product?.commissionType && product.commissionValue) {
+      const cv = Number(product.commissionValue)
+      if (product.commissionType === "FIXED") {
+        totalCommission += cv * item.quantity
+      } else {
+        // PERCENTAGE
+        totalCommission += lineTotal * cv
+      }
+    } else {
+      // Fallback to affiliate's default commission rate
+      totalCommission += lineTotal * affiliateRate
+    }
+  }
+
+  totalCommission = Math.round(totalCommission)
+  if (totalCommission <= 0) return
 
   await db.$transaction(async (tx) => {
-    await tx.affiliateReferral.create({
+    await tx.affiliateReferral.update({
+      where: { id: referral.id },
       data: {
-        linkId,
-        affiliateId: profile.id,
-        orderId,
-        commission,
+        commission: totalCommission,
         status: "CONFIRMED",
       },
     })
     await tx.affiliateProfile.update({
-      where: { id: profile.id },
-      data: { totalEarned: { increment: commission } },
+      where: { id: referral.affiliate.id },
+      data: { totalEarned: { increment: totalCommission } },
     })
   })
 
   await createNotification({
-    userId: profile.userId,
+    userId: referral.affiliate.userId,
     type: "COMMISSION",
     title: "New referral commission!",
-    body: `You earned ${Math.round(commission)} XAF from a referral.`,
+    body: `You earned ${totalCommission} FCFA from a referral.`,
     link: "/dashboard/affiliate/earnings",
   })
+
+  // If affiliate prefers immediate payout, trigger it
+  if (referral.affiliate.payoutPreference === "IMMEDIATE") {
+    await inngest.send({
+      name: "affiliate/immediate-payout",
+      data: { referralId: referral.id, affiliateId: referral.affiliate.id },
+    })
+  }
 }

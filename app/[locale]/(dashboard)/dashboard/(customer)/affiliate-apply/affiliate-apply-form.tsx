@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { useRouter } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { applyForAffiliate } from "@/actions/affiliate.actions"
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { applyForAffiliate } from "@/actions/affiliate.actions";
 import {
   affiliateApplicationSchema,
   type AffiliateApplicationValues,
-} from "@/lib/validators/affiliate.schema"
-import { Button } from "@/components/ui/button"
+} from "@/lib/validators/affiliate.schema";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -25,25 +25,33 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "sonner"
-import { Loader2Icon } from "lucide-react"
-import { useState, useTransition } from "react"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { Loader2Icon } from "lucide-react";
+import { useState, useTransition } from "react";
 
 interface AffiliateApplyFormProps {
-  branches: { id: string; name: string; city: string }[]
-  canReapply: boolean
+  branches: { id: string; name: string; city: string }[];
+  canReapply: boolean;
 }
 
 export function AffiliateApplyForm({
+  branches,
   canReapply,
 }: AffiliateApplyFormProps) {
-  const router = useRouter()
-  const t = useTranslations("affiliateApply")
-  const [isPending, startTransition] = useTransition()
-  const [serverError, setServerError] = useState("")
+  const router = useRouter();
+  const t = useTranslations("affiliateApply");
+  const [isPending, startTransition] = useTransition();
+  const [serverError, setServerError] = useState("");
 
   const form = useForm<AffiliateApplicationValues>({
     resolver: zodResolver(affiliateApplicationSchema) as never,
@@ -51,24 +59,25 @@ export function AffiliateApplyForm({
       payoutMethod: "MOBILE_MONEY",
       payoutPhone: "",
       motivation: "",
+      branchId: "",
     },
-  })
+  });
 
   function onSubmit(values: AffiliateApplicationValues) {
-    setServerError("")
+    setServerError("");
     startTransition(async () => {
-      const result = await applyForAffiliate(values)
+      const result = await applyForAffiliate(values);
       if ("error" in result) {
         if (typeof result.error === "string") {
-          setServerError(result.error)
+          setServerError(result.error);
         } else {
-          toast.error(t("validationError"))
+          toast.error(t("validationError"));
         }
-        return
+        return;
       }
-      toast.success(t("applicationSubmitted"))
-      router.push("/dashboard")
-    })
+      toast.success(t("applicationSubmitted"));
+      router.push("/dashboard");
+    });
   }
 
   if (!canReapply) {
@@ -78,7 +87,7 @@ export function AffiliateApplyForm({
           <p className="text-sm text-muted-foreground">{t("reapplyWait")}</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -99,7 +108,9 @@ export function AffiliateApplyForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("payoutPhone")}</FormLabel>
-                  <FormDescription>{t("payoutPhoneDescription")}</FormDescription>
+                  <FormDescription>
+                    {t("payoutPhoneDescription")}
+                  </FormDescription>
                   <FormControl>
                     <Input {...field} placeholder="+237 6XX XXX XXX" />
                   </FormControl>
@@ -124,11 +135,42 @@ export function AffiliateApplyForm({
 
             <FormField
               control={form.control}
+              name="branchId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("branch")}</FormLabel>
+                  <FormDescription>{t("branchDescription")}</FormDescription>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("selectBranch")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {branches.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.name} — {b.city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="motivation"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("motivation")}</FormLabel>
-                  <FormDescription>{t("motivationDescription")}</FormDescription>
+                  <FormDescription>
+                    {t("motivationDescription")}
+                  </FormDescription>
                   <FormControl>
                     <Textarea
                       {...field}
@@ -152,12 +194,14 @@ export function AffiliateApplyForm({
               {t("cancel")}
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending && <Loader2Icon className="mr-2 size-4 animate-spin" />}
+              {isPending && (
+                <Loader2Icon className="mr-2 size-4 animate-spin" />
+              )}
               {t("submit")}
             </Button>
           </CardFooter>
         </Card>
       </form>
     </Form>
-  )
+  );
 }

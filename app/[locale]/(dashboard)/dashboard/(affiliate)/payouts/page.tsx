@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Locale } from "@/lib/constants";
+import { PayoutPreferenceSelector } from "./payout-preference";
 
 export default async function AffiliatePayoutsPage() {
   const t = await getTranslations("affiliate");
@@ -29,10 +30,13 @@ export default async function AffiliatePayoutsPage() {
         <CardHeader>
           <CardTitle className="text-base">{t("payoutMethod")}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <p className="text-sm">
             {profile.payoutMethod} — {profile.payoutPhone ?? t("noPayoutPhone")}
           </p>
+          <PayoutPreferenceSelector
+            currentPreference={profile.payoutPreference}
+          />
         </CardContent>
       </Card>
 

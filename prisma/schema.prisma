@@ -66,6 +66,12 @@ enum AffiliateStatus {
   APPROVED
   SUSPENDED
   REJECTED
+  REVOKED
+}
+
+enum PayoutPreference {
+  MONTHLY
+  IMMEDIATE
 }
 
 enum ReferralStatus {
@@ -177,6 +183,7 @@ model Branch {
   orders               Order[]
   orderItemFulfillment OrderItem[]            @relation("OrderItemFulfillmentBranch")
   stockByBranch        ProductStockByBranch[]
+  affiliates           AffiliateProfile[]
 }
 
 model Category {
@@ -375,23 +382,27 @@ model OrderStatusHistory {
 }
 
 model AffiliateProfile {
-  id               String          @id @default(cuid())
-  userId           String          @unique
-  status           AffiliateStatus @default(PENDING)
-  commissionRate   Decimal         @default(0.05) @db.Decimal(5, 4)
-  payoutMethod     String          @default("MOBILE_MONEY")
+  id               String           @id @default(cuid())
+  userId           String           @unique
+  status           AffiliateStatus  @default(PENDING)
+  commissionRate   Decimal          @default(0.05) @db.Decimal(5, 4)
+  payoutMethod     String           @default("MOBILE_MONEY")
   payoutPhone      String?
-  totalEarned      Decimal         @default(0) @db.Decimal(12, 2)
-  totalPaid        Decimal         @default(0) @db.Decimal(12, 2)
+  payoutPreference PayoutPreference @default(MONTHLY)
+  totalEarned      Decimal          @default(0) @db.Decimal(12, 2)
+  totalPaid        Decimal          @default(0) @db.Decimal(12, 2)
   websiteUrl       String?
+  branchId         String?
   rejectionReason  String?
   rejectedAt       DateTime?
   suspensionReason String?
   suspendedAt      DateTime?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  revokedAt        DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch    Branch?             @relation(fields: [branchId], references: [id])
   links     AffiliateLink[]
   referrals AffiliateReferral[]
   payouts   CommissionPayout[]

@@ -266,11 +266,22 @@
     "reasonRequired": "Please provide a reason.",
     "previous": "Previous",
     "next": "Next",
+    "revoke": "Revoke",
+    "revoked": "Affiliate revoked.",
+    "branch": "Branch",
+    "exportCsv": "Export CSV",
+    "payoutPreference": "Payout Preference",
+    "preferenceMonthly": "Monthly",
+    "preferenceImmediate": "Immediate",
+    "monthlyDescription": "Commissions are paid out on the 1st of each month.",
+    "immediateDescription": "Commissions are paid out as soon as they are confirmed.",
+    "preferenceUpdated": "Payout preference updated.",
     "affiliateStatus": {
       "PENDING": "Pending",
       "APPROVED": "Approved",
       "SUSPENDED": "Suspended",
-      "REJECTED": "Rejected"
+      "REJECTED": "Rejected",
+      "REVOKED": "Revoked"
     },
     "referralStatus_PENDING": "Pending",
     "referralStatus_CONFIRMED": "Confirmed",
@@ -775,7 +786,10 @@
     "rejectedTitle": "Application Not Approved",
     "rejectedDescription": "Your previous application was not approved. You may re-apply after 30 days.",
     "reason": "Reason",
-    "reapplyWait": "You may re-apply 30 days after your last rejection."
+    "reapplyWait": "You may re-apply 30 days after your last rejection.",
+    "branch": "Branch",
+    "branchDescription": "Select the branch you are associated with.",
+    "selectBranch": "Select a branch"
   },
   "searchCommand": {
     "placeholder": "Search...",

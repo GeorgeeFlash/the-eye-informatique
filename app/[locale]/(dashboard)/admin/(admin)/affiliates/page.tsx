@@ -1,14 +1,14 @@
-import { getTranslations } from "next-intl/server"
-import { getAdminAffiliates } from "@/actions/affiliate.actions"
-import { formatCurrency, formatDate } from "@/lib/utils"
-import { Link } from "@/i18n/navigation"
+import { getTranslations } from "next-intl/server";
+import { getAdminAffiliates } from "@/actions/affiliate.actions";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -16,26 +16,52 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
-const STATUSES = ["", "PENDING", "APPROVED", "SUSPENDED", "REJECTED"] as const
+const STATUSES = [
+  "",
+  "PENDING",
+  "APPROVED",
+  "SUSPENDED",
+  "REJECTED",
+  "REVOKED",
+] as const;
+
+function sortHref(
+  status: string,
+  currentSort: string | undefined,
+  currentOrder: string | undefined,
+  column: string,
+) {
+  const nextOrder =
+    currentSort === column && currentOrder !== "asc" ? "asc" : "desc";
+  return `/admin/affiliates?status=${status}&sortBy=${column}&sortOrder=${nextOrder}`;
+}
 
 export default async function AdminAffiliatesPage({
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const sp = await searchParams
-  const t = await getTranslations("affiliate")
-  const page = Number(sp.page) || 1
-  const status = typeof sp.status === "string" ? sp.status : ""
+  const sp = await searchParams;
+  const t = await getTranslations("affiliate");
+  const page = Number(sp.page) || 1;
+  const status = typeof sp.status === "string" ? sp.status : "";
+  const sortBy = typeof sp.sortBy === "string" ? sp.sortBy : undefined;
+  const sortOrder =
+    typeof sp.sortOrder === "string" && sp.sortOrder === "asc"
+      ? "asc"
+      : undefined;
 
   const { affiliates, total, totalPages } = await getAdminAffiliates({
     page,
     status: status || undefined,
-  })
+    sortBy: sortBy as "createdAt" | "totalEarned" | undefined,
+    sortOrder: sortOrder as "asc" | "desc" | undefined,
+  });
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -63,7 +89,9 @@ export default async function AdminAffiliatesPage({
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t("affiliates")}</CardTitle>
-          <CardDescription>{t("totalAffiliates", { count: total })}</CardDescription>
+          <CardDescription>
+            {t("totalAffiliates", { count: total })}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {affiliates.length === 0 ? (
@@ -76,8 +104,42 @@ export default async function AdminAffiliatesPage({
                   <TableHead>{t("email")}</TableHead>
                   <TableHead>{t("status")}</TableHead>
                   <TableHead>{t("referrals")}</TableHead>
-                  <TableHead>{t("totalEarned")}</TableHead>
-                  <TableHead>{t("joined")}</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="-ml-3 h-8"
+                      asChild
+                    >
+                      <Link
+                        href={sortHref(
+                          status,
+                          sortBy,
+                          sortOrder,
+                          "totalEarned",
+                        )}
+                      >
+                        {t("totalEarned")}
+                        <ArrowUpDown className="ml-1 size-3" />
+                      </Link>
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="-ml-3 h-8"
+                      asChild
+                    >
+                      <Link
+                        href={sortHref(status, sortBy, sortOrder, "createdAt")}
+                      >
+                        {t("joined")}
+                        <ArrowUpDown className="ml-1 size-3" />
+                      </Link>
+                    </Button>
+                  </TableHead>
+                  <TableHead>{t("branch")}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -93,7 +155,8 @@ export default async function AdminAffiliatesPage({
                             ? "default"
                             : a.status === "PENDING"
                               ? "secondary"
-                              : a.status === "SUSPENDED"
+                              : a.status === "SUSPENDED" ||
+                                  a.status === "REVOKED"
                                 ? "destructive"
                                 : "outline"
                         }
@@ -102,11 +165,18 @@ export default async function AdminAffiliatesPage({
                       </Badge>
                     </TableCell>
                     <TableCell>{a._count.referrals}</TableCell>
-                    <TableCell>{formatCurrency(a.totalEarned.toNumber())}</TableCell>
+                    <TableCell>
+                      {formatCurrency(a.totalEarned.toNumber())}
+                    </TableCell>
                     <TableCell>{formatDate(a.createdAt)}</TableCell>
+                    <TableCell className="text-sm">
+                      {a.branch?.name ?? "—"}
+                    </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/admin/affiliates/${a.id}`}>{t("view")}</Link>
+                        <Link href={`/admin/affiliates/${a.id}`}>
+                          {t("view")}
+                        </Link>
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -122,7 +192,9 @@ export default async function AdminAffiliatesPage({
         <div className="flex justify-center gap-2">
           {page > 1 && (
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/admin/affiliates?status=${status}&page=${page - 1}`}>
+              <Link
+                href={`/admin/affiliates?status=${status}&page=${page - 1}${sortBy ? `&sortBy=${sortBy}&sortOrder=${sortOrder ?? "desc"}` : ""}`}
+              >
                 {t("previous")}
               </Link>
             </Button>
@@ -132,7 +204,9 @@ export default async function AdminAffiliatesPage({
           </span>
           {page < totalPages && (
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/admin/affiliates?status=${status}&page=${page + 1}`}>
+              <Link
+                href={`/admin/affiliates?status=${status}&page=${page + 1}${sortBy ? `&sortBy=${sortBy}&sortOrder=${sortOrder ?? "desc"}` : ""}`}
+              >
                 {t("next")}
               </Link>
             </Button>
@@ -140,5 +214,5 @@ export default async function AdminAffiliatesPage({
         </div>
       )}
     </div>
-  )
+  );
 }

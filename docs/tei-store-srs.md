@@ -1,11 +1,11 @@
 # Tei Store — Software Requirements Specification
 
-| Field | Value |
-|---|---|
+| Field       | Value                                                |
+| ----------- | ---------------------------------------------------- |
 | **Project** | Tei Store — Online extension of The Eye Informatique |
-| **Version** | 0.2 |
-| **Status** | Draft |
-| **Date** | 2026-03-06 |
+| **Version** | 0.2                                                  |
+| **Status**  | Draft                                                |
+| **Date**    | 2026-03-06                                           |
 
 ---
 
@@ -19,7 +19,7 @@
    - [Module 1 — User Management & Roles](#module-1--user-management--roles)
    - [Module 2 — Product & Catalog Management](#module-2--product--catalog-management)
    - [Module 3 — Shopping & Checkout](#module-3--shopping--checkout)
-   - [Module 4 — Guarantee, Repairs & Returns](#module-4--guarantee-repairs--returns)
+   - [Module 4 — Guarantee Certificate](#module-4--guarantee-certificate)
    - [Module 5 — Affiliate System](#module-5--affiliate-system)
    - [Module 6 — Content & Blog System](#module-6--content--blog-system)
    - [Module 7 — Notifications & Events](#module-7--notifications--events)
@@ -41,18 +41,18 @@
 
 ### 1.1 Version History
 
-| Version | Date | Status | Summary |
-|---|---|---|---|
-| 0.1 | 2026-03-06 | Superseded | Initial SRS — 10 modules, 25 stories, 157 ACs |
-| 0.2 | 2026-03-06 | Draft | Major expansion — 11 modules, 32 stories, ~196 ACs. Added AI capabilities (Module 11), social sign-in, cross-branch fulfillment, installment deadlines, receipt scanning, activity logging, cookie consent, theming, commission payout preferences. Revised M1.1, M1.2, M3.2, M10.1. Added Douala as 4th branch. |
+| Version | Date       | Status     | Summary                                                                                                                                                                                                                                                                                                          |
+| ------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.1     | 2026-03-06 | Superseded | Initial SRS — 10 modules, 25 stories, 157 ACs                                                                                                                                                                                                                                                                    |
+| 0.2     | 2026-03-06 | Draft      | Major expansion — 11 modules, 32 stories, ~196 ACs. Added AI capabilities (Module 11), social sign-in, cross-branch fulfillment, installment deadlines, receipt scanning, activity logging, cookie consent, theming, commission payout preferences. Revised M1.1, M1.2, M3.2, M10.1. Added Douala as 4th branch. |
 
 ### 1.2 Review & Approval
 
-| Role | Name | Approved |
-|---|---|---|
-| Product Owner | TBD | — |
-| Tech Lead | TBD | — |
-| QA Lead | TBD | — |
+| Role          | Name | Approved |
+| ------------- | ---- | -------- |
+| Product Owner | TBD  | —        |
+| Tech Lead     | TBD  | —        |
+| QA Lead       | TBD  | —        |
 
 ---
 
@@ -82,13 +82,13 @@ The following are explicitly excluded from this SRS and addressed in separate do
 
 ### 2.4 Intended Audience
 
-| Audience | Use |
-|---|---|
-| Product Owner | Validate scope, approve stories, re-prioritise backlog |
-| Developers | Understand what to build without prescribing how |
-| QA Engineers | Derive test cases from acceptance criteria |
-| Branch Admins / Stakeholders | Review promised capabilities |
-| UX Designers | Understand user needs and role workflows |
+| Audience                     | Use                                                    |
+| ---------------------------- | ------------------------------------------------------ |
+| Product Owner                | Validate scope, approve stories, re-prioritise backlog |
+| Developers                   | Understand what to build without prescribing how       |
+| QA Engineers                 | Derive test cases from acceptance criteria             |
+| Branch Admins / Stakeholders | Review promised capabilities                           |
+| UX Designers                 | Understand user needs and role workflows               |
 
 ---
 
@@ -107,27 +107,28 @@ Tei Store operates across physical branches. Each branch:
 - Onboards and manages its own affiliates
 - Generates branch-scoped sales and analytics data
 
-| Branch | City |
-|---|---|
+| Branch   | City    |
+| -------- | ------- |
 | Branch 1 | Bamenda |
-| Branch 2 | Buea |
+| Branch 2 | Buea    |
 | Branch 3 | Yaoundé |
-| Branch 4 | Douala |
+| Branch 4 | Douala  |
 
 Future branches can be added by a Central Admin without structural changes to the platform. Products may be stocked at multiple branches. Cross-branch fulfillment is supported (see §7, CON-4).
 
 ### 3.3 User Roles
 
-| Role ID | Name | Also Known As | Description |
-|---|---|---|---|
-| R1 | Visitor | — | Unauthenticated user browsing the store |
-| R2 | Customer | — | Registered user who shops and may post reviews |
-| R3 | Affiliate | Hunter Man | Approved promoter who earns commission on referred sales |
-| R4 | Moderator / Employee | — | Branch staff who manage product listings, blog content, and in-store receipt entries for their branch |
-| R5 | Branch Admin | — | Manages one branch: products, affiliates, staff, and branch analytics |
-| R6 | Central Admin | — | Cross-branch oversight: all users, all branches, system broadcasts, global analytics |
+| Role ID | Name                 | Also Known As | Description                                                                                           |
+| ------- | -------------------- | ------------- | ----------------------------------------------------------------------------------------------------- |
+| R1      | Visitor              | —             | Unauthenticated user browsing the store                                                               |
+| R2      | Customer             | —             | Registered user who shops and may post reviews                                                        |
+| R3      | Affiliate            | Hunter Man    | Approved promoter who earns commission on referred sales                                              |
+| R4      | Moderator / Employee | —             | Branch staff who manage product listings, blog content, and in-store receipt entries for their branch |
+| R5      | Branch Admin         | —             | Manages one branch: products, affiliates, staff, and branch analytics                                 |
+| R6      | Central Admin        | —             | Cross-branch oversight: all users, all branches, system broadcasts, global analytics                  |
 
 **Role combination rules:**
+
 - An Affiliate is also a Customer; they hold R2 + R3 simultaneously.
 - R4, R5, and R6 are internal staff roles; they may also hold Customer access.
 - A user cannot hold Branch Admin (R5) for two different branches simultaneously.
@@ -136,27 +137,32 @@ Future branches can be added by a Central Admin without structural changes to th
 ### 3.4 User Personas
 
 #### P1 — Retail Customer (Bamenda)
+
 A university student browsing for laptops and phones, comparing specs, and paying via Mobile Money. Needs clear pricing in XAF, a straightforward mobile checkout, and confidence that the order is protected by a fair after-sales policy. May order a product stocked at another branch and expects transparent shipping information.
 
 #### P2 — Affiliate / Hunter Man (Buea)
+
 A local promoter who shares product links on WhatsApp and social media. Needs to see commission rates clearly, generate unique tracking links, choose a payout schedule, and review earnings at any time.
 
 #### P3 — Moderator / Employee (Yaoundé)
+
 A shop assistant who updates product listings, publishes blog content, and records in-store purchases for the Yaoundé branch. Uses AI assistance to draft product descriptions and scan physical receipts. Needs a content and inventory management interface scoped to their branch only.
 
 #### P4 — Branch Admin (Bamenda)
+
 A branch manager who approves new affiliates, monitors stock levels, monitors branch sales, adjusts commission rates, and configures shipping fees. Needs a branch-level analytics dashboard and control over who can promote their branch's products.
 
 #### P5 — Central Admin
+
 A head office operator who oversees all branches, manages user access across the system, sends system-wide announcements, uploads AI knowledge base documents, exports KPI reports, and uses AI-generated analytics insights for executive review.
 
 ### 3.5 Release Strategy
 
 Each requirement is classified by its release target:
 
-| Tag | Meaning |
-|---|---|
-| `MVP` | Required for the initial public launch of Tei Store |
+| Tag        | Meaning                                              |
+| ---------- | ---------------------------------------------------- |
+| `MVP`      | Required for the initial public launch of Tei Store  |
 | `Phase 2+` | Planned for a subsequent release cycle after the MVP |
 
 The MVP establishes core shopping, user management, product catalog, after-sales handling, security, AI-assisted product creation, customer AI chat, and receipt scanning. Phase 2+ extends the platform with the full affiliate dashboard, blog and content management, notifications, full analytics, PWA offline mode, AI analytics, and commission payout preferences.
@@ -181,12 +187,12 @@ Each story entry includes:
 
 ### 4.3 MoSCoW Priority
 
-| Tag | Meaning |
-|---|---|
-| **M — Must** | Non-negotiable for the release target. Blocking if absent. |
+| Tag            | Meaning                                                          |
+| -------------- | ---------------------------------------------------------------- |
+| **M — Must**   | Non-negotiable for the release target. Blocking if absent.       |
 | **S — Should** | High value; included unless a strong constraint forces deferral. |
-| **C — Could** | Desirable; included if time and budget allow. |
-| **W — Won't** | Explicitly deferred to a later release. |
+| **C — Could**  | Desirable; included if time and budget allow.                    |
+| **W — Won't**  | Explicitly deferred to a later release.                          |
 
 ### 4.4 Acceptance Criteria Style Rules
 
@@ -233,18 +239,18 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M1.1 — Unified Sign-Up
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                      |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Visitor, I want to sign up using my social account or email so that I can start shopping or apply to promote products. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | None |
+| **Priority**   | Must                                                                                                                        |
+| **Release**    | MVP                                                                                                                         |
+| **Depends on** | None                                                                                                                        |
 
 **Acceptance Criteria**
 
 - [x] AC-M1.1-1: Registration supports social sign-in via Google and Facebook. A new user signing in via a social provider for the first time is automatically registered as a Customer.
 - [x] AC-M1.1-2: Registration supports email and password. On email registration, a verification code is sent to the registered email address and the user must enter the code to verify their account.
-- [x] AC-M1.1-3: The registration form includes an optional "Apply as Affiliate" toggle. When enabled, user is redirected to affiliate apply form after signing up. 
+- [x] AC-M1.1-3: The registration form includes an optional "Apply as Affiliate" toggle. When enabled, user is redirected to affiliate apply form after signing up.
 - [x] AC-M1.1-4: On successful registration without the affiliate toggle, the user is assigned the Customer role and directed to the shop home.
 - [x] AC-M1.1-5: On successful registration with the affiliate toggle, the user is assigned the Customer role and an Affiliate application status of "Pending". The Affiliate panel is visible on their dashboard but locked with a "Pending approval" notice.
 - [x] AC-M1.1-6: Registering with an email address already associated with an existing account returns a clear error message; no duplicate account is created.
@@ -256,12 +262,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M1.2 — Role-Based Dashboard
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                               |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a logged-in User, I want a dashboard showing only the tools and information relevant to my role(s) so that I am not confused by features that do not apply to me. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | M1.1 |
+| **Priority**   | Must                                                                                                                                                                 |
+| **Release**    | MVP                                                                                                                                                                  |
+| **Depends on** | M1.1                                                                                                                                                                 |
 
 **Acceptance Criteria**
 
@@ -285,12 +291,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M2.1 — Branch-Level Product CRUD
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Moderator or Branch Admin, I want to create, edit, and remove products for my branch so that the catalog accurately reflects what is available. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | M1.2 |
+| **Priority**   | Must                                                                                                                                                 |
+| **Release**    | MVP                                                                                                                                                  |
+| **Depends on** | M1.2                                                                                                                                                 |
 
 **Acceptance Criteria**
 
@@ -307,12 +313,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M2.2 — Dynamic Categories & Custom Features
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                                                    |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Central Admin, I want to create product categories and define which custom feature fields appear for each category so that the catalog can accommodate new device types without development changes. |
-| **Priority** | Should |
-| **Release** | MVP |
-| **Depends on** | M2.1 |
+| **Priority**   | Should                                                                                                                                                                                                    |
+| **Release**    | MVP                                                                                                                                                                                                       |
+| **Depends on** | M2.1                                                                                                                                                                                                      |
 
 **Acceptance Criteria**
 
@@ -326,12 +332,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M2.3 — Inventory Tracking
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                      |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Branch Admin or Central Admin, I want to see real-time stock levels per product variant per branch so that I can prevent overselling and reorder before items run out. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | M2.1 |
+| **Priority**   | Must                                                                                                                                                                        |
+| **Release**    | MVP                                                                                                                                                                         |
+| **Depends on** | M2.1                                                                                                                                                                        |
 
 **Acceptance Criteria**
 
@@ -351,12 +357,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M3.1 — Browse & Filter Products
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Customer or Visitor, I want to search, filter, and page through the product catalog so that I can find the right device quickly. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | M2.1, M2.2 |
+| **Priority**   | Must                                                                                                                                  |
+| **Release**    | MVP                                                                                                                                   |
+| **Depends on** | M2.1, M2.2                                                                                                                            |
 
 **Acceptance Criteria**
 
@@ -371,12 +377,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M3.2 — Cart & Flexible Checkout
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Customer, I want to add items to a cart from any branch and choose between paying in full or making installment payments so that I can complete my purchase in the way that suits my budget. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | M3.1, M1.1 |
+| **Priority**   | Must                                                                                                                                                                                              |
+| **Release**    | MVP                                                                                                                                                                                               |
+| **Depends on** | M3.1, M1.1                                                                                                                                                                                        |
 
 **Acceptance Criteria**
 
@@ -395,71 +401,31 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 ---
 
-### Module 4 — Guarantee, Repairs & Returns
+### Module 4 — Guarantee Certificate
 
-**Purpose:** Model the after-sales lifecycle — exchanges, repairs, and returns — so that customers have confidence in their purchases and branch staff can track every request to resolution.
+**Purpose:** Issue every delivered order a guarantee certificate — a branded, bilingual PDF document that states the applicable warranty terms, valid items, and expiry date — so customers have a portable, verifiable record of their after-sales entitlements.
 
----
-
-#### Story M4.1 — Exchange, Repair & Return Requests
-
-| Field | Detail |
-|---|---|
-| **User story** | As a Customer, I want to request an exchange, repair, or return for a product I purchased so that I can resolve issues without visiting a store. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | M3.2 |
-
-**Acceptance Criteria**
-
-- [ ] AC-M4.1-1: A Customer can create an after-sales request for any completed order line item. The request must specify the request type ("Exchange", "Repair", or "Return") and a text description of the issue.
-- [ ] AC-M4.1-2: A request can only be created within a configurable number of calendar days after the order's delivery date (default 30 days, adjustable by Central Admin). Requests submitted after this window are rejected with a clear message.
-- [ ] AC-M4.1-3: Optional photo or video attachments (up to 5 files, maximum 10 MB each) can be included with a request to document the issue.
-- [ ] AC-M4.1-4: On submission, the request enters a "Submitted" status and the customer receives a confirmation summary containing the request ID, type, and a link to track progress.
-- [ ] AC-M4.1-5: A Moderator or Branch Admin reviews the request and sets the status to one of: "Approved", "In Progress", "Resolved", or "Rejected". Each transition records a timestamp and the acting staff member.
-- [ ] AC-M4.1-6: When a request is rejected, the staff member must provide a written reason. The rejection reason is visible to the customer alongside the status.
-- [ ] AC-M4.1-7: The customer can view all their after-sales requests and current statuses from their dashboard.
+> **Scope note (v0.2 → v0.3):** The original M4 stories (Exchange / Repair / Return request tracking, admin-managed guarantee policies, and internal staff remarks) have been descoped from the MVP. The repair-and-return workflow will be handled in-store and over the phone, consistent with the existing retail model. The guarantee certificate document defined below replaces those stories as the primary digital after-sales artefact.
 
 ---
 
-#### Story M4.2 — Guarantee Lifecycle
+#### Story M4.1 — Guarantee Certificate Document
 
-| Field | Detail |
-|---|---|
-| **User story** | As a Branch Admin, I want to define and attach guarantee policies to products and track guarantee expiry per sale so that customers are protected and staff can verify claims quickly. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | M2.1, M3.2 |
-
-**Acceptance Criteria**
-
-- [ ] AC-M4.2-1: A Branch Admin or Central Admin can create a guarantee policy by providing: a policy name, a coverage description, a duration in calendar months, and optionally a list of exclusions.
-- [ ] AC-M4.2-2: A guarantee policy can be attached to a product or category. When attached to a category, all products in that category inherit the policy.
-- [ ] AC-M4.2-3: When a customer purchases a product with a guarantee policy, a guarantee record is created automatically for that order line item with a start date equal to the delivery date and an end date calculated from the policy duration.
-- [ ] AC-M4.2-4: The guarantee record is displayed on the customer's order detail page, showing: guarantee name, start date, end date, coverage summary, and current status (Active / Expired).
-- [ ] AC-M4.2-5: Staff reviewing an after-sales request (M4.1) can see the guarantee status for the associated product inline. If the guarantee is expired, a visual indicator warns the reviewer before a decision is made.
-- [ ] AC-M4.2-6: A Central Admin can view all active guarantee records across all branches, filterable by branch, product, and expiry period.
-- [ ] AC-M4.2-7: When a guarantee is within 14 calendar days of expiry, a summary notification appears on the customer's dashboard.
-- [ ] AC-M4.2-8: Changes to a guarantee policy (description, duration, exclusions) apply only to future sales; existing guarantee records retain their original terms.
-
----
-
-#### Story M4.3 — Internal Remarks & Notes
-
-| Field | Detail |
-|---|---|
-| **User story** | As a Moderator or Branch Admin, I want to leave internal notes on after-sales requests, orders, and user profiles so that staff can share context without exposing it to customers. |
-| **Priority** | Should |
-| **Release** | MVP |
-| **Depends on** | M4.1 |
+| Field          | Detail                                                                                                                                                                           |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **User story** | As a Customer, I want to receive and download a guarantee certificate for my delivered order so that I have a clear, portable record of the warranty terms covering my purchase. |
+| **Priority**   | Must                                                                                                                                                                             |
+| **Release**    | MVP                                                                                                                                                                              |
+| **Depends on** | M3.2                                                                                                                                                                             |
 
 **Acceptance Criteria**
 
-- [ ] AC-M4.3-1: A Moderator, Branch Admin, or Central Admin can add a text remark to an after-sales request, an order, or a user profile.
-- [ ] AC-M4.3-2: Each remark records the author's name, role, and a timestamp.
-- [ ] AC-M4.3-3: Remarks are displayed in reverse chronological order on the associated record's admin view.
-- [ ] AC-M4.3-4: Remarks are visible only to staff roles (Moderator, Branch Admin, Central Admin). They are never displayed to the Customer or Affiliate on any customer-facing page.
-- [ ] AC-M4.3-5: A remark cannot be edited after creation. Corrections require adding a new remark referencing the previous one.
+- [x] AC-M4.1-1: When payment is confirmed for an order, a Guarantee Certificate PDF is automatically generated and attached to the order confirmation email sent to the customer.
+- [x] AC-M4.1-2: The certificate contains: company name and logo, customer name, order number, purchase date, a table of all purchased items (product name, variant, quantity), the full 7-condition policy text in the customer's locale, and a validity period of 3 months from the purchase date with an explicit expiry date.
+- [x] AC-M4.1-3: A Customer can download their Guarantee Certificate from the order detail page for any order that has reached "Delivered" status. The download option is not visible for orders in any other status.
+- [x] AC-M4.1-4: The downloaded certificate is rendered in the language the customer is currently browsing in (English or French).
+- [x] AC-M4.1-5: The certificate download endpoint is authenticated. Only the customer who placed the order or a staff member (Moderator, Branch Admin, Central Admin) may access it. Unauthenticated or unauthorized requests receive an error response without leaking order data.
+- [x] AC-M4.1-6: Requesting a certificate for an order that is not in "Delivered" status returns an informative error response.
 
 ---
 
@@ -471,12 +437,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M5.1 — Application & Approval
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                            |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Customer, I want to apply to become an Affiliate for a specific branch so that I can earn commissions by promoting products. |
-| **Priority** | Should |
-| **Release** | MVP |
-| **Depends on** | M1.1 |
+| **Priority**   | Should                                                                                                                            |
+| **Release**    | MVP                                                                                                                               |
+| **Depends on** | M1.1                                                                                                                              |
 
 **Acceptance Criteria**
 
@@ -492,12 +458,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M5.2 — Promotional Links & Tracking
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **User story** | As an Affiliate, I want to generate unique promotional links that track my referrals so that I can share them on social channels and receive credit for resulting sales. |
-| **Priority** | Should |
-| **Release** | Phase 2+ |
-| **Depends on** | M5.1 |
+| **Priority**   | Should                                                                                                                                                                   |
+| **Release**    | Phase 2+                                                                                                                                                                 |
+| **Depends on** | M5.1                                                                                                                                                                     |
 
 **Acceptance Criteria**
 
@@ -509,12 +475,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M5.3 — Commission Calculation
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                      |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Branch Admin, I want to set and adjust commission rates for affiliates so that promotional costs remain within budget. |
-| **Priority** | Could |
-| **Release** | Phase 2+ |
-| **Depends on** | M5.2 |
+| **Priority**   | Could                                                                                                                       |
+| **Release**    | Phase 2+                                                                                                                    |
+| **Depends on** | M5.2                                                                                                                        |
 
 **Acceptance Criteria**
 
@@ -528,12 +494,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M5.4 — Affiliate Dashboard
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | **User story** | As an Affiliate, I want a dashboard showing my earnings, link performance, and payout history so that I can track my success and earnings. |
-| **Priority** | Could |
-| **Release** | Phase 2+ |
-| **Depends on** | M5.2, M5.3 |
+| **Priority**   | Could                                                                                                                                      |
+| **Release**    | Phase 2+                                                                                                                                   |
+| **Depends on** | M5.2, M5.3                                                                                                                                 |
 
 **Acceptance Criteria**
 
@@ -546,12 +512,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M5.5 — Admin Affiliate Overview
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                 |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Branch Admin, I want to view a summary of all affiliates in my branch — their status, earnings, and performance — so that I can manage the programme effectively. |
-| **Priority** | Should |
-| **Release** | Phase 2+ |
-| **Depends on** | M5.1 |
+| **Priority**   | Should                                                                                                                                                                 |
+| **Release**    | Phase 2+                                                                                                                                                               |
+| **Depends on** | M5.1                                                                                                                                                                   |
 
 **Acceptance Criteria**
 
@@ -565,12 +531,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M5.6 — Commission Payout Preference
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                                              |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As an Affiliate, I want to choose whether I receive my commission immediately after each sale or as a lump sum at the end of the month so that I can manage my earnings according to my preference. |
-| **Priority** | Should |
-| **Release** | Phase 2+ |
-| **Depends on** | M5.1 |
+| **Priority**   | Should                                                                                                                                                                                              |
+| **Release**    | Phase 2+                                                                                                                                                                                            |
+| **Depends on** | M5.1                                                                                                                                                                                                |
 
 **Acceptance Criteria**
 
@@ -591,12 +557,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M6.1 — Article Authoring
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Moderator, I want to write and submit blog articles so that the store has fresh editorial content for customers. |
-| **Priority** | Should |
-| **Release** | Phase 2+ |
-| **Depends on** | M1.2 |
+| **Priority**   | Should                                                                                                                |
+| **Release**    | Phase 2+                                                                                                              |
+| **Depends on** | M1.2                                                                                                                  |
 
 **Acceptance Criteria**
 
@@ -610,12 +576,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M6.2 — Public Blog Display
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **User story** | As a Customer or Visitor, I want to browse a public blog section with guides, tips, and product news so that I can make informed purchasing decisions. |
-| **Priority** | Should |
-| **Release** | Phase 2+ |
-| **Depends on** | M6.1 |
+| **Priority**   | Should                                                                                                                                                 |
+| **Release**    | Phase 2+                                                                                                                                               |
+| **Depends on** | M6.1                                                                                                                                                   |
 
 **Acceptance Criteria**
 
@@ -629,12 +595,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M6.3 — Product Reviews & Ratings
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Customer, I want to review and rate products I have purchased so that other shoppers can benefit from my experience. |
-| **Priority** | Should |
-| **Release** | Phase 2+ |
-| **Depends on** | M3.2 |
+| **Priority**   | Should                                                                                                                    |
+| **Release**    | Phase 2+                                                                                                                  |
+| **Depends on** | M3.2                                                                                                                      |
 
 **Acceptance Criteria**
 
@@ -655,12 +621,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M7.1 — Email & In-App Notifications
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                 |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a User, I want to receive timely email and in-app notifications for events that concern me so that I stay informed without having to check the platform constantly. |
-| **Priority** | Should |
-| **Release** | Phase 2+ |
-| **Depends on** | M1.1 |
+| **Priority**   | Should                                                                                                                                                                 |
+| **Release**    | Phase 2+                                                                                                                                                               |
+| **Depends on** | M1.1                                                                                                                                                                   |
 
 **Acceptance Criteria**
 
@@ -675,12 +641,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M7.2 — Admin Broadcasts
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **User story** | As a Central Admin, I want to broadcast messages to selected user groups so that I can communicate promotions, policy changes, or important updates across the platform. |
-| **Priority** | Could |
-| **Release** | Phase 2+ |
-| **Depends on** | M7.1 |
+| **Priority**   | Could                                                                                                                                                                    |
+| **Release**    | Phase 2+                                                                                                                                                                 |
+| **Depends on** | M7.1                                                                                                                                                                     |
 
 **Acceptance Criteria**
 
@@ -695,12 +661,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M7.3 — Activity Logging & Admin Audit Trail
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                              |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Central Admin, I want major user and admin activities to be logged and viewable in the administration dashboard so that I can review platform activity and investigate issues. |
-| **Priority** | Should |
-| **Release** | MVP |
-| **Depends on** | M1.2 |
+| **Priority**   | Should                                                                                                                                                                              |
+| **Release**    | MVP                                                                                                                                                                                 |
+| **Depends on** | M1.2                                                                                                                                                                                |
 
 **Acceptance Criteria**
 
@@ -722,12 +688,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M8.1 — Dashboard KPIs
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                  |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Branch Admin or Central Admin, I want a dashboard of key performance indicators so that I can monitor business health at a glance. |
-| **Priority** | Should |
-| **Release** | Phase 2+ |
-| **Depends on** | M3.2, M5.3 |
+| **Priority**   | Should                                                                                                                                  |
+| **Release**    | Phase 2+                                                                                                                                |
+| **Depends on** | M3.2, M5.3                                                                                                                              |
 
 **Acceptance Criteria**
 
@@ -741,12 +707,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M8.2 — Report Export
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **User story** | As a Central Admin, I want to export analytics data to a spreadsheet so that I can perform offline analysis and share reports with stakeholders. |
-| **Priority** | Could |
-| **Release** | Phase 2+ |
-| **Depends on** | M8.1 |
+| **Priority**   | Could                                                                                                                                            |
+| **Release**    | Phase 2+                                                                                                                                         |
+| **Depends on** | M8.1                                                                                                                                             |
 
 **Acceptance Criteria**
 
@@ -766,12 +732,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M9.1 — Payment Security
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                   |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Customer, I want my payment to be handled securely by the platform so that my financial data is protected and my transaction is reliably processed. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | M3.2 |
+| **Priority**   | Must                                                                                                                                                     |
+| **Release**    | MVP                                                                                                                                                      |
+| **Depends on** | M3.2                                                                                                                                                     |
 
 **Acceptance Criteria**
 
@@ -785,12 +751,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M9.2 — Platform-Wide Security Controls
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **User story** | As the Platform, I want to enforce baseline security controls on all traffic and data so that user accounts, sessions, and data are protected from common threats. |
-| **Priority** | Must |
-| **Release** | MVP |
-| **Depends on** | None |
+| **Priority**   | Must                                                                                                                                                               |
+| **Release**    | MVP                                                                                                                                                                |
+| **Depends on** | None                                                                                                                                                               |
 
 **Acceptance Criteria**
 
@@ -813,12 +779,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M10.1 — PWA Install & Offline View
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Customer, I want to install Tei Store on my phone and still view my recent orders and profile when I lose connectivity so that the app feels reliable even with intermittent networks. |
-| **Priority** | Could |
-| **Release** | Phase 2+ |
-| **Depends on** | M1.1 |
+| **Priority**   | Could                                                                                                                                                                                       |
+| **Release**    | Phase 2+                                                                                                                                                                                    |
+| **Depends on** | M1.1                                                                                                                                                                                        |
 
 **Acceptance Criteria**
 
@@ -839,12 +805,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M11.1 — AI-Assisted Product Creation
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                               |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Moderator or Branch Admin, I want AI assistance when creating products so that I can generate descriptions, suggest specifications, and reduce data-entry time. |
-| **Priority** | Should |
-| **Release** | MVP |
-| **Depends on** | M2.1 |
+| **Priority**   | Should                                                                                                                                                               |
+| **Release**    | MVP                                                                                                                                                                  |
+| **Depends on** | M2.1                                                                                                                                                                 |
 
 **Acceptance Criteria**
 
@@ -858,12 +824,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M11.2 — Customer AI Chat
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                            |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Customer or Visitor, I want a chat interface that answers questions about products, policies, and the platform so that I can get guidance without waiting for human support. |
-| **Priority** | Should |
-| **Release** | MVP |
-| **Depends on** | M11.3 |
+| **Priority**   | Should                                                                                                                                                                            |
+| **Release**    | MVP                                                                                                                                                                               |
+| **Depends on** | M11.3                                                                                                                                                                             |
 
 **Acceptance Criteria**
 
@@ -878,12 +844,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M11.3 — Admin Knowledge Base Upload
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **User story** | As a Central Admin or Branch Admin, I want to upload documents that the AI chat uses as its knowledge source so that the AI provides accurate, up-to-date answers. |
-| **Priority** | Should |
-| **Release** | MVP |
-| **Depends on** | M1.2 |
+| **Priority**   | Should                                                                                                                                                             |
+| **Release**    | MVP                                                                                                                                                                |
+| **Depends on** | M1.2                                                                                                                                                               |
 
 **Acceptance Criteria**
 
@@ -897,12 +863,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M11.4 — AI Analytics Insights
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                                          |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Branch Admin or Central Admin, I want the AI to generate natural-language summaries and insights from my analytics data so that I can understand trends without manually analysing charts. |
-| **Priority** | Could |
-| **Release** | Phase 2+ |
-| **Depends on** | M8.1 |
+| **Priority**   | Could                                                                                                                                                                                           |
+| **Release**    | Phase 2+                                                                                                                                                                                        |
+| **Depends on** | M8.1                                                                                                                                                                                            |
 
 **Acceptance Criteria**
 
@@ -916,12 +882,12 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 #### Story M11.5 — AI Receipt Scanning
 
-| Field | Detail |
-|---|---|
+| Field          | Detail                                                                                                                                                                             |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User story** | As a Moderator or Employee, I want to scan a physical receipt and have the AI extract purchase details so that I can record on-site sales that were not made through the platform. |
-| **Priority** | Should |
-| **Release** | MVP |
-| **Depends on** | M1.2 |
+| **Priority**   | Should                                                                                                                                                                             |
+| **Release**    | MVP                                                                                                                                                                                |
+| **Depends on** | M1.2                                                                                                                                                                               |
 
 **Acceptance Criteria**
 
@@ -940,75 +906,75 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 ### NFR-1 — Performance
 
-| ID | Requirement |
-|---|---|
-| NFR-1.1 | Server-side page responses (HTML or JSON) must complete within 500 ms at the 95th percentile under normal load. |
-| NFR-1.2 | The product search endpoint must return results within 800 ms at the 95th percentile for up to 50 000 active product records. |
-| NFR-1.3 | A Lighthouse performance score of 70 or above must be maintained on the home page and product listing page when tested on a simulated 4G mobile connection. |
+| ID      | Requirement                                                                                                                                                           |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NFR-1.1 | Server-side page responses (HTML or JSON) must complete within 500 ms at the 95th percentile under normal load.                                                       |
+| NFR-1.2 | The product search endpoint must return results within 800 ms at the 95th percentile for up to 50 000 active product records.                                         |
+| NFR-1.3 | A Lighthouse performance score of 70 or above must be maintained on the home page and product listing page when tested on a simulated 4G mobile connection.           |
 | NFR-1.4 | AI-assisted operations (product description generation, receipt scanning) must return an initial response within 10 seconds. A loading indicator is shown throughout. |
 
 ### NFR-2 — Availability & Recovery
 
-| ID | Requirement |
-|---|---|
-| NFR-2.1 | The platform must target 99.5 % monthly uptime, measured from an external health-check endpoint. |
+| ID      | Requirement                                                                                                            |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| NFR-2.1 | The platform must target 99.5 % monthly uptime, measured from an external health-check endpoint.                       |
 | NFR-2.2 | Scheduled maintenance windows must be announced to all users at least 48 hours in advance via the notification system. |
-| NFR-2.3 | Database backups must be performed daily with a recovery point objective (RPO) of 24 hours. |
+| NFR-2.3 | Database backups must be performed daily with a recovery point objective (RPO) of 24 hours.                            |
 
 ### NFR-3 — Internationalisation _(i18n)_
 
-| ID | Requirement |
-|---|---|
-| NFR-3.1 | All customer-facing and admin-facing text must be externalised into translation files. No user-visible string is hard-coded. |
+| ID      | Requirement                                                                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| NFR-3.1 | All customer-facing and admin-facing text must be externalised into translation files. No user-visible string is hard-coded.                                 |
 | NFR-3.2 | English is the default language. French is supported with full parity: every label, message, notification, and email template must have a French equivalent. |
-| NFR-3.3 | A language switcher is accessible from every page and persists the user's selection across sessions. |
-| NFR-3.4 | All monetary values are displayed in XAF as whole numbers with the "FCFA" label. Decimal places are never shown to users. |
+| NFR-3.3 | A language switcher is accessible from every page and persists the user's selection across sessions.                                                         |
+| NFR-3.4 | All monetary values are displayed in XAF as whole numbers with the "FCFA" label. Decimal places are never shown to users.                                    |
 
 ### NFR-4 — Observability & Monitoring
 
-| ID | Requirement |
-|---|---|
-| NFR-4.1 | Application logs must include a correlation identifier that traces a request from the entry point through all downstream operations. |
-| NFR-4.2 | Log levels (debug, info, warn, error) must be configurable per environment without redeploying the application. |
-| NFR-4.3 | Unhandled application errors must be captured and reported to a centralised error-tracking and monitoring service in real time. |
-| NFR-4.4 | Error reports must include: stack trace, user context (role, user ID), browser/device information, and the request URL. |
+| ID      | Requirement                                                                                                                                                |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NFR-4.1 | Application logs must include a correlation identifier that traces a request from the entry point through all downstream operations.                       |
+| NFR-4.2 | Log levels (debug, info, warn, error) must be configurable per environment without redeploying the application.                                            |
+| NFR-4.3 | Unhandled application errors must be captured and reported to a centralised error-tracking and monitoring service in real time.                            |
+| NFR-4.4 | Error reports must include: stack trace, user context (role, user ID), browser/device information, and the request URL.                                    |
 | NFR-4.5 | Application performance metrics (response times, error rates, throughput) must be continuously collected and reported to a centralised monitoring service. |
 
 ### NFR-5 — Security Baseline
 
-| ID | Requirement |
-|---|---|
-| NFR-5.1 | All data in transit must be encrypted using TLS 1.2 or higher. |
-| NFR-5.2 | Sensitive data at rest (personal identifiable information, payment references) must be encrypted using AES-256 or equivalent. |
-| NFR-5.3 | The application must set secure HTTP response headers: `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, and a `Content-Security-Policy` baseline. |
-| NFR-5.4 | Dependencies must be scanned for known vulnerabilities on a regular schedule and before each production release. |
+| ID      | Requirement                                                                                                                                                                                                                                                                                |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| NFR-5.1 | All data in transit must be encrypted using TLS 1.2 or higher.                                                                                                                                                                                                                             |
+| NFR-5.2 | Sensitive data at rest (personal identifiable information, payment references) must be encrypted using AES-256 or equivalent.                                                                                                                                                              |
+| NFR-5.3 | The application must set secure HTTP response headers: `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, and a `Content-Security-Policy` baseline.                                                                                                                 |
+| NFR-5.4 | Dependencies must be scanned for known vulnerabilities on a regular schedule and before each production release.                                                                                                                                                                           |
 | NFR-5.5 | A security audit log records the following events: login, failed login, role change, order placement, payment attempt. Entries include actor, action, target, and timestamp. The security audit log is immutable, retained for a minimum of 12 months, and readable only by Central Admin. |
 
 ### NFR-6 — Accessibility
 
-| ID | Requirement |
-|---|---|
-| NFR-6.1 | All customer-facing pages must conform to WCAG 2.1 Level AA success criteria. |
-| NFR-6.2 | All interactive elements must be reachable and operable via keyboard navigation alone. |
+| ID      | Requirement                                                                                                |
+| ------- | ---------------------------------------------------------------------------------------------------------- |
+| NFR-6.1 | All customer-facing pages must conform to WCAG 2.1 Level AA success criteria.                              |
+| NFR-6.2 | All interactive elements must be reachable and operable via keyboard navigation alone.                     |
 | NFR-6.3 | All images must include meaningful alternative text. Decorative images must have an empty `alt` attribute. |
 
 ### NFR-7 — Privacy & Regulatory
 
-| ID | Requirement |
-|---|---|
-| NFR-7.1 | A publicly accessible privacy policy page describes what personal data is collected, how it is used, and how long it is retained. |
+| ID      | Requirement                                                                                                                                                                                                                |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NFR-7.1 | A publicly accessible privacy policy page describes what personal data is collected, how it is used, and how long it is retained.                                                                                          |
 | NFR-7.2 | A Customer can request deletion of their account and associated personal data. The deletion process removes personal data within 30 calendar days while preserving anonymised transaction records for financial integrity. |
-| NFR-7.3 | Personal data is not shared with third parties beyond what is necessary for payment processing and delivery. |
-| NFR-7.4 | User consent must be obtained before processing any data beyond what is strictly necessary for platform operation. |
+| NFR-7.3 | Personal data is not shared with third parties beyond what is necessary for payment processing and delivery.                                                                                                               |
+| NFR-7.4 | User consent must be obtained before processing any data beyond what is strictly necessary for platform operation.                                                                                                         |
 
 ### NFR-8 — Theming
 
-| ID | Requirement |
-|---|---|
-| NFR-8.1 | All customer-facing pages support three theme modes: light, dark, and system (follows device preference). |
-| NFR-8.2 | The user's theme preference is persisted across sessions. |
+| ID      | Requirement                                                                                                          |
+| ------- | -------------------------------------------------------------------------------------------------------------------- |
+| NFR-8.1 | All customer-facing pages support three theme modes: light, dark, and system (follows device preference).            |
+| NFR-8.2 | The user's theme preference is persisted across sessions.                                                            |
 | NFR-8.3 | The administration dashboard supports the same three theme modes plus additional configurable colour theme variants. |
-| NFR-8.4 | Theme switching takes effect immediately without requiring a page reload. |
+| NFR-8.4 | Theme switching takes effect immediately without requiring a page reload.                                            |
 
 ---
 
@@ -1018,94 +984,95 @@ This section documents constraints arising from the Cameroonian market context �
 
 ### CON-1 — Payment Methods
 
-| ID | Constraint |
-|---|---|
-| CON-1.1 | Mobile Money (MTN Mobile Money, Orange Money) must be available as a checkout option alongside card payment. |
-| CON-1.2 | The payment gateway must support XAF as the transaction currency. Multi-currency conversion is not required. |
+| ID      | Constraint                                                                                                                                                                                                  |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CON-1.1 | Mobile Money (MTN Mobile Money, Orange Money) must be available as a checkout option alongside card payment.                                                                                                |
+| CON-1.2 | The payment gateway must support XAF as the transaction currency. Multi-currency conversion is not required.                                                                                                |
 | CON-1.3 | Payment confirmation relies on the gateway's callback or polling mechanism. The platform must handle delayed confirmations gracefully — the order sits in "Pending Payment" until confirmation is received. |
 
 ### CON-2 — Language & Locale
 
-| ID | Constraint |
-|---|---|
+| ID      | Constraint                                                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | CON-2.1 | English and French are equally supported. All new features must ship with both language variants before being considered "Done" (see §4.5). |
-| CON-2.2 | Date formats follow `DD/MM/YYYY`. Time is displayed in 24-hour format. |
+| CON-2.2 | Date formats follow `DD/MM/YYYY`. Time is displayed in 24-hour format.                                                                      |
 
 ### CON-3 — Installment Payment
 
-| ID | Constraint |
-|---|---|
-| CON-3.1 | Installment payment is available on any order. The minimum initial payment amount is defined by the admin and displayed before checkout confirmation. |
-| CON-3.2 | An order placed under installment has a "Partially Paid" status. Items are reserved but not dispatched until the full balance is settled. |
+| ID      | Constraint                                                                                                                                                                                                                                                          |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CON-3.1 | Installment payment is available on any order. The minimum initial payment amount is defined by the admin and displayed before checkout confirmation.                                                                                                               |
+| CON-3.2 | An order placed under installment has a "Partially Paid" status. Items are reserved but not dispatched until the full balance is settled.                                                                                                                           |
 | CON-3.3 | Each product or product category has an admin-configurable installment payment deadline. The deadline is displayed to the customer before order confirmation. The deadline applies to the full order amount, not per item — even when items span multiple branches. |
-| CON-3.4 | If the payment deadline passes and the full balance has not been paid, the order is flagged for admin review. The order is not automatically cancelled. |
-| CON-3.5 | The full installment payment history for an order — each payment amount, date, and running outstanding balance — is visible to both the customer and the admin on the order detail page. |
+| CON-3.4 | If the payment deadline passes and the full balance has not been paid, the order is flagged for admin review. The order is not automatically cancelled.                                                                                                             |
+| CON-3.5 | The full installment payment history for an order — each payment amount, date, and running outstanding balance — is visible to both the customer and the admin on the order detail page.                                                                            |
 
 ### CON-4 — Branch Inventory & Cross-Branch Fulfillment
 
-| ID | Constraint |
-|---|---|
-| CON-4.1 | Inventory is tracked per branch. Each branch manages its own stock levels independently. Products may be stocked at multiple branches (see M2.1, AC-M2.1-8). |
+| ID      | Constraint                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CON-4.1 | Inventory is tracked per branch. Each branch manages its own stock levels independently. Products may be stocked at multiple branches (see M2.1, AC-M2.1-8).                                                                                                                                                                                                                                                                      |
 | CON-4.2 | Cross-branch fulfillment is supported: when a customer orders a product, the system determines the fulfilling branch as follows: (a) if the customer's shipping address is in the same city as a branch that has the item in stock, that branch fulfills the item; (b) if the local branch does not have the item in stock, or there is no branch in the customer's city, the item is shipped from another branch that has stock. |
-| CON-4.3 | A single order may contain items fulfilled by different branches. Each item carries its own fulfillment status and fulfilling branch identifier. |
-| CON-4.4 | A shipping fee, configured by a Branch Admin or Central Admin, is applied to each item whose fulfilling branch is in a different city than the customer's shipping address city. Items fulfilled from the customer's own city incur no shipping fee. The total shipping fee is displayed before checkout confirmation. |
-| CON-4.5 | A Moderator or Branch Admin can adjust inventory only for their own branch. A Central Admin can view inventory across all branches; any stock adjustment is attributed to the specific branch selected. |
+| CON-4.3 | A single order may contain items fulfilled by different branches. Each item carries its own fulfillment status and fulfilling branch identifier.                                                                                                                                                                                                                                                                                  |
+| CON-4.4 | A shipping fee, configured by a Branch Admin or Central Admin, is applied to each item whose fulfilling branch is in a different city than the customer's shipping address city. Items fulfilled from the customer's own city incur no shipping fee. The total shipping fee is displayed before checkout confirmation.                                                                                                            |
+| CON-4.5 | A Moderator or Branch Admin can adjust inventory only for their own branch. A Central Admin can view inventory across all branches; any stock adjustment is attributed to the specific branch selected.                                                                                                                                                                                                                           |
 
 ### CON-5 — Connectivity
 
-| ID | Constraint |
-|---|---|
+| ID      | Constraint                                                                                                                                                                                               |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CON-5.1 | The platform must remain usable on 3G connections typical of Cameroonian mobile networks. Critical pages (home, product listing, cart, checkout) must transfer less than 1.5 MB of data on initial load. |
-| CON-5.2 | Images must be served in modern compressed formats and use lazy loading. The platform must provide responsive image sizing for mobile devices. |
+| CON-5.2 | Images must be served in modern compressed formats and use lazy loading. The platform must provide responsive image sizing for mobile devices.                                                           |
 
 ### CON-6 — Cookie Consent
 
-| ID | Constraint |
-|---|---|
-| CON-6.1 | A cookie consent banner is displayed on the user's first visit to the platform. |
-| CON-6.2 | The user's consent response is stored locally on their device. |
+| ID      | Constraint                                                                               |
+| ------- | ---------------------------------------------------------------------------------------- |
+| CON-6.1 | A cookie consent banner is displayed on the user's first visit to the platform.          |
+| CON-6.2 | The user's consent response is stored locally on their device.                           |
 | CON-6.3 | No non-essential cookies or tracking scripts are loaded until the user provides consent. |
 
 ---
 
 ## 8. Traceability Matrix
 
-| Story ID | Module | Priority | Release | AC Count | Dependencies |
-|---|---|---|---|---|---|
-| M1.1 | User Management & Roles | Must | MVP | 9 | None |
-| M1.2 | User Management & Roles | Must | MVP | 9 | M1.1 |
-| M2.1 | Product & Catalog Management | Must | MVP | 8 | M1.2 |
-| M2.2 | Product & Catalog Management | Should | MVP | 5 | M2.1 |
-| M2.3 | Product & Catalog Management | Must | MVP | 5 | M2.1 |
-| M3.1 | Shopping & Checkout | Must | MVP | 6 | M2.1, M2.2 |
-| M3.2 | Shopping & Checkout | Must | MVP | 12 | M3.1, M1.1 |
-| M4.1 | Guarantee, Repairs & Returns | Must | MVP | 7 | M3.2 |
-| M4.2 | Guarantee, Repairs & Returns | Must | MVP | 8 | M2.1, M3.2 |
-| M4.3 | Guarantee, Repairs & Returns | Should | MVP | 5 | M4.1 |
-| M5.1 | Affiliate System | Should | MVP | 7 | M1.1 |
-| M5.2 | Affiliate System | Should | Phase 2+ | 3 | M5.1 |
-| M5.3 | Affiliate System | Could | Phase 2+ | 5 | M5.2 |
-| M5.4 | Affiliate System | Could | Phase 2+ | 4 | M5.2, M5.3 |
-| M5.5 | Affiliate System | Should | Phase 2+ | 5 | M5.1 |
-| M5.6 | Affiliate System | Should | Phase 2+ | 6 | M5.1 |
-| M6.1 | Content & Blog System | Should | Phase 2+ | 5 | M1.2 |
-| M6.2 | Content & Blog System | Should | Phase 2+ | 5 | M6.1 |
-| M6.3 | Content & Blog System | Should | Phase 2+ | 6 | M3.2 |
-| M7.1 | Notifications & Events | Should | Phase 2+ | 6 | M1.1 |
-| M7.2 | Notifications & Events | Could | Phase 2+ | 6 | M7.1 |
-| M7.3 | Notifications & Events | Should | MVP | 7 | M1.2 |
-| M8.1 | Analytics & KPIs | Should | Phase 2+ | 5 | M3.2, M5.3 |
-| M8.2 | Analytics & KPIs | Could | Phase 2+ | 5 | M8.1 |
-| M9.1 | Security & Trust | Must | MVP | 5 | M3.2 |
-| M9.2 | Security & Trust | Must | MVP | 8 | None |
-| M10.1 | Progressive Web App (PWA) | Could | Phase 2+ | 6 | M1.1 |
-| M11.1 | AI Capabilities | Should | MVP | 5 | M2.1 |
-| M11.2 | AI Capabilities | Should | MVP | 6 | M11.3 |
-| M11.3 | AI Capabilities | Should | MVP | 5 | M1.2 |
-| M11.4 | AI Capabilities | Could | Phase 2+ | 5 | M8.1 |
-| M11.5 | AI Capabilities | Should | MVP | 8 | M1.2 |
+| Story ID | Module                       | Priority | Release  | AC Count | Dependencies |
+| -------- | ---------------------------- | -------- | -------- | -------- | ------------ |
+| M1.1     | User Management & Roles      | Must     | MVP      | 9        | None         |
+| M1.2     | User Management & Roles      | Must     | MVP      | 9        | M1.1         |
+| M2.1     | Product & Catalog Management | Must     | MVP      | 8        | M1.2         |
+| M2.2     | Product & Catalog Management | Should   | MVP      | 5        | M2.1         |
+| M2.3     | Product & Catalog Management | Must     | MVP      | 5        | M2.1         |
+| M3.1     | Shopping & Checkout          | Must     | MVP      | 6        | M2.1, M2.2   |
+| M3.2     | Shopping & Checkout          | Must     | MVP      | 12       | M3.1, M1.1   |
+| M4.1     | Guarantee, Repairs & Returns | Must     | MVP      | 7        | M3.2         |
+| M4.2     | Guarantee, Repairs & Returns | Must     | MVP      | 8        | M2.1, M3.2   |
+| M4.3     | Guarantee, Repairs & Returns | Should   | MVP      | 5        | M4.1         |
+| M5.1     | Affiliate System             | Should   | MVP      | 7        | M1.1         |
+| M5.2     | Affiliate System             | Should   | Phase 2+ | 3        | M5.1         |
+| M5.3     | Affiliate System             | Could    | Phase 2+ | 5        | M5.2         |
+| M5.4     | Affiliate System             | Could    | Phase 2+ | 4        | M5.2, M5.3   |
+| M5.5     | Affiliate System             | Should   | Phase 2+ | 5        | M5.1         |
+| M5.6     | Affiliate System             | Should   | Phase 2+ | 6        | M5.1         |
+| M6.1     | Content & Blog System        | Should   | Phase 2+ | 5        | M1.2         |
+| M6.2     | Content & Blog System        | Should   | Phase 2+ | 5        | M6.1         |
+| M6.3     | Content & Blog System        | Should   | Phase 2+ | 6        | M3.2         |
+| M7.1     | Notifications & Events       | Should   | Phase 2+ | 6        | M1.1         |
+| M7.2     | Notifications & Events       | Could    | Phase 2+ | 6        | M7.1         |
+| M7.3     | Notifications & Events       | Should   | MVP      | 7        | M1.2         |
+| M8.1     | Analytics & KPIs             | Should   | Phase 2+ | 5        | M3.2, M5.3   |
+| M8.2     | Analytics & KPIs             | Could    | Phase 2+ | 5        | M8.1         |
+| M9.1     | Security & Trust             | Must     | MVP      | 5        | M3.2         |
+| M9.2     | Security & Trust             | Must     | MVP      | 8        | None         |
+| M10.1    | Progressive Web App (PWA)    | Could    | Phase 2+ | 6        | M1.1         |
+| M11.1    | AI Capabilities              | Should   | MVP      | 5        | M2.1         |
+| M11.2    | AI Capabilities              | Should   | MVP      | 6        | M11.3        |
+| M11.3    | AI Capabilities              | Should   | MVP      | 5        | M1.2         |
+| M11.4    | AI Capabilities              | Could    | Phase 2+ | 5        | M8.1         |
+| M11.5    | AI Capabilities              | Should   | MVP      | 8        | M1.2         |
 
 **Summary:**
+
 - Total stories: 32
 - Total acceptance criteria: 196
 - MVP stories: 18 (Must: 11, Should: 7)
@@ -1115,36 +1082,36 @@ This section documents constraints arising from the Cameroonian market context �
 
 ## 9. Risk Register
 
-| ID | Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|---|
-| R1 | Mobile Money gateway downtime blocks all checkout. | Medium | High | Implement retry with exponential back-off on payment callbacks. Display a clear "payment temporarily unavailable" message. Support card as an alternative. |
-| R2 | Network outages in certain Cameroonian cities degrade user experience. | High | Medium | PWA caching for read-only access. Compressed assets and lazy loading. Design for graceful degradation. |
-| R3 | Affiliate fraud — self-referrals or link manipulation. | Medium | Medium | Last-click attribution only. Self-referral detection (customer and affiliate same account). Configurable attribution window. Admin review of anomalous referral patterns. |
-| R4 | Stock discrepancy between physical store and platform inventory. | Medium | Medium | Near-real-time stock decrement on order completion. In-store purchase recording (M11.5) keeps platform inventory aligned with physical sales. Low-stock alerts. |
-| R5 | Content moderation backlog — reviews and articles stuck in pending state. | Low | Medium | Dashboard surfacing pending-review counts. Notification to Branch Admin on new submissions. |
-| R6 | Scope creep from frequent SRS iterations. | Medium | Medium | Agile ceremonies: sprint reviews, backlog grooming, MoSCoW re-prioritisation at each iteration boundary. |
-| R7 | Data privacy breach due to insufficient encryption or access control. | Low | Critical | Encryption at rest and in transit (NFR-5). Role-based access at the data layer (M9.2). Security audit log (NFR-5.5). Regular dependency scanning (NFR-5.4). |
-| R8 | XAF formatting errors causing customer confusion. | Low | Medium | Centralised currency formatter. Automated tests covering edge cases (zero, large amounts). |
-| R9 | French translation parity lagging behind English. | Medium | Medium | "Done" definition requires both translations (§4.5). Translation completeness check in CI pipeline. |
-| R10 | AI-generated content may be inaccurate or misleading (hallucination). | Medium | High | All AI output is presented as a suggestion requiring human confirmation. AI chat discloses its AI nature and refuses to fabricate answers. Knowledge base scoping limits context. |
-| R11 | Cross-branch shipping coordination may delay delivery timelines. | Medium | Medium | Per-item fulfillment tracking with shipping city transparency. Admin-configured shipping fees incentivise local-stock ordering. Clear estimated delivery display at checkout. |
-| R12 | AI service unavailability degrades staff and customer workflows. | Medium | Medium | All AI features degrade gracefully — manual fallbacks exist for every AI-assisted flow (M11.1-5, M11.5-7). No feature is blocked solely by AI availability. |
+| ID  | Risk                                                                      | Likelihood | Impact   | Mitigation                                                                                                                                                                        |
+| --- | ------------------------------------------------------------------------- | ---------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Mobile Money gateway downtime blocks all checkout.                        | Medium     | High     | Implement retry with exponential back-off on payment callbacks. Display a clear "payment temporarily unavailable" message. Support card as an alternative.                        |
+| R2  | Network outages in certain Cameroonian cities degrade user experience.    | High       | Medium   | PWA caching for read-only access. Compressed assets and lazy loading. Design for graceful degradation.                                                                            |
+| R3  | Affiliate fraud — self-referrals or link manipulation.                    | Medium     | Medium   | Last-click attribution only. Self-referral detection (customer and affiliate same account). Configurable attribution window. Admin review of anomalous referral patterns.         |
+| R4  | Stock discrepancy between physical store and platform inventory.          | Medium     | Medium   | Near-real-time stock decrement on order completion. In-store purchase recording (M11.5) keeps platform inventory aligned with physical sales. Low-stock alerts.                   |
+| R5  | Content moderation backlog — reviews and articles stuck in pending state. | Low        | Medium   | Dashboard surfacing pending-review counts. Notification to Branch Admin on new submissions.                                                                                       |
+| R6  | Scope creep from frequent SRS iterations.                                 | Medium     | Medium   | Agile ceremonies: sprint reviews, backlog grooming, MoSCoW re-prioritisation at each iteration boundary.                                                                          |
+| R7  | Data privacy breach due to insufficient encryption or access control.     | Low        | Critical | Encryption at rest and in transit (NFR-5). Role-based access at the data layer (M9.2). Security audit log (NFR-5.5). Regular dependency scanning (NFR-5.4).                       |
+| R8  | XAF formatting errors causing customer confusion.                         | Low        | Medium   | Centralised currency formatter. Automated tests covering edge cases (zero, large amounts).                                                                                        |
+| R9  | French translation parity lagging behind English.                         | Medium     | Medium   | "Done" definition requires both translations (§4.5). Translation completeness check in CI pipeline.                                                                               |
+| R10 | AI-generated content may be inaccurate or misleading (hallucination).     | Medium     | High     | All AI output is presented as a suggestion requiring human confirmation. AI chat discloses its AI nature and refuses to fabricate answers. Knowledge base scoping limits context. |
+| R11 | Cross-branch shipping coordination may delay delivery timelines.          | Medium     | Medium   | Per-item fulfillment tracking with shipping city transparency. Admin-configured shipping fees incentivise local-stock ordering. Clear estimated delivery display at checkout.     |
+| R12 | AI service unavailability degrades staff and customer workflows.          | Medium     | Medium   | All AI features degrade gracefully — manual fallbacks exist for every AI-assisted flow (M11.1-5, M11.5-7). No feature is blocked solely by AI availability.                       |
 
 ---
 
 ## 10. Open Assumptions
 
-| ID | Assumption | Status |
-|---|---|---|
-| A1 | A single payment gateway integration covers both Mobile Money and card transactions. | Resolved |
-| A2 | Branch Admins will manage their own product catalogs and inventory without a dedicated data-entry team. | Open |
-| A3 | Delivery is managed by each branch independently; the platform does not integrate with a shipping carrier API. Shipping fees for cross-branch orders are flat-rate and admin-configured, not calculated dynamically. | Resolved |
-| A4 | A Central Admin can change the role of any staff member directly from the staff management page. Role changes take effect on next request. | Resolved |
-| A5 | The platform will launch with four branches (Bamenda, Buea, Yaoundé, Douala) and must support addition of new branches without structural changes. | Open |
-| A6 | Products may be stocked at multiple branches. Each branch manages its own stock level independently for shared products. Cross-branch fulfillment uses shared product identity to determine which branch can fulfill an item. | Resolved |
-| A7 | Initial product data will be entered manually; no CSV import or bulk upload is required for MVP. | Open |
-| A8 | Douala is established as the fourth operational branch at launch. | Resolved |
-| A9 | AI features depend on an external model service. If the service is unavailable, all AI-assisted workflows degrade gracefully to manual operation. No platform feature is blocked solely by AI availability. | Resolved |
+| ID  | Assumption                                                                                                                                                                                                                    | Status   |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| A1  | A single payment gateway integration covers both Mobile Money and card transactions.                                                                                                                                          | Resolved |
+| A2  | Branch Admins will manage their own product catalogs and inventory without a dedicated data-entry team.                                                                                                                       | Open     |
+| A3  | Delivery is managed by each branch independently; the platform does not integrate with a shipping carrier API. Shipping fees for cross-branch orders are flat-rate and admin-configured, not calculated dynamically.          | Resolved |
+| A4  | A Central Admin can change the role of any staff member directly from the staff management page. Role changes take effect on next request.                                                                                    | Resolved |
+| A5  | The platform will launch with four branches (Bamenda, Buea, Yaoundé, Douala) and must support addition of new branches without structural changes.                                                                            | Open     |
+| A6  | Products may be stocked at multiple branches. Each branch manages its own stock level independently for shared products. Cross-branch fulfillment uses shared product identity to determine which branch can fulfill an item. | Resolved |
+| A7  | Initial product data will be entered manually; no CSV import or bulk upload is required for MVP.                                                                                                                              | Open     |
+| A8  | Douala is established as the fourth operational branch at launch.                                                                                                                                                             | Resolved |
+| A9  | AI features depend on an external model service. If the service is unavailable, all AI-assisted workflows degrade gracefully to manual operation. No platform feature is blocked solely by AI availability.                   | Resolved |
 
 ---
 
@@ -1164,21 +1131,21 @@ Version numbers increment by 0.1 for minor iterations and by 1.0 for milestone b
 
 ## 12. Glossary
 
-| Term | Definition |
-|---|---|
-| AC | Acceptance Criterion — a binary, testable condition for a user story |
-| Affiliate / Hunter Man | A user who promotes products via unique links and earns commission on referred sales |
-| Branch | A physical The Eye Informatique retail location with its own staff, products, and inventory |
-| Central Admin | The highest system role; oversees all branches, users, and global settings |
-| CON | Cameroon Operational Constraint — a business or environmental rule specific to the Cameroon market |
-| Customer | A registered user who shops on the platform |
-| FCFA | Franc CFA — the displayed currency label for Central African Franc (XAF) |
-| In-Store Purchase | A sale that occurred at a physical branch, recorded on the platform via receipt scanning (M11.5) for analytics and affiliate attribution purposes |
-| Knowledge Base | A collection of admin-uploaded documents used by the AI chat as its authoritative context source |
-| Moderator / Employee | Branch staff who manage product listings, content, and in-store receipt entries for their assigned branch |
-| MoSCoW | A prioritisation framework: Must, Should, Could, Won't |
-| MVP | Minimum Viable Product — the initial public release |
-| NFR | Non-Functional Requirement — a system-quality or cross-cutting constraint |
-| PWA | Progressive Web App — a web application installable on devices with optional offline capabilities |
-| SRS | Software Requirements Specification |
-| XAF | ISO 4217 code for Central African CFA Franc |
+| Term                   | Definition                                                                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC                     | Acceptance Criterion — a binary, testable condition for a user story                                                                              |
+| Affiliate / Hunter Man | A user who promotes products via unique links and earns commission on referred sales                                                              |
+| Branch                 | A physical The Eye Informatique retail location with its own staff, products, and inventory                                                       |
+| Central Admin          | The highest system role; oversees all branches, users, and global settings                                                                        |
+| CON                    | Cameroon Operational Constraint — a business or environmental rule specific to the Cameroon market                                                |
+| Customer               | A registered user who shops on the platform                                                                                                       |
+| FCFA                   | Franc CFA — the displayed currency label for Central African Franc (XAF)                                                                          |
+| In-Store Purchase      | A sale that occurred at a physical branch, recorded on the platform via receipt scanning (M11.5) for analytics and affiliate attribution purposes |
+| Knowledge Base         | A collection of admin-uploaded documents used by the AI chat as its authoritative context source                                                  |
+| Moderator / Employee   | Branch staff who manage product listings, content, and in-store receipt entries for their assigned branch                                         |
+| MoSCoW                 | A prioritisation framework: Must, Should, Could, Won't                                                                                            |
+| MVP                    | Minimum Viable Product — the initial public release                                                                                               |
+| NFR                    | Non-Functional Requirement — a system-quality or cross-cutting constraint                                                                         |
+| PWA                    | Progressive Web App — a web application installable on devices with optional offline capabilities                                                 |
+| SRS                    | Software Requirements Specification                                                                                                               |
+| XAF                    | ISO 4217 code for Central African CFA Franc                                                                                                       |

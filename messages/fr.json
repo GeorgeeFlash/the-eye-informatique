@@ -266,11 +266,22 @@
     "reasonRequired": "Veuillez fournir une raison.",
     "previous": "Précédent",
     "next": "Suivant",
+    "revoke": "Révoquer",
+    "revoked": "Affilié révoqué.",
+    "branch": "Agence",
+    "exportCsv": "Exporter CSV",
+    "payoutPreference": "Préférence de paiement",
+    "preferenceMonthly": "Mensuel",
+    "preferenceImmediate": "Immédiat",
+    "monthlyDescription": "Les commissions sont versées le 1er de chaque mois.",
+    "immediateDescription": "Les commissions sont versées dès leur confirmation.",
+    "preferenceUpdated": "Préférence de paiement mise à jour.",
     "affiliateStatus": {
       "PENDING": "En attente",
       "APPROVED": "Approuvé",
       "SUSPENDED": "Suspendu",
-      "REJECTED": "Rejeté"
+      "REJECTED": "Rejeté",
+      "REVOKED": "Révoqué"
     },
     "referralStatus_PENDING": "En attente",
     "referralStatus_CONFIRMED": "Confirmé",
@@ -774,7 +785,10 @@
     "rejectedTitle": "Candidature non approuvée",
     "rejectedDescription": "Votre précédente candidature n'a pas été approuvée. Vous pouvez postuler à nouveau après 30 jours.",
     "reason": "Raison",
-    "reapplyWait": "Vous pouvez postuler à nouveau 30 jours après votre dernier rejet."
+    "reapplyWait": "Vous pouvez postuler à nouveau 30 jours après votre dernier rejet.",
+    "branch": "Agence",
+    "branchDescription": "Sélectionnez l'agence à laquelle vous êtes rattaché(e).",
+    "selectBranch": "Sélectionner une agence"
   },
   "searchCommand": {
     "placeholder": "Rechercher...",

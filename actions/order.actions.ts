@@ -10,6 +10,8 @@ import { Prisma } from "@/lib/generated/prisma/client"
 import { calculateShippingFee } from "@/lib/shipping"
 import { getSetting } from "@/actions/settings.actions"
 import { createCheckoutSession } from "@/lib/payment"
+import { cookies } from "next/headers"
+import { REFERRAL_COOKIE_NAME } from "@/lib/constants"
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -252,6 +254,35 @@ export async function createOrder(data: CreateOrderInput) {
             dueDate,
           },
         })
+      }
+    }
+
+    // Link affiliate referral if referral cookie is present
+    const cookieStore = await cookies()
+    const refCookie = cookieStore.get(REFERRAL_COOKIE_NAME)?.value
+    if (refCookie) {
+      const [affiliateId, linkId] = refCookie.split(":")
+      if (affiliateId && linkId) {
+        // Validate the affiliate is still active
+        const affiliate = await tx.affiliateProfile.findUnique({
+          where: { id: affiliateId },
+          select: { id: true, status: true },
+        })
+        const link = await tx.affiliateLink.findUnique({
+          where: { id: linkId },
+          select: { id: true },
+        })
+        if (affiliate?.status === "APPROVED" && link) {
+          await tx.affiliateReferral.create({
+            data: {
+              linkId,
+              affiliateId,
+              orderId: newOrder.id,
+              commission: 0, // Calculated on payment confirmation
+              status: "PENDING",
+            },
+          })
+        }
       }
     }
 

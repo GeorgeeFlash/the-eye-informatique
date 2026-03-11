@@ -1,6 +1,7 @@
 import { db } from "@/server/db"
 import { initiatePayment, verifyTransaction } from "@/server/payunit"
 import { APP_URL } from "@/lib/constants"
+import { confirmReferralCommission } from "@/actions/affiliate.actions"
 
 /**
  * Create a PayUnit checkout session for an order or installment.
@@ -98,6 +99,10 @@ export async function processPaymentResult(transactionId: string) {
         },
       }),
     ])
+
+    // Confirm affiliate referral commission if applicable
+    await confirmReferralCommission(payment.orderId)
+
     return { status: "SUCCESS" as const, orderId: payment.orderId }
   }
 
@@ -152,6 +157,9 @@ async function processInstallmentPayment(
           },
         }),
       ])
+
+      // Confirm affiliate referral commission if applicable
+      await confirmReferralCommission(installment.orderId)
     }
 
     return { status: "SUCCESS" as const, orderId: installment.orderId }

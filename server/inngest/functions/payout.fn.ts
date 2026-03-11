@@ -4,18 +4,21 @@ import { createNotification } from "@/actions/notification.actions"
 
 // M5.6 — Monthly affiliate commission payouts
 // Runs on the 1st of every month at midnight
+// Only processes affiliates with MONTHLY payout preference
 export const monthlyAffiliatePayout = inngest.createFunction(
   { id: "monthly-affiliate-payout" },
   { cron: "0 0 1 * *" },
   async ({ step }) => {
-    // 1. Find all approved affiliates with confirmed (unpaid) referrals
+    // 1. Find all approved affiliates with MONTHLY preference and confirmed referrals
     const affiliates = await step.run("find-eligible-affiliates", async () => {
       const results = await db.affiliateProfile.findMany({
         where: {
           status: "APPROVED",
+          payoutPreference: "MONTHLY",
           referrals: { some: { status: "CONFIRMED" } },
         },
         include: {
+          user: { select: { email: true, name: true } },
           referrals: {
             where: { status: "CONFIRMED" },
             select: { id: true, commission: true },
@@ -25,6 +28,8 @@ export const monthlyAffiliatePayout = inngest.createFunction(
       return results.map((a) => ({
         id: a.id,
         userId: a.userId,
+        userEmail: a.user.email,
+        userName: a.user.name,
         payoutMethod: a.payoutMethod,
         payoutPhone: a.payoutPhone,
         total: a.referrals.reduce(
@@ -70,9 +75,27 @@ export const monthlyAffiliatePayout = inngest.createFunction(
           userId: affiliate.userId,
           type: "COMMISSION",
           title: "Monthly payout processed",
-          body: `Your monthly payout of ${Math.round(affiliate.total)} XAF has been initiated.`,
+          body: `Your monthly payout of ${Math.round(affiliate.total)} FCFA has been initiated.`,
           link: "/dashboard/affiliate/payouts",
         })
+
+        // Send payout notification email
+        if (affiliate.userEmail) {
+          await inngest.send({
+            name: "email/send",
+            data: {
+              to: affiliate.userEmail,
+              subject: "Monthly Commission Payout",
+              template: "payout-notification" as const,
+              props: {
+                affiliateName: affiliate.userName ?? "Affiliate",
+                amount: Math.round(affiliate.total),
+                currency: "XAF",
+                payoutMethod: affiliate.payoutMethod,
+              },
+            },
+          })
+        }
       })
 
       processed++

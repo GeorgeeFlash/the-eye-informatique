@@ -1,13 +1,8 @@
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
-import { getAdminAffiliateDetail } from "@/actions/affiliate.actions"
-import { formatCurrency, formatDate } from "@/lib/utils"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { getAdminAffiliateDetail } from "@/actions/affiliate.actions";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,19 +10,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { AffiliateAdminActions } from "./admin-actions"
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { AffiliateAdminActions } from "./admin-actions";
 
 export default async function AdminAffiliateDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = await params
-  const t = await getTranslations("affiliate")
-  const profile = await getAdminAffiliateDetail(id)
-  if (!profile) notFound()
+  const { id } = await params;
+  const t = await getTranslations("affiliate");
+  const profile = await getAdminAffiliateDetail(id);
+  if (!profile) notFound();
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -44,7 +39,9 @@ export default async function AdminAffiliateDetailPage({
               ? "default"
               : profile.status === "PENDING"
                 ? "secondary"
-                : "destructive"
+                : profile.status === "SUSPENDED" || profile.status === "REVOKED"
+                  ? "destructive"
+                  : "outline"
           }
         >
           {t(`affiliateStatus.${profile.status}`)}
@@ -57,7 +54,9 @@ export default async function AdminAffiliateDetailPage({
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalEarned")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("totalEarned")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -67,7 +66,9 @@ export default async function AdminAffiliateDetailPage({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalPaid")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("totalPaid")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -77,7 +78,9 @@ export default async function AdminAffiliateDetailPage({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("commissionRate")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("commissionRate")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -110,7 +113,9 @@ export default async function AdminAffiliateDetailPage({
               <TableBody>
                 {profile.links.map((link) => (
                   <TableRow key={link.id}>
-                    <TableCell className="font-mono text-sm">{link.code}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {link.code}
+                    </TableCell>
                     <TableCell className="max-w-50 truncate text-sm">
                       {link.targetUrl}
                     </TableCell>
@@ -148,13 +153,23 @@ export default async function AdminAffiliateDetailPage({
               <TableBody>
                 {profile.referrals.map((ref) => (
                   <TableRow key={ref.id}>
-                    <TableCell className="font-mono text-sm">{ref.link.code}</TableCell>
-                    <TableCell>
-                      {ref.order ? formatCurrency(ref.order.total.toNumber()) : "—"}
+                    <TableCell className="font-mono text-sm">
+                      {ref.link.code}
                     </TableCell>
-                    <TableCell>{formatCurrency(ref.commission.toNumber())}</TableCell>
                     <TableCell>
-                      <Badge variant={ref.status === "PAID" ? "default" : "secondary"}>
+                      {ref.order
+                        ? formatCurrency(ref.order.total.toNumber())
+                        : "—"}
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrency(ref.commission.toNumber())}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          ref.status === "PAID" ? "default" : "secondary"
+                        }
+                      >
                         {ref.status}
                       </Badge>
                     </TableCell>
@@ -208,7 +223,9 @@ export default async function AdminAffiliateDetailPage({
                     </TableCell>
                     <TableCell>{formatDate(payout.createdAt)}</TableCell>
                     <TableCell>
-                      {payout.processedAt ? formatDate(payout.processedAt) : "—"}
+                      {payout.processedAt
+                        ? formatDate(payout.processedAt)
+                        : "—"}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -218,5 +235,5 @@ export default async function AdminAffiliateDetailPage({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
