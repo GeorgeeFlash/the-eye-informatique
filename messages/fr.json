@@ -739,7 +739,21 @@
     "saveError": "Échec de l'enregistrement du reçu.",
     "statusProcessing": "En traitement",
     "statusActive": "Actif",
-    "statusFailed": "Échoué"
+    "statusFailed": "Échoué",
+    "irisTitle": "Iris",
+    "irisSubtitle": "Votre assistant shopping IA",
+    "irisWelcome": "Bonjour ! Je suis Iris, votre assistant shopping. Demandez-moi tout sur nos produits, prix ou services !",
+    "irisPlaceholder": "Demandez à Iris...",
+    "irisThinking": "Iris réfléchit...",
+    "searchingProducts": "Recherche de produits...",
+    "loadingProduct": "Chargement du produit...",
+    "irisOpen": "Ouvrir l'assistant Iris",
+    "irisScrollDown": "Dernier",
+    "irisPoweredBy": "Propulsé par Iris IA",
+    "irisSuggestion1": "Trouvez-moi un ordinateur portable",
+    "irisSuggestion2": "Avez-vous des téléphones reconditionnés ?",
+    "irisSuggestion3": "Quelle est votre politique de retour ?",
+    "irisSuggestion4": "Contacter le support"
   },
   "analytics": {
     "title": "Analytiques",

@@ -739,7 +739,21 @@
     "saveError": "Failed to save receipt.",
     "statusProcessing": "Processing",
     "statusActive": "Active",
-    "statusFailed": "Failed"
+    "statusFailed": "Failed",
+    "irisTitle": "Iris",
+    "irisSubtitle": "Your AI shopping assistant",
+    "irisWelcome": "Hi! I'm Iris, your shopping assistant. Ask me about products, pricing, or anything about our store!",
+    "irisPlaceholder": "Ask Iris anything...",
+    "irisThinking": "Iris is thinking...",
+    "searchingProducts": "Searching products...",
+    "loadingProduct": "Loading product details...",
+    "irisOpen": "Open Iris assistant",
+    "irisScrollDown": "Latest",
+    "irisPoweredBy": "Powered by Iris AI",
+    "irisSuggestion1": "Find me a laptop",
+    "irisSuggestion2": "Do you have refurbished phones?",
+    "irisSuggestion3": "What's your return policy?",
+    "irisSuggestion4": "Contact support"
   },
   "analytics": {
     "title": "Analytics",
