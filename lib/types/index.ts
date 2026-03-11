@@ -48,7 +48,7 @@ export type PayoutStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
 // Content
 // ---------------------------------------------------------------------------
 
-export type ArticleStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED"
+export type ArticleStatus = "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "ARCHIVED"
 
 export type NotificationType =
   | "ORDER_UPDATE"

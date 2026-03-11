@@ -13,5 +13,7 @@ DROP TYPE IF EXISTS "Priority";
 -- PostgreSQL does not support DROP VALUE from enum, so we recreate it
 ALTER TYPE "NotificationType" RENAME TO "NotificationType_old";
 CREATE TYPE "NotificationType" AS ENUM ('ORDER_UPDATE', 'COMMISSION', 'SYSTEM', 'PROMOTION', 'LOW_STOCK_ALERT', 'AFFILIATE_APPLICATION');
+ALTER TABLE "Notification" ALTER COLUMN "type" DROP DEFAULT;
 ALTER TABLE "Notification" ALTER COLUMN "type" TYPE "NotificationType" USING ("type"::text::"NotificationType");
+ALTER TABLE "Notification" ALTER COLUMN "type" SET DEFAULT 'SYSTEM';
 DROP TYPE "NotificationType_old";

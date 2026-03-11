@@ -50,6 +50,7 @@ export default async function ProductDetailPage({ params }: Props) {
       stockByBranch: v.stockByBranch,
     })),
     reviews: product.reviews,
+    reviewAggregate: product.reviewAggregate,
     featureValues:
       product.featureValues?.map((fv) => ({
         featureFieldName: fv.featureField.name,

@@ -40,6 +40,7 @@ export function AppSidebar({
         { title: t("categories"), url: "/admin/categories" },
         { title: t("inventory"), url: "/admin/inventory" },
         { title: t("receipts"), url: "/admin/receipts" },
+        { title: t("reviews"), url: "/admin/reviews" },
       ],
     },
     {
@@ -49,6 +50,7 @@ export function AppSidebar({
       items: [
         { title: t("analytics"), url: "/admin/analytics" },
         { title: t("blog"), url: "/admin/blog" },
+        { title: t("blogAnalytics"), url: "/admin/blog/analytics" },
         { title: t("affiliates"), url: "/admin/affiliates" },
       ],
     },

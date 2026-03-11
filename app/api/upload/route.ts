@@ -13,7 +13,7 @@ const ALLOWED_MIME_TYPES = [
   "video/webm",
 ]
 
-const ALLOWED_FOLDERS = ["products"] as const
+const ALLOWED_FOLDERS = ["products", "blog"] as const
 
 export async function POST(request: NextRequest) {
   const { userId } = await auth()
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const prefix = `products/${Date.now()}`
+    const prefix = `${folder}/${Date.now()}`
 
     const blob = await put(`${prefix}-${file.name}`, file, {
       access: "public",

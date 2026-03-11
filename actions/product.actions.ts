@@ -390,27 +390,45 @@ export async function getProduct(id: string) {
 }
 
 export async function getProductBySlug(slug: string) {
-  return db.product.findUnique({
-    where: { slug, isActive: true },
-    include: {
-      category: true,
-      images: { orderBy: { sortOrder: "asc" } },
-      variants: {
-        include: {
-          stockByBranch: { include: { branch: { select: { id: true, name: true, city: true } } } },
+  const [product, aggregate] = await Promise.all([
+    db.product.findUnique({
+      where: { slug, isActive: true },
+      include: {
+        category: true,
+        images: { orderBy: { sortOrder: "asc" } },
+        variants: {
+          include: {
+            stockByBranch: { include: { branch: { select: { id: true, name: true, city: true } } } },
+          },
+        },
+        featureValues: {
+          include: { featureField: true },
+        },
+        reviews: {
+          where: { status: "APPROVED" },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+          include: { user: { select: { name: true } } },
         },
       },
-      featureValues: {
-        include: { featureField: true },
-      },
-      reviews: {
-        where: { status: "APPROVED" },
-        orderBy: { createdAt: "desc" },
-        take: 10,
-        include: { user: { select: { name: true } } },
-      },
-    },
-  })
+    }),
+    db.product.findUnique({
+      where: { slug, isActive: true },
+      select: { id: true },
+    }).then(async (p) => {
+      if (!p) return { avg: null, count: 0 };
+      const agg = await db.productReview.aggregate({
+        where: { productId: p.id, status: "APPROVED" },
+        _avg: { rating: true },
+        _count: { id: true },
+      });
+      return { avg: agg._avg.rating, count: agg._count.id };
+    }),
+  ]);
+
+  if (!product) return null;
+
+  return { ...product, reviewAggregate: aggregate };
 }
 
 interface GetProductsParams {

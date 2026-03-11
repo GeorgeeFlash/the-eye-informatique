@@ -89,6 +89,7 @@ enum PayoutStatus {
 
 enum ArticleStatus {
   DRAFT
+  PENDING_REVIEW
   PUBLISHED
   ARCHIVED
 }
@@ -149,7 +150,8 @@ model User {
   notifications      Notification[]
   affiliateProfile   AffiliateProfile?
   activityLogs       ActivityLog[]
-  blogArticles       BlogArticle[]
+  blogArticles       BlogArticle[]           @relation("AuthoredArticles")
+  reviewedArticles   BlogArticle[]           @relation("ReviewedArticles")
   productReviews     ProductReview[]
   knowledgeBaseDocs  KnowledgeBaseDocument[]
   orderStatusChanges OrderStatusHistory[]    @relation("OrderStatusChangedBy")
@@ -464,10 +466,23 @@ model BlogArticle {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  author User  @relation(fields: [authorId], references: [id])
-  tags   Tag[] @relation("ArticleTags")
+  /// Reviewer fields for approval workflow
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewerNote String?
+
+  /// Self-relation for draft versioning: when editing a published article,
+  /// a new DRAFT row is created with draftOfId pointing to the original.
+  draftOfId String?
+
+  author   User          @relation("AuthoredArticles", fields: [authorId], references: [id])
+  reviewer User?         @relation("ReviewedArticles", fields: [reviewedById], references: [id])
+  draftOf  BlogArticle?  @relation("ArticleDrafts", fields: [draftOfId], references: [id])
+  drafts   BlogArticle[] @relation("ArticleDrafts")
+  tags     Tag[]         @relation("ArticleTags")
 
   @@index([status, publishedAt(sort: Desc)])
+  @@index([draftOfId])
 }
 
 model Notification {

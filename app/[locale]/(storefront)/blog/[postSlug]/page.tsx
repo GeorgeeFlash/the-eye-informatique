@@ -1,21 +1,22 @@
-import { notFound } from "next/navigation"
-import { getTranslations } from "next-intl/server"
-import { getArticleBySlug } from "@/actions/blog.actions"
-import { Badge } from "@/components/ui/badge"
-import { formatDate } from "@/lib/utils"
-import Image from "next/image"
-import Link from "next/link"
-import { ArrowLeftIcon } from "lucide-react"
-import type { Metadata } from "next"
+import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { getArticleBySlug } from "@/actions/blog.actions";
+import { Badge } from "@/components/ui/badge";
+import { BlockContent } from "@/components/blog/block-content";
+import { formatDate } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowLeftIcon } from "lucide-react";
+import type { Metadata } from "next";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ postSlug: string }>
+  params: Promise<{ postSlug: string }>;
 }): Promise<Metadata> {
-  const { postSlug } = await params
-  const article = await getArticleBySlug(postSlug)
-  if (!article) return { title: "Not Found" }
+  const { postSlug } = await params;
+  const article = await getArticleBySlug(postSlug);
+  if (!article) return { title: "Not Found" };
   return {
     title: article.title,
     description: article.excerpt ?? undefined,
@@ -24,25 +25,25 @@ export async function generateMetadata({
       description: article.excerpt ?? undefined,
       images: article.coverImageUrl ? [article.coverImageUrl] : [],
     },
-  }
+  };
 }
 
 export default async function BlogArticlePage({
   params,
 }: {
-  params: Promise<{ postSlug: string; locale: string }>
+  params: Promise<{ postSlug: string; locale: string }>;
 }) {
-  const { postSlug, locale } = await params
-  const t = await getTranslations("blog")
-  const article = await getArticleBySlug(postSlug)
+  const { postSlug, locale } = await params;
+  const t = await getTranslations("blog");
+  const article = await getArticleBySlug(postSlug);
 
-  if (!article) notFound()
+  if (!article) notFound();
 
   // Simple JSON content renderer — works for plain text and basic BlockNote output
   const contentHtml =
     typeof article.content === "string"
       ? article.content
-      : JSON.stringify(article.content)
+      : JSON.stringify(article.content);
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
@@ -95,44 +96,17 @@ export default async function BlogArticlePage({
       </header>
 
       <div className="prose prose-neutral dark:prose-invert max-w-none">
-        {/* 
-          For a full BlockNote implementation, render blocks here. 
-          For now we display the raw content. 
-        */}
-        <div
-          dangerouslySetInnerHTML={{
-            __html:
-              typeof article.content === "string"
-                ? article.content
-                : renderBlockContent(article.content),
-          }}
-        />
+        {Array.isArray(article.content) ? (
+          <BlockContent content={article.content} />
+        ) : (
+          <div
+            dangerouslySetInnerHTML={{
+              __html:
+                typeof article.content === "string" ? article.content : "",
+            }}
+          />
+        )}
       </div>
     </article>
-  )
-}
-
-/**
- * Minimal renderer for BlockNote JSON content.
- * Converts block-level nodes to simple HTML.
- */
-function renderBlockContent(content: unknown): string {
-  if (!Array.isArray(content)) return ""
-  return content
-    .map((block: { type?: string; content?: { text?: string }[]; props?: { level?: number } }) => {
-      const text = block.content?.map((c) => c.text ?? "").join("") ?? ""
-      switch (block.type) {
-        case "heading": {
-          const level = block.props?.level ?? 2
-          return `<h${level}>${text}</h${level}>`
-        }
-        case "bulletListItem":
-          return `<li>${text}</li>`
-        case "numberedListItem":
-          return `<li>${text}</li>`
-        default:
-          return text ? `<p>${text}</p>` : ""
-      }
-    })
-    .join("\n")
+  );
 }

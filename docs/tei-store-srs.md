@@ -630,7 +630,7 @@ The following are confirmed out of scope for all releases covered by this SRS:
 
 **Acceptance Criteria**
 
-- [ ] AC-M7.1-1: The following events trigger both an email and an in-app notification: order status change, after-sales request status change, affiliate application status change, and guarantee nearing expiry.
+- [ ] AC-M7.1-1: The following events trigger both an email and an in-app notification: order status change, and affiliate application status change.
 - [ ] AC-M7.1-2: The following events trigger an in-app notification only (no email): low-stock alert (to branch staff), new article pending review (to Branch Admin), and new affiliate application received (to Branch Admin).
 - [ ] AC-M7.1-3: A user can view all their in-app notifications from a notification centre accessible on every page. Notifications display: event type, a brief message, timestamp, and a read/unread indicator.
 - [ ] AC-M7.1-4: Notifications are displayed in reverse chronological order. The notification centre shows an unread count badge.

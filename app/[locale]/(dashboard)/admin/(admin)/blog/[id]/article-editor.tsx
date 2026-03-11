@@ -16,6 +16,9 @@ import {
   publishArticle,
   unpublishArticle,
   deleteArticle,
+  submitForReview,
+  approveArticle,
+  rejectArticle,
 } from "@/actions/blog.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,10 +33,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Editor } from "@/components/blog/editor";
+import dynamic from "next/dynamic";
+const Editor = dynamic(
+  () => import("@/components/blog/editor").then((m) => ({ default: m.Editor })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-100 animate-pulse rounded-md border bg-muted" />
+    ),
+  },
+);
+import { CoverImageUploader } from "@/components/blog/cover-image-uploader";
 import { toast } from "sonner";
-import { SaveIcon, GlobeIcon, ArchiveIcon } from "lucide-react";
+import {
+  SaveIcon,
+  GlobeIcon,
+  ArchiveIcon,
+  SendIcon,
+  CheckIcon,
+  XIcon,
+} from "lucide-react";
 import { Locale } from "@/lib/constants";
+import type { Role } from "@/lib/types";
 
 type Tag = { id: string; name: string; slug: string };
 
@@ -47,24 +68,35 @@ type Article = {
   locale: string;
   status: string;
   tags: Tag[];
+  reviewerNote?: string | null;
+  reviewer?: { name: string | null } | null;
+  reviewedAt?: Date | null;
 };
 
 export function ArticleEditor({
   article,
   tags,
+  userRole,
 }: {
   article?: Article;
   tags: Tag[];
+  userRole: Role;
 }) {
   const t = useTranslations("blog");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [content, setContent] = useState<unknown>(article?.content ?? "");
+  const [coverImage, setCoverImage] = useState<string>(
+    article?.coverImageUrl ?? "",
+  );
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
     article?.tags.map((t) => t.id) ?? [],
   );
+  const [rejectionNote, setRejectionNote] = useState("");
+  const [showRejectForm, setShowRejectForm] = useState(false);
 
   const isNew = !article;
+  const isAdmin = userRole === "ADMIN" || userRole === "CENTRAL_ADMIN";
 
   const form = useForm<CreateArticleValues>({
     resolver: zodResolver(
@@ -90,7 +122,12 @@ export function ArticleEditor({
 
   function onSubmit(values: CreateArticleValues) {
     startTransition(async () => {
-      const data = { ...values, content, tagIds: selectedTagIds };
+      const data = {
+        ...values,
+        coverImageUrl: coverImage,
+        content,
+        tagIds: selectedTagIds,
+      };
 
       if (isNew) {
         const result = await createArticle(data);
@@ -139,6 +176,61 @@ export function ArticleEditor({
     });
   }
 
+  function handleSubmitForReview() {
+    if (!article) return;
+    startTransition(async () => {
+      const result = await submitForReview(article.id);
+      if ("error" in result) {
+        toast.error(result.error as string);
+        return;
+      }
+      toast.success(t("submittedForReview"));
+      router.refresh();
+    });
+  }
+
+  function handleApprove() {
+    if (!article) return;
+    startTransition(async () => {
+      const result = await approveArticle(article.id);
+      if ("error" in result) {
+        toast.error(result.error as string);
+        return;
+      }
+      toast.success(t("articleApproved"));
+      if (result.mergedInto) {
+        router.push(`/admin/blog/${result.mergedInto}`);
+      } else {
+        router.refresh();
+      }
+    });
+  }
+
+  function handleReject() {
+    if (!article || !rejectionNote.trim()) return;
+    startTransition(async () => {
+      const result = await rejectArticle(article.id, rejectionNote.trim());
+      if ("error" in result) {
+        toast.error(result.error as string);
+        return;
+      }
+      toast.success(t("articleRejected"));
+      setRejectionNote("");
+      setShowRejectForm(false);
+      router.refresh();
+    });
+  }
+
+  async function uploadFileToBlob(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.set("folder", "blog");
+    formData.append("files", file);
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Upload failed");
+    return (json.files as { url: string }[])[0].url;
+  }
+
   function toggleTag(tagId: string) {
     setSelectedTagIds((prev) =>
       prev.includes(tagId)
@@ -182,7 +274,11 @@ export function ArticleEditor({
 
             <div className="space-y-2">
               <Label>{t("content")}</Label>
-              <Editor initialContent={content} onChange={setContent} />
+              <Editor
+                initialContent={content}
+                onChange={setContent}
+                uploadFile={uploadFileToBlob}
+              />
             </div>
 
             <div className="space-y-2">
@@ -207,14 +303,33 @@ export function ArticleEditor({
           </CardHeader>
           <CardContent className="space-y-2">
             {article && (
-              <div className="mb-4">
+              <div className="mb-4 space-y-2">
                 <Badge
                   variant={
-                    article.status === "PUBLISHED" ? "default" : "secondary"
+                    article.status === "PUBLISHED"
+                      ? "default"
+                      : article.status === "PENDING_REVIEW"
+                        ? "outline"
+                        : "secondary"
                   }
                 >
                   {t(`status.${article.status}`)}
                 </Badge>
+                {article.reviewerNote && (
+                  <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm">
+                    <p className="font-medium text-destructive">
+                      {t("reviewerNoteLabel")}
+                    </p>
+                    <p className="mt-1 text-muted-foreground">
+                      {article.reviewerNote}
+                    </p>
+                    {article.reviewer?.name && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        — {article.reviewer.name}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -223,7 +338,22 @@ export function ArticleEditor({
               {isNew ? t("createDraft") : t("saveDraft")}
             </Button>
 
+            {/* Submit for Review (STAFF can submit drafts; ADMIN/CENTRAL_ADMIN can also submit) */}
             {article && article.status === "DRAFT" && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleSubmitForReview}
+                disabled={isPending}
+              >
+                <SendIcon className="mr-2 size-4" />
+                {t("submitForReview")}
+              </Button>
+            )}
+
+            {/* Direct Publish (ADMIN/CENTRAL_ADMIN only, skip review) */}
+            {article && article.status === "DRAFT" && isAdmin && (
               <Button
                 type="button"
                 variant="outline"
@@ -234,6 +364,67 @@ export function ArticleEditor({
                 <GlobeIcon className="mr-2 size-4" />
                 {t("publish")}
               </Button>
+            )}
+
+            {/* Approve / Reject (ADMIN/CENTRAL_ADMIN, only for PENDING_REVIEW) */}
+            {article && article.status === "PENDING_REVIEW" && isAdmin && (
+              <>
+                <Button
+                  type="button"
+                  variant="default"
+                  className="w-full"
+                  onClick={handleApprove}
+                  disabled={isPending}
+                >
+                  <CheckIcon className="mr-2 size-4" />
+                  {t("approve")}
+                </Button>
+
+                {!showRejectForm ? (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => setShowRejectForm(true)}
+                    disabled={isPending}
+                  >
+                    <XIcon className="mr-2 size-4" />
+                    {t("reject")}
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={rejectionNote}
+                      onChange={(e) => setRejectionNote(e.target.value)}
+                      placeholder={t("rejectionNotePlaceholder")}
+                      rows={3}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="flex-1"
+                        onClick={handleReject}
+                        disabled={isPending || !rejectionNote.trim()}
+                      >
+                        {t("confirmReject")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowRejectForm(false);
+                          setRejectionNote("");
+                        }}
+                      >
+                        {t("cancel")}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {article && article.status === "PUBLISHED" && (
@@ -269,10 +460,7 @@ export function ArticleEditor({
             <CardTitle className="text-base">{t("coverImage")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Input
-              {...form.register("coverImageUrl")}
-              placeholder="https://..."
-            />
+            <CoverImageUploader value={coverImage} onChange={setCoverImage} />
           </CardContent>
         </Card>
 

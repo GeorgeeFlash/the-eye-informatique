@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useCart } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
@@ -20,9 +20,14 @@ import {
   CheckCircleIcon,
   MinusIcon,
   PlusIcon,
+  StarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Locale } from "@/lib/constants";
+import { getProductReviews } from "@/actions/review.actions";
+import { ReviewForm } from "@/components/storefront/review-form";
 
 type Variant = {
   id: string;
@@ -53,6 +58,7 @@ type ProductData = {
     comment: string | null;
     user: { name: string | null };
   }[];
+  reviewAggregate: { avg: number | null; count: number };
   featureValues?: {
     featureFieldName: string;
     value: string;
@@ -100,11 +106,29 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     setQuantity((current) => Math.min(Math.max(current, 1), availableToAdd));
   }, [availableToAdd, selectedVariant]);
 
-  const avgRating =
-    product.reviews.length > 0
-      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
-        product.reviews.length
-      : null;
+  const avgRating = product.reviewAggregate.avg;
+  const totalReviewCount = product.reviewAggregate.count;
+
+  // Review pagination & sorting state
+  const [reviewPage, setReviewPage] = useState(1);
+  const [sortBy, setSortBy] = useState<
+    "newest" | "oldest" | "highest" | "lowest"
+  >("newest");
+  const [paginatedReviews, setPaginatedReviews] = useState(product.reviews);
+  const [reviewTotalPages, setReviewTotalPages] = useState(1);
+  const [isLoadingReviews, startReviewTransition] = useTransition();
+
+  useEffect(() => {
+    startReviewTransition(async () => {
+      const result = await getProductReviews(product.id, {
+        page: reviewPage,
+        pageSize: 10,
+        sortBy,
+      });
+      setPaginatedReviews(result.reviews);
+      setReviewTotalPages(result.totalPages);
+    });
+  }, [product.id, reviewPage, sortBy]);
 
   return (
     <div className="space-y-6">
@@ -126,10 +150,22 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       {/* Rating */}
       {avgRating !== null && (
         <div className="flex items-center gap-2 text-sm">
+          <div className="flex">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <StarIcon
+                key={star}
+                className={`h-4 w-4 ${
+                  star <= Math.round(avgRating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-muted-foreground"
+                }`}
+              />
+            ))}
+          </div>
           <span className="font-medium">{avgRating.toFixed(1)} / 5</span>
           <span className="text-muted-foreground">
-            ({product.reviews.length}{" "}
-            {product.reviews.length === 1 ? "review" : "reviews"})
+            ({totalReviewCount}{" "}
+            {totalReviewCount === 1 ? t("reviewSingular") : t("reviews")})
           </span>
         </div>
       )}
@@ -319,29 +355,94 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       <Separator />
 
       {/* Reviews */}
-      {product.reviews.length > 0 && (
-        <div className="space-y-4">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">{t("reviews")}</h2>
-          {product.reviews.map((review) => (
-            <div key={review.id} className="space-y-1 rounded-lg border p-4">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-sm">
-                  {review.user.name ?? t("anonymous")}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {"★".repeat(review.rating)}
-                  {"☆".repeat(5 - review.rating)}
-                </span>
-              </div>
-              {review.comment && (
-                <p className="text-sm text-muted-foreground">
-                  {review.comment}
-                </p>
-              )}
-            </div>
-          ))}
+          {totalReviewCount > 0 && (
+            <Select
+              value={sortBy}
+              onValueChange={(v) => {
+                setSortBy(v as typeof sortBy);
+                setReviewPage(1);
+              }}
+            >
+              <SelectTrigger className="w-45">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">{t("sortNewest")}</SelectItem>
+                <SelectItem value="oldest">{t("sortOldest")}</SelectItem>
+                <SelectItem value="highest">{t("sortHighest")}</SelectItem>
+                <SelectItem value="lowest">{t("sortLowest")}</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
-      )}
+
+        {/* Review form */}
+        <ReviewForm productId={product.id} />
+
+        {paginatedReviews.length > 0 ? (
+          <div className="space-y-3">
+            {paginatedReviews.map((review) => (
+              <div key={review.id} className="space-y-1 rounded-lg border p-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">
+                    {review.user.name ?? t("anonymous")}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {"★".repeat(review.rating)}
+                      {"☆".repeat(5 - review.rating)}
+                    </span>
+                    {"createdAt" in review && (
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(
+                          review.createdAt as string,
+                        ).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {review.comment && (
+                  <p className="text-sm text-muted-foreground">
+                    {review.comment}
+                  </p>
+                )}
+              </div>
+            ))}
+
+            {/* Pagination */}
+            {reviewTotalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={reviewPage <= 1 || isLoadingReviews}
+                  onClick={() => setReviewPage((p) => p - 1)}
+                >
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  {reviewPage} / {reviewTotalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={reviewPage >= reviewTotalPages || isLoadingReviews}
+                  onClick={() => setReviewPage((p) => p + 1)}
+                >
+                  <ChevronRightIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("noReviews")}</p>
+        )}
+      </div>
     </div>
   );
 }

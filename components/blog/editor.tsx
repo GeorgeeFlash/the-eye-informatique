@@ -1,22 +1,34 @@
 // BlockNote editor wrapper — dynamic import prevents SSR issues
-"use client"
+"use client";
 
-// TODO: Install @blocknote/react and @blocknote/mantine or @blocknote/shadcn
-// then replace this stub with the real editor
+import { useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/shadcn";
+import type { Block } from "@blocknote/core";
+import "@blocknote/shadcn/style.css";
+
 interface EditorProps {
-  initialContent?: unknown
-  onChange?: (content: unknown) => void
+  initialContent?: unknown;
+  onChange?: (content: unknown) => void;
+  uploadFile?: (file: File) => Promise<string>;
 }
 
-export function Editor({ onChange }: EditorProps) {
+export function Editor({ initialContent, onChange, uploadFile }: EditorProps) {
+  const editor = useCreateBlockNote({
+    initialContent: Array.isArray(initialContent)
+      ? (initialContent as Block[])
+      : undefined,
+    uploadFile,
+  });
+
   return (
-    <div className="min-h-100 rounded-md border p-4">
-      {/* TODO: <BlockNoteView editor={...} /> */}
-      <textarea
-        className="h-full w-full resize-none outline-none"
-        placeholder="Commencez à écrire..."
-        onChange={(e) => onChange?.(e.target.value)}
+    <div className="min-h-100 rounded-md border">
+      <BlockNoteView
+        editor={editor}
+        onChange={() => {
+          onChange?.(editor.document);
+        }}
+        theme="light"
       />
     </div>
-  )
+  );
 }
