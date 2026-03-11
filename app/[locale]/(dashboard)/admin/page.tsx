@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import {
   PackageIcon,
   ShoppingCartIcon,
-  WrenchIcon,
   ArrowRightIcon,
   ClockIcon,
   UsersIcon,
@@ -38,7 +37,6 @@ export default async function AdminDashboardPage() {
   const [
     orderCount,
     pendingOrders,
-    openRepairs,
     totalProducts,
     totalUsers,
     recentOrders,
@@ -47,9 +45,6 @@ export default async function AdminDashboardPage() {
   ] = await Promise.all([
     db.order.count({ where: branchFilter }),
     db.order.count({ where: { ...branchFilter, status: "PENDING" } }),
-    db.repairTicket.count({
-      where: { ...branchFilter, status: { notIn: ["CLOSED", "RETURNED"] } },
-    }),
     db.product.count({
       where: isCentralAdmin
         ? {}
@@ -105,11 +100,6 @@ export default async function AdminDashboardPage() {
           title={t("pendingOrders")}
           value={pendingOrders}
           icon={ClockIcon}
-        />
-        <StatCard
-          title={t("openRepairs")}
-          value={openRepairs}
-          icon={WrenchIcon}
         />
         <StatCard
           title={isCentralAdmin ? t("totalUsers") : t("totalProducts")}

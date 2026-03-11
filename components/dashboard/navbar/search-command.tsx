@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useTranslations } from "next-intl"
-import { useRouter } from "@/i18n/navigation"
-import { SearchIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { SearchIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
   CommandEmpty,
@@ -13,28 +13,28 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 
 export function SearchCommand() {
-  const [open, setOpen] = useState(false)
-  const router = useRouter()
-  const t = useTranslations("searchCommand")
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const t = useTranslations("searchCommand");
 
   // Keyboard shortcut: Ctrl+K / Cmd+K
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setOpen((v) => !v)
+        e.preventDefault();
+        setOpen((v) => !v);
       }
-    }
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   function navigate(href: string) {
-    router.push(href)
-    setOpen(false)
+    router.push(href);
+    setOpen(false);
   }
 
   return (
@@ -67,10 +67,15 @@ export function SearchCommand() {
         <CommandList>
           <CommandEmpty>{t("noResults")}</CommandEmpty>
           <CommandGroup heading={t("navGroup")}>
-            <CommandItem onSelect={() => navigate("/admin")}>{t("overview")}</CommandItem>
-            <CommandItem onSelect={() => navigate("/admin/orders")}>{t("orders")}</CommandItem>
-            <CommandItem onSelect={() => navigate("/admin/products")}>{t("products")}</CommandItem>
-            <CommandItem onSelect={() => navigate("/admin/repairs")}>{t("repairs")}</CommandItem>
+            <CommandItem onSelect={() => navigate("/admin")}>
+              {t("overview")}
+            </CommandItem>
+            <CommandItem onSelect={() => navigate("/admin/orders")}>
+              {t("orders")}
+            </CommandItem>
+            <CommandItem onSelect={() => navigate("/admin/products")}>
+              {t("products")}
+            </CommandItem>
           </CommandGroup>
           <CommandSeparator />
           <CommandGroup heading={t("quickActionsGroup")}>
@@ -84,5 +89,5 @@ export function SearchCommand() {
         </CommandList>
       </CommandDialog>
     </>
-  )
+  );
 }

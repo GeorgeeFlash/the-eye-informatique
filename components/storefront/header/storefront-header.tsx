@@ -96,16 +96,6 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
               </NavigationMenuLink>
             </NavigationMenuItem>
 
-            {/* Guarantee */}
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                asChild
-                className={navigationMenuTriggerStyle()}
-              >
-                <Link href="/guarantee">{t("guarantee")}</Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-
             {/* About */}
             <NavigationMenuItem>
               <NavigationMenuLink

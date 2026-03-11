@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/server/db"
-import { Prisma } from "@/lib/generated/prisma"
+import { Prisma } from "@/lib/generated/prisma/client"
 import { requireRole, canManageBranch, type AuthUser } from "@/lib/auth"
 import { productSchema, productSchemaBase, productVariantSchema } from "@/lib/validators/product.schema"
 import { sanitizeHtml } from "@/lib/sanitize"

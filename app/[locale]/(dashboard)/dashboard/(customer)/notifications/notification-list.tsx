@@ -1,79 +1,77 @@
-"use client"
+"use client";
 
-import { useTransition } from "react"
-import { useTranslations, useLocale } from "next-intl"
-import { formatDistanceToNow } from "date-fns"
-import { fr as frLocale, enUS } from "date-fns/locale"
+import { useTransition } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDistanceToNow } from "date-fns";
+import { fr as frLocale, enUS } from "date-fns/locale";
 import {
   markNotificationRead,
   markAllNotificationsRead,
   deleteNotification,
-} from "@/actions/notification.actions"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+} from "@/actions/notification.actions";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   CheckCheckIcon,
   Trash2Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
-} from "lucide-react"
-import { Link } from "@/i18n/navigation"
-import { useRouter } from "@/i18n/navigation"
+} from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 type Notification = {
-  id: string
-  type: string
-  title: string
-  body: string
-  isRead: boolean
-  link: string | null
-  createdAt: Date
-}
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  isRead: boolean;
+  link: string | null;
+  createdAt: Date;
+};
 
 const TYPE_VARIANT: Record<string, "default" | "secondary" | "outline"> = {
   ORDER_UPDATE: "default",
-  REPAIR_UPDATE: "secondary",
   COMMISSION: "default",
   SYSTEM: "outline",
   PROMOTION: "default",
   LOW_STOCK_ALERT: "secondary",
   AFFILIATE_APPLICATION: "secondary",
-  GUARANTEE_EXPIRY: "outline",
-}
+};
 
 export function NotificationList({
   notifications,
   page,
   totalPages,
 }: {
-  notifications: Notification[]
-  page: number
-  totalPages: number
+  notifications: Notification[];
+  page: number;
+  totalPages: number;
 }) {
-  const t = useTranslations("notifications")
-  const locale = useLocale()
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const t = useTranslations("notifications");
+  const locale = useLocale();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   function handleMarkRead(id: string) {
     startTransition(async () => {
-      await markNotificationRead(id)
-      router.refresh()
-    })
+      await markNotificationRead(id);
+      router.refresh();
+    });
   }
 
   function handleMarkAllRead() {
     startTransition(async () => {
-      await markAllNotificationsRead()
-      router.refresh()
-    })
+      await markAllNotificationsRead();
+      router.refresh();
+    });
   }
 
   function handleDelete(id: string) {
     startTransition(async () => {
-      await deleteNotification(id)
-      router.refresh()
-    })
+      await deleteNotification(id);
+      router.refresh();
+    });
   }
 
   if (notifications.length === 0) {
@@ -81,7 +79,7 @@ export function NotificationList({
       <p className="py-8 text-center text-sm text-muted-foreground">
         {t("empty")}
       </p>
-    )
+    );
   }
 
   return (
@@ -108,7 +106,10 @@ export function NotificationList({
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <Badge variant={TYPE_VARIANT[n.type] ?? "outline"} className="text-xs">
+                <Badge
+                  variant={TYPE_VARIANT[n.type] ?? "outline"}
+                  className="text-xs"
+                >
                   {t(`types.${n.type}`)}
                 </Badge>
                 {!n.isRead && (
@@ -164,7 +165,12 @@ export function NotificationList({
           <span className="text-sm text-muted-foreground">
             {page} / {totalPages}
           </span>
-          <Button variant="outline" size="sm" asChild disabled={page >= totalPages}>
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            disabled={page >= totalPages}
+          >
             <Link href={`/dashboard/notifications?page=${page + 1}`}>
               <ChevronRightIcon className="size-4" />
             </Link>
@@ -172,5 +178,5 @@ export function NotificationList({
         </div>
       )}
     </div>
-  )
+  );
 }

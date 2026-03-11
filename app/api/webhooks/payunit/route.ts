@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { processPaymentResult } from "@/lib/payment"
 import { inngest } from "@/server/inngest/client"
 import { db } from "@/server/db"
+import { renderToBuffer } from "@react-pdf/renderer"
+import { GuaranteeCertificate } from "@/components/pdf/guarantee-certificate"
+import { createElement } from "react"
 
 /**
  * PayUnit webhook handler.
@@ -45,13 +48,28 @@ export async function POST(req: Request) {
       })
 
       if (order?.user?.email) {
+        // Generate guarantee certificate PDF
+        const guaranteeElement = createElement(GuaranteeCertificate, {
+          customerName: order.user.name ?? "Customer",
+          orderNumber: order.orderNumber,
+          purchaseDate: order.createdAt.toISOString(),
+          items: order.items.map((i) => ({
+            productName: i.variant?.product?.name ?? "Product",
+            variant: i.variant?.color ?? undefined,
+            quantity: i.quantity,
+          })),
+          locale: "en",
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pdfBuffer = await renderToBuffer(guaranteeElement as any)
+
         await inngest.send({
           name: "email/send",
           data: {
             to: order.user.email,
             subject: `Order ${order.orderNumber} — Payment Confirmed`,
-            templateName: "order-confirmation",
-            templateData: {
+            template: "order-confirmation",
+            props: {
               customerName: order.user.name ?? "Customer",
               orderId: order.orderNumber,
               items: order.items.map((i) => ({
@@ -62,6 +80,12 @@ export async function POST(req: Request) {
               total: Number(order.total),
               deliveryMethod: order.deliveryMethod,
             },
+            attachments: [
+              {
+                filename: `guarantee-${order.orderNumber}.pdf`,
+                content: Buffer.from(pdfBuffer).toString("base64"),
+              },
+            ],
           },
         })
       }

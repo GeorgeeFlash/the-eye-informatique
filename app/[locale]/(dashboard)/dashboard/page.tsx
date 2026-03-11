@@ -15,11 +15,8 @@ import { Button } from "@/components/ui/button";
 import {
   PackageIcon,
   ShoppingCartIcon,
-  WrenchIcon,
   ArrowRightIcon,
   ClockIcon,
-  ShieldCheckIcon,
-  AlertTriangleIcon,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -37,20 +34,8 @@ export default async function DashboardHomePage() {
   const t = await getTranslations("customerDashboard");
   const locale = (await getLocale()) as Locale;
 
-  const now = new Date();
-  const fourteenDaysFromNow = new Date(
-    now.getTime() + 14 * 24 * 60 * 60 * 1000,
-  );
-
   // Fetch customer data in parallel
-  const [
-    recentOrders,
-    activeRepairs,
-    guaranteeCards,
-    affiliateProfile,
-    totalOrders,
-    expiringGuarantees,
-  ] = await Promise.all([
+  const [recentOrders, affiliateProfile, totalOrders] = await Promise.all([
     db.order.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -64,35 +49,11 @@ export default async function DashboardHomePage() {
         items: { select: { id: true } },
       },
     }),
-    db.repairTicket.count({
-      where: { userId: user.id, status: { notIn: ["CLOSED", "RETURNED"] } },
-    }),
-    db.guaranteeCard.count({
-      where: { userId: user.id, expiresAt: { gt: now } },
-    }),
     db.affiliateProfile.findUnique({
       where: { userId: user.id },
       select: { status: true, totalEarned: true },
     }),
     db.order.count({ where: { userId: user.id } }),
-    // AC-M4.2-7: Guarantees expiring within 14 days
-    db.guaranteeCard.findMany({
-      where: {
-        userId: user.id,
-        expiresAt: { gt: now, lte: fourteenDaysFromNow },
-      },
-      select: {
-        id: true,
-        expiresAt: true,
-        orderItem: {
-          select: {
-            variant: {
-              select: { product: { select: { name: true } } },
-            },
-          },
-        },
-      },
-    }),
   ]);
 
   return (
@@ -106,21 +67,11 @@ export default async function DashboardHomePage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title={t("totalOrders")}
           value={totalOrders}
           icon={ShoppingCartIcon}
-        />
-        <StatCard
-          title={t("activeRepairs")}
-          value={activeRepairs}
-          icon={WrenchIcon}
-        />
-        <StatCard
-          title={t("activeGuarantees")}
-          value={guaranteeCards}
-          icon={ShieldCheckIcon}
         />
         <StatCard
           title={t("browseProducts")}
@@ -128,39 +79,6 @@ export default async function DashboardHomePage() {
           icon={PackageIcon}
         />
       </div>
-
-      {/* Guarantee Expiry Warnings — AC-M4.2-7 */}
-      {expiringGuarantees.length > 0 && (
-        <Card className="border-warning bg-warning/5">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <AlertTriangleIcon className="h-5 w-5 text-amber-500" />
-              <CardTitle className="text-base">
-                {t("guaranteeExpiryWarning")}
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {expiringGuarantees.map((g) => (
-                <div
-                  key={g.id}
-                  className="flex items-center justify-between text-sm"
-                >
-                  <span>
-                    {g.orderItem?.variant?.product?.name ?? t("product")}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {t("expiresOn", {
-                      date: formatDate(g.expiresAt, "dd/MM/yyyy", locale),
-                    })}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Recent Orders */}
       <Card>

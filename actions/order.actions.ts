@@ -309,7 +309,6 @@ export async function getOrder(orderId: string) {
             },
           },
           fulfillmentBranch: { select: { id: true, name: true, city: true } },
-          guaranteeCard: { select: { id: true, serialNumber: true, expiresAt: true, warrantyMonths: true } },
         },
       },
       payment: true,

@@ -38,7 +38,6 @@ export const ROUTES = {
   cart: "/cart",
   checkout: "/checkout",
   blog: "/blog",
-  guarantee: "/guarantee",
   about: "/about",
   contact: "/contact",
   affiliate: "/affiliate",

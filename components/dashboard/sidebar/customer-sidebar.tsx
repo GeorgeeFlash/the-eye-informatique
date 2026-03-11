@@ -34,11 +34,7 @@ export function CustomerSidebar({
       title: t("myServices"),
       url: "/dashboard/orders",
       icon: "package",
-      items: [
-        { title: t("orders"), url: "/dashboard/orders" },
-        { title: t("repairs"), url: "/dashboard/repairs" },
-        { title: t("guarantee"), url: "/dashboard/guarantee" },
-      ],
+      items: [{ title: t("orders"), url: "/dashboard/orders" }],
     },
     {
       title: t("notifications"),

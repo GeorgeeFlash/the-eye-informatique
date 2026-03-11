@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, DownloadIcon } from "lucide-react";
 import { Locale } from "@/lib/constants";
 
 export async function generateMetadata({
@@ -79,6 +79,17 @@ export default async function OrderDetailPage({
         >
           {t(`status_${order.status}`)}
         </Badge>
+        {order.status === "DELIVERED" && (
+          <Button asChild variant="outline" size="sm">
+            <a
+              href={`/api/guarantee-pdf/${order.id}?locale=${locale}`}
+              download
+            >
+              <DownloadIcon className="mr-2 size-4" />
+              {t("downloadGuarantee")}
+            </a>
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -109,24 +120,6 @@ export default async function OrderDetailPage({
                         <span className="text-xs text-muted-foreground">
                           {item.variant.color}
                         </span>
-                      )}
-                      {/* AC-M4.2-4: Guarantee info per item */}
-                      {item.guaranteeCard && (
-                        <div className="mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            {new Date(item.guaranteeCard.expiresAt) > new Date()
-                              ? t("guaranteeActive")
-                              : t("guaranteeExpired")}
-                            {" — "}
-                            {t("expiresOn", {
-                              date: formatDate(
-                                item.guaranteeCard.expiresAt,
-                                "dd/MM/yyyy",
-                                locale,
-                              ),
-                            })}
-                          </Badge>
-                        </div>
                       )}
                     </TableCell>
                     <TableCell className="text-center">

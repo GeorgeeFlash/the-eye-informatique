@@ -45,20 +45,6 @@ export type ReferralStatus = "PENDING" | "CONFIRMED" | "PAID"
 export type PayoutStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
 
 // ---------------------------------------------------------------------------
-// Repair
-// ---------------------------------------------------------------------------
-
-export type RepairStatus =
-  | "SUBMITTED"
-  | "DIAGNOSED"
-  | "IN_REPAIR"
-  | "READY"
-  | "RETURNED"
-  | "CLOSED"
-
-export type Priority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-
-// ---------------------------------------------------------------------------
 // Content
 // ---------------------------------------------------------------------------
 
@@ -66,7 +52,6 @@ export type ArticleStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED"
 
 export type NotificationType =
   | "ORDER_UPDATE"
-  | "REPAIR_UPDATE"
   | "COMMISSION"
   | "SYSTEM"
   | "PROMOTION"
@@ -100,8 +85,12 @@ export interface EmailSendEvent {
   data: {
     to: string
     subject: string
-    templateId: string
-    payload: Record<string, unknown>
+    template: string
+    props: Record<string, unknown>
+    attachments?: Array<{
+      filename: string
+      content: string
+    }>
   }
 }
 

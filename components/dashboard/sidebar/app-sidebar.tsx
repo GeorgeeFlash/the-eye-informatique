@@ -39,7 +39,6 @@ export function AppSidebar({
         { title: t("products"), url: "/admin/products" },
         { title: t("categories"), url: "/admin/categories" },
         { title: t("inventory"), url: "/admin/inventory" },
-        { title: t("repairs"), url: "/admin/repairs" },
         { title: t("receipts"), url: "/admin/receipts" },
       ],
     },

@@ -206,11 +206,6 @@ async function main() {
     create: { key: "low_stock_threshold", value: { units: 3 } },
   })
   await db.setting.upsert({
-    where: { key: "after_sales_request_window_days" },
-    update: {},
-    create: { key: "after_sales_request_window_days", value: { days: 30 } },
-  })
-  await db.setting.upsert({
     where: { key: "affiliate_re_application_wait_days" },
     update: {},
     create: { key: "affiliate_re_application_wait_days", value: { days: 30 } },

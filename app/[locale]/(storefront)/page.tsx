@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowRightIcon,
   SparklesIcon,
-  WrenchIcon,
+  HeadphonesIcon,
   ShieldCheckIcon,
   TruckIcon,
 } from "lucide-react";
@@ -73,7 +73,7 @@ export default async function HomePage() {
             {[
               { icon: TruckIcon, label: t("valueFastDelivery") },
               { icon: ShieldCheckIcon, label: t("valueWarranty") },
-              { icon: WrenchIcon, label: t("valueRepairService") },
+              { icon: HeadphonesIcon, label: t("valueCustomerSupport") },
               { icon: SparklesIcon, label: t("valueQuality") },
             ].map(({ icon: Icon, label }) => (
               <div

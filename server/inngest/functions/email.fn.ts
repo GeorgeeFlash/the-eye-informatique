@@ -2,7 +2,6 @@ import { createElement } from "react"
 import { inngest } from "../client"
 import { resend, FROM_EMAIL } from "@/server/resend"
 import { OrderConfirmationEmail } from "@/components/email/order-confirmation"
-import { RepairStatusEmail } from "@/components/email/repair-status"
 import { AffiliateWelcomeEmail } from "@/components/email/affiliate-welcome"
 import { InstallmentReminderEmail } from "@/components/email/installment-reminder"
 import { PayoutNotificationEmail } from "@/components/email/payout-notification"
@@ -11,7 +10,6 @@ import { PayoutNotificationEmail } from "@/components/email/payout-notification"
 // Add new templates here as they are created.
 const EMAIL_TEMPLATES = {
   "order-confirmation": OrderConfirmationEmail,
-  "repair-status": RepairStatusEmail,
   "affiliate-welcome": AffiliateWelcomeEmail,
   "installment-reminder": InstallmentReminderEmail,
   "payout-notification": PayoutNotificationEmail,
@@ -27,6 +25,11 @@ export type SendEmailEventData = {
   // Props are passed as a plain object and cast to the component's prop type
   // inside the step, keeping the event payload JSON-safe.
   props: Record<string, unknown>
+  // Optional file attachments (base64-encoded content)
+  attachments?: Array<{
+    filename: string
+    content: string // base64
+  }>
 }
 
 // M7.1 — Async email dispatch triggered by "email/send" events
@@ -34,13 +37,25 @@ export const sendEmail = inngest.createFunction(
   { id: "send-email" },
   { event: "email/send" },
   async ({ event, step }) => {
-    const { to, subject, template, props } = event.data as SendEmailEventData
+    const { to, subject, template, props, attachments } =
+      event.data as SendEmailEventData
 
     await step.run("send-via-resend", async () => {
       const Component = EMAIL_TEMPLATES[template]
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const react = createElement(Component as React.FC<any>, props as any)
-      return resend.emails.send({ from: FROM_EMAIL, to, subject, react })
+      return resend.emails.send({
+        from: FROM_EMAIL,
+        to,
+        subject,
+        react,
+        ...(attachments && {
+          attachments: attachments.map((a) => ({
+            filename: a.filename,
+            content: Buffer.from(a.content, "base64"),
+          })),
+        }),
+      })
     })
   },
 )

@@ -116,14 +116,6 @@ export function StorefrontFooter() {
                   {t("refurbished")}
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/guarantee"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {tNav("guarantee")}
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -131,14 +123,6 @@ export function StorefrontFooter() {
           <div>
             <h3 className="mb-4 text-sm font-semibold">{t("services")}</h3>
             <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/repair"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {t("repair")}
-                </Link>
-              </li>
               <li>
                 <Link
                   href="/checkout"
