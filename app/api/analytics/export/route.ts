@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
   lines.push(`Products Sold,${kpis.productsSold.value},${kpis.productsSold.change}`)
   lines.push(`Affiliate Sales (XAF),${kpis.affiliateSales.value},${kpis.affiliateSales.change}`)
   lines.push(`Retention Rate (%),${kpis.retentionRate.value},${kpis.retentionRate.change}`)
+  lines.push(`Conversion Rate (%),${kpis.conversionRate.value},${kpis.conversionRate.change}`)
   lines.push("")
 
   // Category sales

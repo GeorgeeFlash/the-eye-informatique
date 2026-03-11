@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/actions/product.actions";
 import { ProductGallery } from "@/components/storefront/product-gallery";
 import { ProductDetails } from "@/components/storefront/product-details";
+import { ProductViewTracker } from "@/components/storefront/product-view-tracker";
 import type { Metadata } from "next";
 
 interface Props {
@@ -60,6 +61,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
+      <ProductViewTracker productId={product.id} />
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Gallery */}
         <ProductGallery images={images} productName={product.name} />

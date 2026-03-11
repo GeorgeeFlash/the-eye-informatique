@@ -762,8 +762,14 @@
     "product": "Produit",
     "unitsSold": "Unités vendues",
     "revenue": "Chiffre d'affaires",
+    "conversionRate": "Taux de conversion",
+    "salesTrend": "Tendance des ventes",
+    "orderStatusBreakdown": "Répartition des statuts",
+    "branchComparison": "Comparaison par agence",
+    "searchProduct": "Rechercher un produit...",
     "noData": "Aucune donnée pour la période sélectionnée.",
-    "selectDateRange": "Sélectionnez une plage de dates et cliquez sur Charger pour voir les analytiques."  },
+    "selectDateRange": "Sélectionnez une plage de dates et cliquez sur Charger pour voir les analytiques."
+  },
   "footer": {
     "tagline": "Votre boutique tech de confiance au Cameroun. T\u00e9l\u00e9phones, ordinateurs et accessoires.",
     "shop": "Boutique",

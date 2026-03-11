@@ -157,6 +157,7 @@ model User {
   orderStatusChanges OrderStatusHistory[]    @relation("OrderStatusChangedBy")
   cartItems          ServerCartItem[]
   sentBroadcasts     Broadcast[]             @relation("SentBroadcasts")
+  productPageViews   ProductPageView[]
 }
 
 model Address {
@@ -187,6 +188,7 @@ model Branch {
   orderItemFulfillment OrderItem[]            @relation("OrderItemFulfillmentBranch")
   stockByBranch        ProductStockByBranch[]
   affiliates           AffiliateProfile[]
+  productPageViews     ProductPageView[]
 }
 
 model Category {
@@ -237,6 +239,7 @@ model Product {
   reviews          ProductReview[]
   inStorePurchases InStorePurchase[]
   featureValues    ProductFeatureValue[]
+  pageViews        ProductPageView[]
 }
 
 model ProductVariant {
@@ -616,6 +619,23 @@ model ContactSubmission {
   createdAt DateTime @default(now())
 
   @@index([isRead, createdAt(sort: Desc)])
+}
+
+model ProductPageView {
+  id        String   @id @default(cuid())
+  productId String
+  branchId  String?
+  sessionId String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branch  Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([productId, createdAt(sort: Desc)])
+  @@index([branchId, createdAt(sort: Desc)])
+  @@index([sessionId, productId])
 }
 
 model Broadcast {

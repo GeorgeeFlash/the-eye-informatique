@@ -762,6 +762,11 @@
     "product": "Product",
     "unitsSold": "Units Sold",
     "revenue": "Revenue",
+    "conversionRate": "Conversion Rate",
+    "salesTrend": "Sales Trend",
+    "orderStatusBreakdown": "Order Status Breakdown",
+    "branchComparison": "Branch Comparison",
+    "searchProduct": "Search products...",
     "noData": "No data for the selected period.",
     "selectDateRange": "Select a date range and click Load Data to view analytics."
   },

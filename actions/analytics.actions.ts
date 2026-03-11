@@ -1,8 +1,9 @@
 "use server"
 
 import { db } from "@/server/db"
-import { requireRole } from "@/lib/auth"
+import { requireRole, getCurrentUser } from "@/lib/auth"
 import { Prisma } from "@/lib/generated/prisma/client"
+import { cookies } from "next/headers"
 
 type DateRange = { from: Date; to: Date }
 
@@ -16,6 +17,46 @@ function previousPeriod(range: DateRange): DateRange {
 
 function branchFilter(branchId?: string | null) {
   return branchId ? { branchId } : {}
+}
+
+/**
+ * Track a product page view. Uses a session-based cookie for deduplication
+ * (one view per product per session, max once every 30 minutes).
+ */
+export async function trackProductPageView(productId: string) {
+  const cookieStore = await cookies()
+  let sessionId = cookieStore.get("ppv_session")?.value
+  if (!sessionId) {
+    sessionId = crypto.randomUUID()
+    cookieStore.set("ppv_session", sessionId, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24, // 1 day
+      path: "/",
+    })
+  }
+
+  const user = await getCurrentUser()
+
+  // Dedup: skip if same session+product viewed in the last 30 minutes
+  const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000)
+  const recent = await db.productPageView.findFirst({
+    where: {
+      sessionId,
+      productId,
+      createdAt: { gte: thirtyMinAgo },
+    },
+  })
+  if (recent) return
+
+  await db.productPageView.create({
+    data: {
+      productId,
+      sessionId,
+      userId: user?.id ?? null,
+      branchId: user?.branchId ?? null,
+    },
+  })
 }
 
 export async function getAnalyticsKPIs(
@@ -41,10 +82,13 @@ export async function getAnalyticsKPIs(
     currentAffiliateOrders,
     previousAffiliateOrders,
     currentDistinctProducts,
+    previousDistinctProducts,
     currentReturnCustomers,
     currentTotalCustomers,
     previousReturnCustomers,
     previousTotalCustomers,
+    currentPageViews,
+    previousPageViews,
   ] = await Promise.all([
     // Current completed orders
     db.order.aggregate({
@@ -118,6 +162,18 @@ export async function getAnalyticsKPIs(
       select: { variantId: true },
       distinct: ["variantId"],
     }),
+    // Previous distinct products sold
+    db.orderItem.findMany({
+      where: {
+        order: {
+          ...prevDateFilter,
+          status: { in: completedStatuses },
+          ...branchFilter(scopedBranchId),
+        },
+      },
+      select: { variantId: true },
+      distinct: ["variantId"],
+    }),
     // Current return customers (>1 order)
     db.$queryRaw<Array<{ cnt: bigint }>>`
       SELECT COUNT(*) as cnt FROM (
@@ -158,6 +214,20 @@ export async function getAnalyticsKPIs(
       select: { userId: true },
       distinct: ["userId"],
     }),
+    // Current product page views
+    db.productPageView.count({
+      where: {
+        ...dateFilter,
+        ...(scopedBranchId ? { branchId: scopedBranchId } : {}),
+      },
+    }),
+    // Previous product page views
+    db.productPageView.count({
+      where: {
+        ...prevDateFilter,
+        ...(scopedBranchId ? { branchId: scopedBranchId } : {}),
+      },
+    }),
   ])
 
   const curSales =
@@ -176,6 +246,17 @@ export async function getAnalyticsKPIs(
   const prevAffSales = Number(previousAffiliateOrders._sum.total ?? 0)
 
   const curProductsSold = currentDistinctProducts.length
+  const prevProductsSold = previousDistinctProducts.length
+
+  // Conversion rate: orders / page views
+  const curConversionRate =
+    currentPageViews > 0
+      ? (curOrderCount / currentPageViews) * 100
+      : 0
+  const prevConversionRate =
+    previousPageViews > 0
+      ? (prevOrderCount / previousPageViews) * 100
+      : 0
 
   const curReturnRate =
     currentTotalCustomers.length > 0
@@ -210,7 +291,7 @@ export async function getAnalyticsKPIs(
     },
     productsSold: {
       value: curProductsSold,
-      change: 0, // distinct products — no meaningful % change
+      change: pctChange(curProductsSold, prevProductsSold),
     },
     affiliateSales: {
       value: curAffSales,
@@ -219,6 +300,10 @@ export async function getAnalyticsKPIs(
     retentionRate: {
       value: Math.round(curReturnRate * 10) / 10,
       change: pctChange(curReturnRate, prevReturnRate),
+    },
+    conversionRate: {
+      value: Math.round(curConversionRate * 10) / 10,
+      change: pctChange(curConversionRate, prevConversionRate),
     },
   }
 }
@@ -256,12 +341,13 @@ export async function getCategorySalesChart(
 
   const categoryMap = new Map<
     string,
-    { name: string; units: number; revenue: number }
+    { id: string; name: string; units: number; revenue: number }
   >()
 
   for (const item of items) {
     const cat = item.variant.product.category
     const existing = categoryMap.get(cat.id) ?? {
+      id: cat.id,
       name: cat.name,
       units: 0,
       revenue: 0,
@@ -328,4 +414,104 @@ export async function getBranches() {
     select: { id: true, name: true, city: true },
     orderBy: { name: "asc" },
   })
+}
+
+export async function getSalesTrendChart(
+  range: DateRange,
+  filterBranchId?: string | null,
+) {
+  const user = await requireRole(["ADMIN", "STAFF", "CENTRAL_ADMIN"])
+  const scopedBranchId =
+    user.role === "ADMIN" ? user.branchId : filterBranchId
+
+  // Auto-granularity: daily if ≤31 days, weekly if ≤90 days, monthly otherwise
+  const durationMs = range.to.getTime() - range.from.getTime()
+  const durationDays = durationMs / (1000 * 60 * 60 * 24)
+
+  let truncFn: string
+  if (durationDays <= 31) {
+    truncFn = "day"
+  } else if (durationDays <= 90) {
+    truncFn = "week"
+  } else {
+    truncFn = "month"
+  }
+
+  const rows = await db.$queryRaw<
+    Array<{ period: Date; revenue: number; orders: bigint }>
+  >`
+    SELECT
+      date_trunc(${truncFn}, "createdAt") AS period,
+      COALESCE(SUM("total"::numeric), 0) AS revenue,
+      COUNT(*) AS orders
+    FROM "Order"
+    WHERE "createdAt" >= ${range.from}
+      AND "createdAt" <= ${range.to}
+      AND "status" = 'DELIVERED'
+      ${scopedBranchId ? Prisma.sql`AND "branchId" = ${scopedBranchId}` : Prisma.empty}
+    GROUP BY period
+    ORDER BY period
+  `
+
+  return {
+    granularity: truncFn as "day" | "week" | "month",
+    data: rows.map((r) => ({
+      period: r.period.toISOString(),
+      revenue: Number(r.revenue),
+      orders: Number(r.orders),
+    })),
+  }
+}
+
+export async function getOrderStatusDistribution(
+  range: DateRange,
+  filterBranchId?: string | null,
+) {
+  const user = await requireRole(["ADMIN", "STAFF", "CENTRAL_ADMIN"])
+  const scopedBranchId =
+    user.role === "ADMIN" ? user.branchId : filterBranchId
+
+  const result = await db.order.groupBy({
+    by: ["status"],
+    where: {
+      createdAt: { gte: range.from, lte: range.to },
+      ...branchFilter(scopedBranchId),
+    },
+    _count: true,
+  })
+
+  return result.map((r) => ({
+    status: r.status,
+    count: r._count,
+  }))
+}
+
+export async function getBranchRevenueComparison(range: DateRange) {
+  await requireRole(["CENTRAL_ADMIN"])
+
+  const rows = await db.$queryRaw<
+    Array<{ branchId: string; branchName: string; revenue: number; orders: bigint }>
+  >`
+    SELECT
+      b."id" AS "branchId",
+      b."name" AS "branchName",
+      COALESCE(SUM(o."total"::numeric), 0) AS revenue,
+      COUNT(o."id") AS orders
+    FROM "Branch" b
+    LEFT JOIN "Order" o
+      ON o."branchId" = b."id"
+      AND o."createdAt" >= ${range.from}
+      AND o."createdAt" <= ${range.to}
+      AND o."status" = 'DELIVERED'
+    WHERE b."isActive" = true
+    GROUP BY b."id", b."name"
+    ORDER BY revenue DESC
+  `
+
+  return rows.map((r) => ({
+    branchId: r.branchId,
+    branchName: r.branchName,
+    revenue: Number(r.revenue),
+    orders: Number(r.orders),
+  }))
 }
