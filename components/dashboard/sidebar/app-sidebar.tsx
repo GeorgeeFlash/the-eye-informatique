@@ -54,6 +54,16 @@ export function AppSidebar({
         { title: t("affiliates"), url: "/admin/affiliates" },
       ],
     },
+    {
+      title: t("activityLog"),
+      url: "/admin/activity-log",
+      icon: "scroll-text",
+    },
+    {
+      title: t("broadcasts"),
+      url: "/admin/broadcasts",
+      icon: "megaphone",
+    },
   ];
 
   const centralAdminExtras: NavItem[] = [
@@ -64,9 +74,7 @@ export function AppSidebar({
       items: [
         { title: t("users"), url: "/admin/users" },
         { title: t("branches"), url: "/admin/branches" },
-        { title: t("broadcasts"), url: "/admin/broadcasts" },
         { title: t("knowledgeBase"), url: "/admin/knowledge-base" },
-        { title: t("activityLog"), url: "/admin/activity-log" },
       ],
     },
   ];

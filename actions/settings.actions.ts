@@ -1,6 +1,7 @@
 "use server"
 
 import { db } from "@/server/db"
+import { logActivity } from "@/lib/activity-log"
 
 /**
  * Read a single setting value by key. Returns the raw JSON value, or the
@@ -23,5 +24,11 @@ export async function updateSetting(key: string, value: unknown): Promise<void> 
     where: { key },
     create: { key, value: value as never },
     update: { value: value as never },
+  })
+
+  logActivity({
+    action: "SETTING_UPDATED",
+    entityType: "Setting",
+    entityId: key,
   })
 }

@@ -11,6 +11,8 @@ import {
 } from "@/lib/validators/blog.schema"
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants"
 import { Prisma } from "@/lib/generated/prisma/client"
+import { logActivity } from "@/lib/activity-log"
+import { createLocalizedNotification } from "@/lib/notifications"
 
 /* ─── Create ────────────────────────────────────────────── */
 
@@ -30,6 +32,13 @@ export async function createArticle(data: CreateArticleValues) {
         ? { tags: { connect: tagIds.map((id) => ({ id })) } }
         : {}),
     },
+  })
+
+  logActivity({
+    action: "ARTICLE_CREATED",
+    entityType: "BlogArticle",
+    entityId: article.id,
+    metadata: { title: rest.title },
   })
 
   revalidatePath("/[locale]/(storefront)/blog", "page")
@@ -81,6 +90,13 @@ export async function updateArticle(id: string, data: UpdateArticleValues) {
     },
   })
 
+  logActivity({
+    action: "ARTICLE_UPDATED",
+    entityType: "BlogArticle",
+    entityId: id,
+    metadata: { updatedFields: Object.keys(rest) },
+  })
+
   revalidatePath("/[locale]/(storefront)/blog", "page")
   return { success: true }
 }
@@ -129,6 +145,27 @@ export async function submitForReview(id: string) {
       reviewerNote: null,
     },
   })
+
+  logActivity({
+    action: "ARTICLE_SUBMITTED_FOR_REVIEW",
+    entityType: "BlogArticle",
+    entityId: id,
+  })
+
+  // Notify all ADMIN/CENTRAL_ADMIN users about the submission
+  const admins = await db.user.findMany({
+    where: { role: { in: ["ADMIN", "CENTRAL_ADMIN"] }, isActive: true },
+    select: { id: true },
+  })
+  for (const admin of admins) {
+    void createLocalizedNotification({
+      userId: admin.id,
+      type: "SYSTEM",
+      messageKey: "articleSubmittedForReview",
+      params: { articleTitle: article.title },
+      link: `/admin/blog/${id}`,
+    })
+  }
 
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/blog", "page")
   return { success: true }
@@ -186,6 +223,21 @@ export async function approveArticle(id: string) {
     },
   })
 
+  logActivity({
+    action: "ARTICLE_APPROVED",
+    entityType: "BlogArticle",
+    entityId: id,
+  })
+
+  // Notify the author
+  void createLocalizedNotification({
+    userId: article.authorId,
+    type: "SYSTEM",
+    messageKey: "articleApproved",
+    params: { articleTitle: article.title },
+    link: `/admin/blog/${id}`,
+  })
+
   revalidatePath("/[locale]/(storefront)/blog", "page")
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/blog", "page")
   return { success: true }
@@ -208,6 +260,22 @@ export async function rejectArticle(id: string, note: string) {
     },
   })
 
+  logActivity({
+    action: "ARTICLE_REJECTED",
+    entityType: "BlogArticle",
+    entityId: id,
+    metadata: { note },
+  })
+
+  // Notify the author
+  void createLocalizedNotification({
+    userId: article.authorId,
+    type: "SYSTEM",
+    messageKey: "articleRejected",
+    params: { articleTitle: article.title, reason: note },
+    link: `/admin/blog/${id}`,
+  })
+
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/blog", "page")
   return { success: true }
 }
@@ -220,6 +288,12 @@ export async function deleteArticle(id: string) {
   await db.blogArticle.update({
     where: { id },
     data: { status: "ARCHIVED" },
+  })
+
+  logActivity({
+    action: "ARTICLE_DELETED",
+    entityType: "BlogArticle",
+    entityId: id,
   })
 
   revalidatePath("/[locale]/(storefront)/blog", "page")

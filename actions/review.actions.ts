@@ -134,6 +134,12 @@ export async function approveReview(reviewId: string) {
     },
   })
 
+  logActivity({
+    action: "REVIEW_APPROVED",
+    entityType: "ProductReview",
+    entityId: reviewId,
+  })
+
   revalidatePath("/[locale]/(storefront)/products/[slug]", "page")
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/reviews", "page")
   return { success: true }
@@ -148,6 +154,13 @@ export async function rejectReview(reviewId: string, reason: string) {
       status: "REJECTED",
       rejectionReason: reason,
     },
+  })
+
+  logActivity({
+    action: "REVIEW_REJECTED",
+    entityType: "ProductReview",
+    entityId: reviewId,
+    metadata: { reason },
   })
 
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/reviews", "page")

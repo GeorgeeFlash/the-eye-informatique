@@ -25,6 +25,9 @@ export const REFERRAL_COOKIE_TTL_DAYS = 30
 // Activity log retention (days)
 export const ACTIVITY_LOG_RETENTION_DAYS = 90
 
+// Low stock alert threshold
+export const LOW_STOCK_THRESHOLD = 5
+
 // PayUnit (CON-1)
 export const PAYUNIT_GATEWAYS = {
   MTN: "CM_MTNMOMO",

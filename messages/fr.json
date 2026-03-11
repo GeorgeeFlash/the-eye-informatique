@@ -651,6 +651,48 @@
       "AFFILIATE_APPLICATION": "Affiliation"
     }
   },
+  "notificationMessages": {
+    "orderStatusChanged": {
+      "title": "Commande {orderNumber} — Statut mis à jour",
+      "body": "Le statut de votre commande a été changé à {status}."
+    },
+    "lowStockAlert": {
+      "title": "Alerte stock bas : {productName}",
+      "body": "La variante {variantLabel} n'a plus que {stockCount} unités en stock."
+    },
+    "articleSubmittedForReview": {
+      "title": "Article soumis pour révision",
+      "body": "Un nouvel article \"{articleTitle}\" a été soumis et attend votre révision."
+    },
+    "articleApproved": {
+      "title": "Article approuvé",
+      "body": "Votre article \"{articleTitle}\" a été approuvé."
+    },
+    "articleRejected": {
+      "title": "Article rejeté",
+      "body": "Votre article \"{articleTitle}\" a été rejeté. Raison : {reason}"
+    },
+    "affiliateApplicationReceived": {
+      "title": "Nouvelle candidature affilié",
+      "body": "{applicantName} a postulé pour le programme d'affiliation."
+    },
+    "affiliateApproved": {
+      "title": "Candidature affilié approuvée !",
+      "body": "Votre candidature d'affiliation a été approuvée. Vous pouvez maintenant générer des liens de parrainage."
+    },
+    "affiliateRejected": {
+      "title": "Candidature affilié rejetée",
+      "body": "Votre candidature d'affiliation n'a pas été approuvée pour le moment."
+    },
+    "affiliateSuspended": {
+      "title": "Compte affilié suspendu",
+      "body": "Votre compte affilié a été suspendu. Raison : {reason}"
+    },
+    "affiliateRevoked": {
+      "title": "Compte affilié révoqué",
+      "body": "Votre compte affilié a été définitivement révoqué. Raison : {reason}"
+    }
+  },
   "ai": {
     "chatTitle": "Assistant IA",
     "chatSubtitle": "Posez-moi vos questions sur nos produits et services.",
@@ -898,20 +940,49 @@
   },
   "adminBroadcasts": {
     "title": "Diffusions",
-    "description": "Envoyez des notifications à l'ensemble des utilisateurs.",
+    "description": "Envoyez des notifications aux utilisateurs.",
     "compose": "Nouvelle diffusion",
-    "titleLabel": "Titre",
+    "titleLabel": "Titre (Anglais)",
     "titlePlaceholder": "Titre de la notification...",
-    "bodyLabel": "Message",
+    "bodyLabel": "Message (Anglais)",
     "bodyPlaceholder": "Rédigez votre message de diffusion...",
+    "titleFrLabel": "Titre (Français)",
+    "titleFrPlaceholder": "Titre de la notification...",
+    "bodyFrLabel": "Message (Français)",
+    "bodyFrPlaceholder": "Rédigez votre message...",
     "send": "Envoyer la diffusion",
     "sending": "Envoi en cours...",
     "sent": "Diffusion envoyée avec succès !",
     "error": "Échec de l'envoi de la diffusion.",
+    "noRecipients": "Aucun destinataire ne correspond à l'audience sélectionnée.",
     "history": "Historique des diffusions",
     "noHistory": "Aucune diffusion envoyée.",
     "sentAt": "Envoyé le {date}",
-    "recipientCount": "{count, plural, one {# destinataire} other {# destinataires}}"
+    "recipientCount": "{count, plural, one {# destinataire} other {# destinataires}}",
+    "targetAudience": "Audience cible",
+    "audienceAllUsers": "Tous les utilisateurs",
+    "audienceCustomers": "Clients",
+    "audienceAffiliates": "Affiliés",
+    "audienceBranchStaff": "Personnel de la branche",
+    "audienceAllStaff": "Tout le personnel",
+    "selectBranch": "Sélectionner la branche",
+    "sendEmailCopy": "Envoyer également par e-mail",
+    "confirm": "Confirmer et envoyer",
+    "cancel": "Annuler",
+    "confirmTitle": "Confirmer la diffusion",
+    "confirmDescription": "Vérifiez votre diffusion avant l'envoi.",
+    "confirmSubject": "Sujet",
+    "confirmBody": "Aperçu du message",
+    "confirmAudience": "Audience cible",
+    "confirmRecipients": "Destinataires estimés",
+    "confirmEmail": "Copie e-mail",
+    "confirmEmailYes": "Oui",
+    "confirmEmailNo": "Non",
+    "sender": "Expéditeur",
+    "audience": "Audience",
+    "date": "Date",
+    "recipients": "Destinataires",
+    "emailSent": "E-mail"
   },
   "adminActivityLog": {
     "title": "Journal d'activité",
@@ -924,7 +995,14 @@
     "details": "Détails",
     "all": "Toutes",
     "noEntries": "Aucune entrée dans le journal.",
-    "system": "Système"
+    "system": "Système",
+    "filters": "Filtres",
+    "filterByAction": "Filtrer par action",
+    "filterByEntity": "Filtrer par type d'entité",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "applyFilters": "Appliquer",
+    "clearFilters": "Effacer"
   },
   "adminSettings": {
     "title": "Paramètres",

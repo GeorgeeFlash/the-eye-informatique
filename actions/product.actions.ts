@@ -8,6 +8,7 @@ import { sanitizeHtml } from "@/lib/sanitize"
 import { slugify } from "@/lib/utils"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { logActivity } from "@/lib/activity-log"
 
 // ---------------------------------------------------------------------------
 // Schemas for multi-step creation
@@ -154,6 +155,13 @@ export async function createProduct(data: CreateProductInput) {
     return p
   })
 
+  logActivity({
+    action: "PRODUCT_CREATED",
+    entityType: "Product",
+    entityId: product.id,
+    metadata: { name: parsed.data.name, slug, branchId },
+  })
+
   revalidateProducts()
   return { success: true, data: { id: product.id, slug: product.slug } }
 }
@@ -222,6 +230,13 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
     }
   })
 
+  logActivity({
+    action: "PRODUCT_UPDATED",
+    entityType: "Product",
+    entityId: id,
+    metadata: { updatedFields: Object.keys(fields) },
+  })
+
   revalidateProducts()
   return { success: true }
 }
@@ -237,6 +252,12 @@ export async function deleteProduct(id: string) {
   await db.product.update({
     where: { id },
     data: { isActive: false },
+  })
+
+  logActivity({
+    action: "PRODUCT_DELETED",
+    entityType: "Product",
+    entityId: id,
   })
 
   revalidateProducts()
@@ -333,6 +354,13 @@ export async function updateStock(data: z.infer<typeof updateStockInput>) {
   await db.productVariant.update({
     where: { id: parsed.data.variantId },
     data: { stock: aggregate._sum.stock ?? 0 },
+  })
+
+  logActivity({
+    action: "STOCK_UPDATED",
+    entityType: "ProductVariant",
+    entityId: parsed.data.variantId,
+    metadata: { branchId: parsed.data.branchId, newQuantity: parsed.data.quantity },
   })
 
   revalidateProducts()

@@ -7,6 +7,7 @@ import { stripHtml } from "@/lib/sanitize"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import type { Role } from "@/lib/types"
+import { logActivity } from "@/lib/activity-log"
 
 // ---------------------------------------------------------------------------
 // Complete Registration — called after Clerk sign-up
@@ -61,6 +62,13 @@ export async function completeRegistration(data: CompleteRegistrationInput) {
         update: {},
       })
     }
+  })
+
+  logActivity({
+    action: "USER_REGISTERED",
+    entityType: "User",
+    entityId: user.id,
+    metadata: { applyAsAffiliate },
   })
 
   return { success: true }
@@ -127,6 +135,13 @@ export async function assignRole(data: z.infer<typeof assignRoleSchema>) {
       role,
       branchId: (role === "STAFF" || role === "ADMIN") ? branchId : null,
     },
+  })
+
+  logActivity({
+    action: "STAFF_ROLE_CHANGED",
+    entityType: "User",
+    entityId: userId,
+    metadata: { newRole: role, previousRole: targetUser.role, branchId: branchId ?? null },
   })
 
   revalidatePath("/[locale]/(dashboard)/admin/users")

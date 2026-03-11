@@ -156,6 +156,7 @@ model User {
   knowledgeBaseDocs  KnowledgeBaseDocument[]
   orderStatusChanges OrderStatusHistory[]    @relation("OrderStatusChangedBy")
   cartItems          ServerCartItem[]
+  sentBroadcasts     Broadcast[]             @relation("SentBroadcasts")
 }
 
 model Address {
@@ -615,4 +616,20 @@ model ContactSubmission {
   createdAt DateTime @default(now())
 
   @@index([isRead, createdAt(sort: Desc)])
+}
+
+model Broadcast {
+  id             String   @id @default(cuid())
+  senderId       String
+  subject        String
+  body           String
+  targetAudience String // ALL_USERS, CUSTOMERS, AFFILIATES, BRANCH_STAFF, ALL_STAFF
+  branchId       String? // For BRANCH_STAFF targeting
+  recipientCount Int
+  emailCopySent  Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  sender User @relation("SentBroadcasts", fields: [senderId], references: [id])
+
+  @@index([senderId, createdAt(sort: Desc)])
 }

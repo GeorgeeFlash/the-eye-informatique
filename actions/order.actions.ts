@@ -12,6 +12,8 @@ import { getSetting } from "@/actions/settings.actions"
 import { createCheckoutSession } from "@/lib/payment"
 import { cookies } from "next/headers"
 import { REFERRAL_COOKIE_NAME } from "@/lib/constants"
+import { logActivity } from "@/lib/activity-log"
+import { createLocalizedNotification } from "@/lib/notifications"
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -297,6 +299,13 @@ export async function createOrder(data: CreateOrderInput) {
 
   revalidateOrders()
 
+  logActivity({
+    action: "ORDER_CREATED",
+    entityType: "Order",
+    entityId: order.id,
+    metadata: { orderNumber: order.orderNumber, total, itemCount: lineItems.length },
+  })
+
   // Initiate PayUnit checkout session.
   // user.name / user.email are already available from requireAuth() above.
   try {
@@ -486,6 +495,22 @@ export async function updateOrderStatus(
       : []),
   ])
 
+  logActivity({
+    action: "ORDER_STATUS_CHANGED",
+    entityType: "Order",
+    entityId: orderId,
+    metadata: { newStatus: status, previousStatus: order.status, note },
+  })
+
+  // Notify the customer about the status change
+  void createLocalizedNotification({
+    userId: order.userId,
+    type: "ORDER_UPDATE",
+    messageKey: "orderStatusChanged",
+    params: { orderNumber: order.orderNumber, status },
+    link: `/dashboard/orders/${orderId}`,
+  })
+
   revalidateOrders()
   return { success: true }
 }
@@ -545,6 +570,13 @@ export async function cancelOrder(orderId: string) {
         note: "Order cancelled",
       },
     })
+  })
+
+  logActivity({
+    action: "ORDER_CANCELLED",
+    entityType: "Order",
+    entityId: orderId,
+    metadata: { orderNumber: order.orderNumber },
   })
 
   revalidateOrders()

@@ -5,6 +5,7 @@ import { OrderConfirmationEmail } from "@/components/email/order-confirmation"
 import { AffiliateWelcomeEmail } from "@/components/email/affiliate-welcome"
 import { InstallmentReminderEmail } from "@/components/email/installment-reminder"
 import { PayoutNotificationEmail } from "@/components/email/payout-notification"
+import { BroadcastNotificationEmail } from "@/components/email/broadcast-notification"
 
 // Registry of all serializable email templates.
 // Add new templates here as they are created.
@@ -13,6 +14,7 @@ const EMAIL_TEMPLATES = {
   "affiliate-welcome": AffiliateWelcomeEmail,
   "installment-reminder": InstallmentReminderEmail,
   "payout-notification": PayoutNotificationEmail,
+  "broadcast-notification": BroadcastNotificationEmail,
 } as const
 
 export type EmailTemplateName = keyof typeof EMAIL_TEMPLATES

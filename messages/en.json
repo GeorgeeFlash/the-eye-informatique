@@ -651,6 +651,48 @@
       "AFFILIATE_APPLICATION": "Affiliate"
     }
   },
+  "notificationMessages": {
+    "orderStatusChanged": {
+      "title": "Order {orderNumber} — Status Updated",
+      "body": "Your order status has been changed to {status}."
+    },
+    "lowStockAlert": {
+      "title": "Low Stock Alert: {productName}",
+      "body": "Variant {variantLabel} has only {stockCount} units remaining."
+    },
+    "articleSubmittedForReview": {
+      "title": "Article submitted for review",
+      "body": "A new article \"{articleTitle}\" has been submitted and awaits your review."
+    },
+    "articleApproved": {
+      "title": "Article approved",
+      "body": "Your article \"{articleTitle}\" has been approved."
+    },
+    "articleRejected": {
+      "title": "Article rejected",
+      "body": "Your article \"{articleTitle}\" was rejected. Reason: {reason}"
+    },
+    "affiliateApplicationReceived": {
+      "title": "New affiliate application",
+      "body": "{applicantName} has applied for the affiliate program."
+    },
+    "affiliateApproved": {
+      "title": "Affiliate application approved!",
+      "body": "Your affiliate application has been approved. You can now generate referral links."
+    },
+    "affiliateRejected": {
+      "title": "Affiliate application rejected",
+      "body": "Your affiliate application was not approved at this time."
+    },
+    "affiliateSuspended": {
+      "title": "Affiliate account suspended",
+      "body": "Your affiliate account has been suspended. Reason: {reason}"
+    },
+    "affiliateRevoked": {
+      "title": "Affiliate account revoked",
+      "body": "Your affiliate account has been permanently revoked. Reason: {reason}"
+    }
+  },
   "ai": {
     "chatTitle": "Chat Assistant",
     "chatSubtitle": "Ask me anything about our products and services.",
@@ -901,18 +943,47 @@
     "title": "Broadcasts",
     "description": "Send system-wide notifications to users.",
     "compose": "New Broadcast",
-    "titleLabel": "Title",
+    "titleLabel": "Title (English)",
     "titlePlaceholder": "Notification title...",
-    "bodyLabel": "Message",
+    "bodyLabel": "Message (English)",
     "bodyPlaceholder": "Write your broadcast message...",
+    "titleFrLabel": "Title (French)",
+    "titleFrPlaceholder": "Titre de la notification...",
+    "bodyFrLabel": "Message (French)",
+    "bodyFrPlaceholder": "Rédigez votre message...",
     "send": "Send Broadcast",
     "sending": "Sending...",
     "sent": "Broadcast sent successfully!",
     "error": "Failed to send broadcast.",
+    "noRecipients": "No recipients match the selected audience.",
     "history": "Broadcast History",
     "noHistory": "No broadcasts sent yet.",
     "sentAt": "Sent {date}",
-    "recipientCount": "{count, plural, one {# recipient} other {# recipients}}"
+    "recipientCount": "{count, plural, one {# recipient} other {# recipients}}",
+    "targetAudience": "Target Audience",
+    "audienceAllUsers": "All Users",
+    "audienceCustomers": "Customers",
+    "audienceAffiliates": "Affiliates",
+    "audienceBranchStaff": "Branch Staff",
+    "audienceAllStaff": "All Staff",
+    "selectBranch": "Select Branch",
+    "sendEmailCopy": "Also send email copy",
+    "confirm": "Confirm & Send",
+    "cancel": "Cancel",
+    "confirmTitle": "Confirm Broadcast",
+    "confirmDescription": "Review your broadcast before sending.",
+    "confirmSubject": "Subject",
+    "confirmBody": "Message Preview",
+    "confirmAudience": "Target Audience",
+    "confirmRecipients": "Estimated Recipients",
+    "confirmEmail": "Email Copy",
+    "confirmEmailYes": "Yes",
+    "confirmEmailNo": "No",
+    "sender": "Sender",
+    "audience": "Audience",
+    "date": "Date",
+    "recipients": "Recipients",
+    "emailSent": "Email"
   },
   "adminActivityLog": {
     "title": "Activity Log",
@@ -925,7 +996,14 @@
     "details": "Details",
     "all": "All",
     "noEntries": "No activity log entries.",
-    "system": "System"
+    "system": "System",
+    "filters": "Filters",
+    "filterByAction": "Filter by action",
+    "filterByEntity": "Filter by entity type",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "applyFilters": "Apply",
+    "clearFilters": "Clear"
   },
   "adminSettings": {
     "title": "Settings",

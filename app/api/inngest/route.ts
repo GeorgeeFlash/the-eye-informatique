@@ -5,6 +5,7 @@ import { immediateAffiliatePayout } from "@/server/inngest/functions/immediate-p
 import { installmentDeadlineCheck } from "@/server/inngest/functions/installment.fn"
 import { activityLogCleanup } from "@/server/inngest/functions/cleanup.fn"
 import { sendEmail } from "@/server/inngest/functions/email.fn"
+import { lowStockAlertCheck } from "@/server/inngest/functions/low-stock.fn"
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -14,5 +15,6 @@ export const { GET, POST, PUT } = serve({
     installmentDeadlineCheck,
     activityLogCleanup,
     sendEmail,
+    lowStockAlertCheck,
   ],
 })

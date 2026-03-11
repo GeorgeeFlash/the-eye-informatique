@@ -5,6 +5,7 @@ import { db } from "@/server/db"
 import { renderToBuffer } from "@react-pdf/renderer"
 import { GuaranteeCertificate } from "@/components/pdf/guarantee-certificate"
 import { createElement } from "react"
+import { logActivity } from "@/lib/activity-log"
 
 /**
  * PayUnit webhook handler.
@@ -28,6 +29,13 @@ export async function POST(req: Request) {
 
     // Verify the transaction with PayUnit to prevent spoofed webhooks
     const result = await processPaymentResult(transactionId)
+
+    logActivity({
+      action: "PAYMENT_COMPLETED",
+      entityType: "Order",
+      entityId: result.orderId,
+      metadata: { transactionId, status: result.status },
+    })
 
     // If payment succeeded, trigger confirmation email via Inngest
     if (result.status === "SUCCESS") {

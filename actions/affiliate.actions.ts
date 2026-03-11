@@ -7,6 +7,7 @@ import {
 } from "@/lib/validators/affiliate.schema"
 import { requireAuth, requireRole } from "@/lib/auth"
 import { createNotification } from "@/actions/notification.actions"
+import { createLocalizedNotification } from "@/lib/notifications"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { APP_URL, DEFAULT_PAGE_SIZE } from "@/lib/constants"
@@ -14,6 +15,7 @@ import { createDisbursement, confirmDisbursement } from "@/server/payunit"
 import { inngest } from "@/server/inngest/client"
 import type { AuthUser } from "@/lib/auth"
 import { payoutPreferenceSchema } from "@/lib/validators/affiliate.schema"
+import { logActivity } from "@/lib/activity-log"
 
 // ─── Helper: verify admin can access this affiliate ─────────────────
 
@@ -77,6 +79,32 @@ export async function applyForAffiliate(
         branchId: parsed.data.branchId,
         status: "PENDING",
       },
+    })
+  }
+
+  logActivity({
+    action: "AFFILIATE_APPLICATION_SUBMITTED",
+    entityType: "AffiliateProfile",
+    entityId: user.id,
+    metadata: { payoutMethod: parsed.data.payoutMethod, branchId: parsed.data.branchId ?? null },
+  })
+
+  // Notify admins about new application
+  const admins = await db.user.findMany({
+    where: {
+      role: { in: ["ADMIN", "CENTRAL_ADMIN"] },
+      isActive: true,
+      ...(parsed.data.branchId ? { OR: [{ branchId: parsed.data.branchId }, { role: "CENTRAL_ADMIN" }] } : {}),
+    },
+    select: { id: true },
+  })
+  for (const admin of admins) {
+    void createLocalizedNotification({
+      userId: admin.id,
+      type: "AFFILIATE_APPLICATION",
+      messageKey: "affiliateApplicationReceived",
+      params: { applicantName: user.name ?? user.email ?? "User" },
+      link: "/admin/affiliates",
     })
   }
 
@@ -353,11 +381,10 @@ export async function approveAffiliate(profileId: string) {
     include: { user: true },
   })
 
-  await createNotification({
+  await createLocalizedNotification({
     userId: profile.userId,
     type: "AFFILIATE_APPLICATION",
-    title: "Affiliate application approved!",
-    body: "Your affiliate application has been approved. You can now generate referral links.",
+    messageKey: "affiliateApproved",
     link: "/dashboard/affiliate/links",
   })
 
@@ -374,6 +401,13 @@ export async function approveAffiliate(profileId: string) {
         dashboardUrl: `${APP_URL}/dashboard/affiliate/links`,
       },
     },
+  })
+
+  logActivity({
+    action: "AFFILIATE_APPROVED",
+    entityType: "AffiliateProfile",
+    entityId: profileId,
+    metadata: { userId: profile.userId },
   })
 
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/affiliates")
@@ -396,11 +430,17 @@ export async function rejectAffiliate(profileId: string, reason?: string) {
     include: { user: true },
   })
 
-  await createNotification({
+  await createLocalizedNotification({
     userId: profile.userId,
     type: "AFFILIATE_APPLICATION",
-    title: "Affiliate application rejected",
-    body: reason ?? "Your affiliate application was not approved at this time.",
+    messageKey: "affiliateRejected",
+  })
+
+  logActivity({
+    action: "AFFILIATE_REJECTED",
+    entityType: "AffiliateProfile",
+    entityId: profileId,
+    metadata: { userId: profile.userId, reason: reason ?? null },
   })
 
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/affiliates")
@@ -423,11 +463,18 @@ export async function suspendAffiliate(profileId: string, reason: string) {
     include: { user: true },
   })
 
-  await createNotification({
+  await createLocalizedNotification({
     userId: profile.userId,
     type: "AFFILIATE_APPLICATION",
-    title: "Affiliate account suspended",
-    body: `Your affiliate account has been suspended. Reason: ${reason}`,
+    messageKey: "affiliateSuspended",
+    params: { reason },
+  })
+
+  logActivity({
+    action: "AFFILIATE_SUSPENDED",
+    entityType: "AffiliateProfile",
+    entityId: profileId,
+    metadata: { userId: profile.userId, reason },
   })
 
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/affiliates")
@@ -455,11 +502,18 @@ export async function revokeAffiliate(profileId: string, reason: string) {
     where: { affiliateId: profileId },
   })
 
-  await createNotification({
+  await createLocalizedNotification({
     userId: profile.userId,
     type: "AFFILIATE_APPLICATION",
-    title: "Affiliate account revoked",
-    body: `Your affiliate account has been permanently revoked. Reason: ${reason}`,
+    messageKey: "affiliateRevoked",
+    params: { reason },
+  })
+
+  logActivity({
+    action: "AFFILIATE_REVOKED",
+    entityType: "AffiliateProfile",
+    entityId: profileId,
+    metadata: { userId: profile.userId, reason },
   })
 
   revalidatePath("/[locale]/(dashboard)/admin/(admin)/affiliates")

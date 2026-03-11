@@ -7,6 +7,7 @@ import { featureFieldSchema } from "@/lib/validators/category.schema"
 import { slugify } from "@/lib/utils"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { logActivity } from "@/lib/activity-log"
 
 export async function createCategory(
   data: z.infer<typeof categorySchema>,
@@ -29,6 +30,13 @@ export async function createCategory(
       iconUrl: parsed.data.iconUrl,
       sortOrder: parsed.data.sortOrder,
     },
+  })
+
+  logActivity({
+    action: "CATEGORY_CREATED",
+    entityType: "Category",
+    entityId: category.id,
+    metadata: { name: category.name, slug: category.slug },
   })
 
   revalidatePath("/admin/products")
@@ -62,6 +70,13 @@ export async function updateCategory(
     },
   })
 
+  logActivity({
+    action: "CATEGORY_UPDATED",
+    entityType: "Category",
+    entityId: category.id,
+    metadata: { name: category.name, slug: category.slug },
+  })
+
   revalidatePath("/admin/products")
   return { success: true, data: category }
 }
@@ -84,6 +99,12 @@ export async function deleteCategory(id: string) {
   })
 
   await db.category.delete({ where: { id } })
+
+  logActivity({
+    action: "CATEGORY_DELETED",
+    entityType: "Category",
+    entityId: id,
+  })
 
   revalidatePath("/admin/products")
   return { success: true }
@@ -154,6 +175,13 @@ export async function createFeatureField(
     },
   })
 
+  logActivity({
+    action: "FEATURE_FIELD_CREATED",
+    entityType: "CategoryFeatureField",
+    entityId: field.id,
+    metadata: { categoryId, name: field.name, type: field.type },
+  })
+
   revalidatePath("/admin/categories")
   return { success: true, data: field }
 }
@@ -178,6 +206,13 @@ export async function updateFeatureField(
     },
   })
 
+  logActivity({
+    action: "FEATURE_FIELD_UPDATED",
+    entityType: "CategoryFeatureField",
+    entityId: field.id,
+    metadata: { name: field.name, type: field.type },
+  })
+
   revalidatePath("/admin/categories")
   return { success: true, data: field }
 }
@@ -186,6 +221,12 @@ export async function deleteFeatureField(id: string) {
   await requireRole(["CENTRAL_ADMIN"])
 
   await db.categoryFeatureField.delete({ where: { id } })
+
+  logActivity({
+    action: "FEATURE_FIELD_DELETED",
+    entityType: "CategoryFeatureField",
+    entityId: id,
+  })
 
   revalidatePath("/admin/categories")
   return { success: true }
