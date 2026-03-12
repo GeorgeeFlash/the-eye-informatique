@@ -30,7 +30,7 @@ export function CartSheet() {
     <Sheet open={cartSheetOpen} onOpenChange={setCartSheetOpen}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col sm:max-w-md p-0"
+        className="flex h-full w-full flex-col overflow-hidden p-0 sm:max-w-md"
       >
         <SheetHeader className="px-6 pt-6 pb-4 border-b">
           <SheetTitle className="flex items-center gap-2">
@@ -59,7 +59,7 @@ export function CartSheet() {
           </div>
         ) : (
           <>
-            <ScrollArea className="flex-1">
+            <ScrollArea className="min-h-0 flex-1">
               <ul className="divide-y px-6">
                 {items.map((item) => (
                   <li key={item.variantId} className="flex gap-4 py-5">
@@ -153,7 +153,7 @@ export function CartSheet() {
             </ScrollArea>
 
             {/* Footer */}
-            <div className="border-t px-6 py-5 space-y-4">
+            <div className="shrink-0 space-y-4 border-t px-6 py-5">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
                   {t("subtotal")} ({t("items", { count: totalItems })})

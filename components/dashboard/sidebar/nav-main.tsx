@@ -1,19 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import {
   BarChart3Icon,
   BellIcon,
+  BookOpenTextIcon,
+  BoxesIcon,
+  Building2Icon,
   BriefcaseIcon,
   ChevronRightIcon,
   GitBranchIcon,
   LayoutDashboardIcon,
   type LucideIcon,
+  MegaphoneIcon,
+  NewspaperIcon,
   PackageIcon,
   PackageSearchIcon,
+  ReceiptTextIcon,
   ServerIcon,
   SettingsIcon,
   ShoppingCartIcon,
+  TagsIcon,
+  UsersIcon,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -27,12 +36,15 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "package-search": PackageSearchIcon,
   "git-branch": GitBranchIcon,
   briefcase: BriefcaseIcon,
+  boxes: BoxesIcon,
+  tags: TagsIcon,
+  receipt: ReceiptTextIcon,
+  megaphone: MegaphoneIcon,
+  newspaper: NewspaperIcon,
+  users: UsersIcon,
+  branch: Building2Icon,
+  knowledge: BookOpenTextIcon,
 };
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -44,12 +56,43 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-export type NavItem = {
+type NavMatch = "exact" | "prefix";
+
+export type NavSubItem = {
   title: string;
   url: string;
-  icon: string;
-  items?: { title: string; url: string }[];
+  match?: NavMatch;
 };
+
+export type NavItem = {
+  title: string;
+  url?: string;
+  icon: string;
+  match?: NavMatch;
+  items?: NavSubItem[];
+};
+
+function matchesPath(
+  pathname: string,
+  url?: string,
+  match: NavMatch = "exact",
+) {
+  if (!url) {
+    return false;
+  }
+
+  if (match === "prefix") {
+    return pathname === url || pathname.startsWith(`${url}/`);
+  }
+
+  return pathname === url;
+}
+
+function getBestMatch(items: NavSubItem[] | undefined, pathname: string) {
+  return items
+    ?.filter((item) => matchesPath(pathname, item.url, item.match))
+    .sort((left, right) => right.url.length - left.url.length)[0];
+}
 
 export function NavMain({
   items,
@@ -59,73 +102,113 @@ export function NavMain({
   label?: string;
 }) {
   const pathname = usePathname();
+  const activeItemTitle =
+    items.find(
+      (item) =>
+        item.items?.some((sub) => matchesPath(pathname, sub.url, sub.match)) ||
+        matchesPath(pathname, item.url, item.match),
+    )?.title ?? null;
+  const [manualOpenItem, setManualOpenItem] = useState<string | null>(null);
+  const openItem = manualOpenItem ?? activeItemTitle;
 
   return (
-    <SidebarGroup>
-      {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
+    <SidebarGroup className="px-3 py-0">
+      {label && (
+        <SidebarGroupLabel className="h-auto px-3 pb-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/45">
+          {label}
+        </SidebarGroupLabel>
+      )}
       <SidebarMenu>
-        {items.map((item) =>
-          item.items?.length ? (
-            <Collapsible
-              key={item.title}
-              asChild
-              defaultOpen={item.items.some((sub) =>
-                pathname.startsWith(sub.url),
-              )}
-              className="group/collapsible"
-            >
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    isActive={item.items.some((sub) =>
-                      pathname.startsWith(sub.url),
-                    )}
-                  >
-                    {(() => {
-                      const Icon = ICON_MAP[item.icon];
-                      return Icon ? <Icon /> : null;
-                    })()}
-                    <span>{item.title}</span>
-                    <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
+        {items.map((item) => {
+          const activeSubItem = getBestMatch(item.items, pathname);
+          const isItemActive =
+            Boolean(activeSubItem) ||
+            matchesPath(pathname, item.url, item.match);
+          const isOpen = openItem === item.title;
+
+          return item.items?.length ? (
+            <SidebarMenuItem key={item.title} className="overflow-hidden">
+              <SidebarMenuButton
+                type="button"
+                tooltip={item.title}
+                isActive={isItemActive}
+                aria-expanded={isOpen}
+                onClick={() =>
+                  setManualOpenItem((current) =>
+                    current === item.title ? null : item.title,
+                  )
+                }
+                className="group/nav-button h-11 rounded-2xl px-3 transition-all duration-200 hover:bg-sidebar-accent/70 data-[active=true]:bg-sidebar-accent data-[active=true]:shadow-sm"
+              >
+                {(() => {
+                  const Icon = ICON_MAP[item.icon];
+                  return Icon ? (
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-sidebar-border/70 bg-background/80 text-sidebar-foreground/60 transition-colors group-data-[active=true]/nav-button:border-primary/20 group-data-[active=true]/nav-button:bg-primary/10 group-data-[active=true]/nav-button:text-primary">
+                      <Icon className="size-4" />
+                    </span>
+                  ) : null;
+                })()}
+                <span className="font-medium text-sidebar-foreground/85">
+                  {item.title}
+                </span>
+                <ChevronRightIcon
+                  className={`ml-auto size-4 text-sidebar-foreground/45 transition-transform duration-300 ${
+                    isOpen ? "rotate-90" : "rotate-0"
+                  }`}
+                />
+              </SidebarMenuButton>
+              <div
+                className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-out ${
+                  isOpen
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <SidebarMenuSub className="mx-0 mt-2 gap-1 border-l-0 px-0 py-0 pl-11">
                     {item.items.map((sub) => (
                       <SidebarMenuSubItem key={sub.title}>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={pathname === sub.url}
+                          isActive={activeSubItem?.url === sub.url}
+                          className="h-9 rounded-xl px-3 text-sidebar-foreground/65 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground"
                         >
                           <Link href={sub.url}>
+                            <span className="size-1.5 rounded-full bg-current/35" />
                             <span>{sub.title}</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}
                   </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
+                </div>
+              </div>
+            </SidebarMenuItem>
           ) : (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 asChild
                 tooltip={item.title}
-                isActive={pathname === item.url}
+                isActive={matchesPath(pathname, item.url, item.match)}
+                className="group/nav-button h-11 rounded-2xl px-3 transition-all duration-200 hover:bg-sidebar-accent/70 data-[active=true]:bg-sidebar-accent data-[active=true]:shadow-sm"
               >
-                <Link href={item.url}>
+                <Link href={item.url ?? "#"}>
                   {(() => {
                     const Icon = ICON_MAP[item.icon];
-                    return Icon ? <Icon /> : null;
+                    return Icon ? (
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-sidebar-border/70 bg-background/80 text-sidebar-foreground/60 transition-colors group-data-[active=true]/nav-button:border-primary/20 group-data-[active=true]/nav-button:bg-primary/10 group-data-[active=true]/nav-button:text-primary">
+                        <Icon className="size-4" />
+                      </span>
+                    ) : null;
                   })()}
-                  <span>{item.title}</span>
+                  <span className="font-medium text-sidebar-foreground/85">
+                    {item.title}
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          ),
-        )}
+          );
+        })}
       </SidebarMenu>
     </SidebarGroup>
   );

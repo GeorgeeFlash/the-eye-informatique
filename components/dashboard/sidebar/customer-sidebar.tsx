@@ -13,7 +13,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { NavMain, type NavItem } from "@/components/dashboard/sidebar/nav-main";
-import { APP_NAME } from "@/lib/constants";
+import { Logo } from "@/components/shared/logo";
 
 type PortalVariant = "customer" | "affiliate";
 
@@ -24,39 +24,52 @@ export function CustomerSidebar({
 }) {
   const t = useTranslations("sidebar.customer");
 
-  const customerNav: NavItem[] = [
+  const workspaceNav: NavItem[] = [
     {
       title: t("overview"),
       url: "/dashboard",
       icon: "layout-dashboard",
+      match: "exact",
     },
     {
-      title: t("myServices"),
-      url: "/dashboard/orders",
-      icon: "package",
-      items: [{ title: t("orders"), url: "/dashboard/orders" }],
+      title: t("account"),
+      icon: "briefcase",
+      items: [
+        { title: t("orders"), url: "/dashboard/orders", match: "prefix" },
+        {
+          title: t("notifications"),
+          url: "/dashboard/notifications",
+          match: "prefix",
+        },
+      ],
     },
-    {
-      title: t("notifications"),
-      url: "/dashboard/notifications",
-      icon: "bell",
-    },
+  ];
+
+  const storeNav: NavItem[] = [
     {
       title: t("browseProducts"),
       url: "/products",
       icon: "package-search",
+      match: "prefix",
     },
   ];
 
   const affiliateNav: NavItem[] = [
     {
       title: t("affiliateProgram"),
-      url: "/dashboard/earnings",
       icon: "git-branch",
       items: [
-        { title: t("earnings"), url: "/dashboard/earnings" },
-        { title: t("myLinks"), url: "/dashboard/links" },
-        { title: t("payouts"), url: "/dashboard/payouts" },
+        {
+          title: t("earnings"),
+          url: "/dashboard/earnings",
+          match: "prefix",
+        },
+        { title: t("myLinks"), url: "/dashboard/links", match: "prefix" },
+        {
+          title: t("payouts"),
+          url: "/dashboard/payouts",
+          match: "prefix",
+        },
       ],
     },
   ];
@@ -66,49 +79,50 @@ export function CustomerSidebar({
       title: t("settings"),
       url: "/dashboard/settings",
       icon: "settings",
+      match: "prefix",
     },
   ];
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/70">
+      <SidebarHeader className="border-b border-sidebar-border/70 px-4 pt-5 pb-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground text-xs font-bold">
-                  TEI
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold text-sm">{APP_NAME}</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {variant === "affiliate"
-                      ? t("affiliateSpace")
-                      : t("mySpace")}
-                  </span>
-                </div>
-              </Link>
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              className="h-auto rounded-2xl px-3 py-2.5 hover:bg-sidebar-accent/60"
+            >
+              <Logo
+                size="lg"
+                className="gap-3 text-sm font-semibold text-sidebar-foreground"
+              />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <span className="px-3 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-sidebar-foreground/45 group-data-[collapsible=icon]:hidden">
+          {variant === "affiliate" ? t("affiliateSpace") : t("mySpace")}
+        </span>
       </SidebarHeader>
 
-      <SidebarContent>
-        <NavMain items={customerNav} label={t("myAccount")} />
+      <SidebarContent className="gap-5 px-0 py-4">
+        <NavMain items={workspaceNav} label={t("workspace")} />
+        <NavMain items={storeNav} label={t("store")} />
         {variant === "affiliate" && (
-          <>
-            <SidebarSeparator />
-            <NavMain items={affiliateNav} label={t("affiliation")} />
-          </>
+          <NavMain items={affiliateNav} label={t("affiliation")} />
         )}
         <SidebarSeparator />
-        <NavMain items={bottomNav} />
+        <NavMain items={bottomNav} label={t("preferences")} />
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border/70 px-4 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild size="sm">
+            <SidebarMenuButton
+              asChild
+              size="sm"
+              className="h-10 rounded-2xl border border-sidebar-border/70 bg-background/70 px-3 hover:bg-sidebar-accent/60"
+            >
               <Link href="/">
                 <PackageSearchIcon />
                 <span>{t("backToStore")}</span>
