@@ -2,10 +2,10 @@ import { z } from "zod";
 
 const serverEnvSchema = z.object({
   DATABASE_URL: z.url("DATABASE_URL must be a valid URL"),
-  DATABASE_URL_UNPOOLED: z.url("DATABASE_URL_UNPOOLED must be a valid URL").optional(),
-  CLERK_WEBHOOK_SECRET: z
-    .string()
-    .min(1, "CLERK_WEBHOOK_SECRET is required"),
+  DATABASE_URL_UNPOOLED: z
+    .url("DATABASE_URL_UNPOOLED must be a valid URL")
+    .optional(),
+  CLERK_WEBHOOK_SECRET: z.string().min(1, "CLERK_WEBHOOK_SECRET is required"),
   CLERK_SECRET_KEY: z.string().min(1, "CLERK_SECRET_KEY is required"),
   RESEND_API_KEY: z
     .string()
@@ -18,7 +18,7 @@ const serverEnvSchema = z.object({
   PAYUNIT_MODE: z.enum(["test", "live"]).default("test"),
   ARCJET_KEY: z.string().min(1, "ARCJET_KEY is required"),
   INNGEST_EVENT_KEY: z.string().min(1, "INNGEST_EVENT_KEY is required"),
-  INNGEST_SIGNIN_KEY: z.string().min(1, "INNGEST_SIGNIN_KEY is required"),
+  INNGEST_SIGNING_KEY: z.string().min(1, "INNGEST_SIGNING_KEY is required"),
   INNGEST_DEV: z.string().optional(),
   CONTACT_EMAIL: z.email().optional(),
   VERCEL_GIT_COMMIT_SHA: z.string().optional(),
@@ -45,7 +45,7 @@ function validateEnv(): ServerEnv {
     PAYUNIT_MODE: process.env.PAYUNIT_MODE,
     ARCJET_KEY: process.env.ARCJET_KEY,
     INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,
-    INNGEST_SIGNIN_KEY: process.env.INNGEST_SIGNIN_KEY,
+    INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
     INNGEST_DEV: process.env.INNGEST_DEV,
     CONTACT_EMAIL: process.env.CONTACT_EMAIL,
     VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
@@ -58,9 +58,7 @@ function validateEnv(): ServerEnv {
     const errors = result.error.issues
       .map((issue) => `  - ${issue.path.join(".")}: ${issue.message}`)
       .join("\n");
-    throw new Error(
-      `Invalid server environment variables:\n${errors}`,
-    );
+    throw new Error(`Invalid server environment variables:\n${errors}`);
   }
 
   return result.data;
@@ -82,7 +80,7 @@ export const serverEnv = {
   PAYUNIT_MODE: env.PAYUNIT_MODE,
   ARCJET_KEY: env.ARCJET_KEY,
   INNGEST_EVENT_KEY: env.INNGEST_EVENT_KEY,
-  INNGEST_SIGNIN_KEY: env.INNGEST_SIGNIN_KEY,
+  INNGEST_SIGNING_KEY: env.INNGEST_SIGNING_KEY,
   INNGEST_DEV: env.INNGEST_DEV,
   CONTACT_EMAIL: env.CONTACT_EMAIL ?? "contact@theeyeinformatique.cm",
   VERCEL_GIT_COMMIT_SHA: env.VERCEL_GIT_COMMIT_SHA,
