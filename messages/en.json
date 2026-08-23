@@ -530,6 +530,7 @@
     "archiveSuccess": "Product archived successfully",
     "archiveError": "Failed to archive product",
     "confirmArchive": "Are you sure you want to archive this product?",
+    "cancel": "Cancel",
     "showing": "Showing {from}-{to} of {total}",
     "previous": "Previous",
     "next": "Next",
@@ -606,7 +607,7 @@
     "maxImagesReached": "Maximum images reached",
     "dropImages": "Drop images here",
     "browseFiles": "browse files",
-    "imageRequirements": "PNG, JPG or WebP — max 5 MB each",
+    "imageRequirements": "PNG, JPG, WebP or GIF — max 5 MB each",
     "fileTooLarge": "File exceeds the 5 MB limit",
     "invalidFileType": "Invalid file type. Only PNG, JPG, WebP, and GIF are allowed",
     "setPrimary": "Set as primary image",
@@ -633,7 +634,12 @@
     "shareOnTwitter": "X / Twitter",
     "shareViaEmail": "Email",
     "generatingLink": "Generating affiliate link...",
-    "previewTitle": "Preview Card"
+    "previewTitle": "Preview Card",
+    "shareLinkTitle": "Check out this product",
+    "shareLinkText": "{targetUrl} — Use my link: {url}",
+    "shareLinkTooltip": "Share link",
+    "copyLinkTooltip": "Copy link",
+    "copyError": "Failed to copy"
   },
   "home": {
     "heroTitle": "Premium Tech, Unbeatable Prices",

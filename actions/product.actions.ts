@@ -232,13 +232,14 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
 
   // Validate required category features if categoryId is updated or existing
   const targetCategoryId = fields.categoryId ?? (await db.product.findUnique({ where: { id }, select: { categoryId: true } }))?.categoryId
-  if (targetCategoryId && featureValues) {
+  if (targetCategoryId) {
     const requiredFields = await db.categoryFeatureField.findMany({
       where: { categoryId: targetCategoryId, isRequired: true },
       select: { id: true, name: true },
     })
+    const values = featureValues ?? []
     for (const req of requiredFields) {
-      const match = featureValues.find((fv) => fv.featureFieldId === req.id && fv.value.trim() !== "")
+      const match = values.find((fv) => fv.featureFieldId === req.id && fv.value.trim() !== "")
       if (!match) {
         return { error: `Feature field "${req.name}" is required.` }
       }
@@ -318,7 +319,8 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
             },
           })
 
-          // Sync stockByBranch if branchId is known
+          // Sync stockByBranch if branchId is known, or resolve from existing records
+          const variantExisting = existingVariants.find((ev) => ev.id === v.id)
           if (branchId) {
             await tx.productStockByBranch.upsert({
               where: {
@@ -326,6 +328,11 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
               },
               create: { variantId: v.id, branchId, stock: v.stock },
               update: { stock: v.stock },
+            })
+          } else if (variantExisting?.stockByBranch.length) {
+            await tx.productStockByBranch.updateMany({
+              where: { variantId: v.id },
+              data: { stock: v.stock },
             })
           }
         } else {
@@ -658,45 +665,37 @@ export async function getProducts({
     }))
   }
 
-  // Stock status filter
-  if (stockStatus && stockStatus !== "all") {
-    if (stockStatus === "in_stock") {
-      where.variants = {
-        some: {
-          stock: { gt: 0 },
-          ...(branchId ? { stockByBranch: { some: { branchId } } } : {}),
-        },
-      }
-    } else if (stockStatus === "low_stock") {
-      where.variants = {
-        some: {
-          stock: { lte: 3, gt: 0 },
-          ...(branchId ? { stockByBranch: { some: { branchId } } } : {}),
-        },
-      }
-    } else if (stockStatus === "out_of_stock") {
-      where.variants = {
-        every: {
-          stock: 0,
-        },
-      }
-    }
+  // Build unified variant predicate for stockStatus, condition, and branch scoping
+  const variantSome: Record<string, unknown> = {}
+
+  if (condition) {
+    variantSome.condition = condition
   }
 
-  // Condition filter: products that have at least one variant with given condition
-  if (condition) {
-    where.variants = {
-      ...(where.variants ?? {}),
-      some: {
-        condition,
-        ...(branchId ? { stockByBranch: { some: { branchId } } } : {}),
-      },
+  if (stockStatus && stockStatus !== "all") {
+    if (branchId) {
+      if (stockStatus === "in_stock") {
+        variantSome.stockByBranch = { some: { branchId, stock: { gt: 0 } } }
+      } else if (stockStatus === "low_stock") {
+        variantSome.stockByBranch = { some: { branchId, stock: { lte: 3, gt: 0 } } }
+      } else if (stockStatus === "out_of_stock") {
+        variantSome.stockByBranch = { some: { branchId, stock: 0 } }
+      }
+    } else {
+      if (stockStatus === "in_stock") {
+        variantSome.stock = { gt: 0 }
+      } else if (stockStatus === "low_stock") {
+        variantSome.stock = { lte: 3, gt: 0 }
+      } else if (stockStatus === "out_of_stock") {
+        variantSome.every = { stock: 0 }
+      }
     }
-  } else if (branchId && !stockStatus) {
-    // Branch scoping: only show products that have stock at the given branch
-    where.variants = {
-      some: { stockByBranch: { some: { branchId } } },
-    }
+  } else if (branchId) {
+    variantSome.stockByBranch = { some: { branchId } }
+  }
+
+  if (Object.keys(variantSome).length > 0) {
+    where.variants = { some: variantSome }
   }
 
   const [products, total] = await Promise.all([

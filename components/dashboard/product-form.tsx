@@ -200,10 +200,7 @@ export function ProductForm({
       });
 
     if (missingRequired) {
-      form.setError("featureValues", {
-        type: "required",
-        message: t("featureRequiredError"),
-      });
+      setServerError(t("featureRequiredError"));
       return;
     }
 

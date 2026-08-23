@@ -530,6 +530,7 @@
     "archiveSuccess": "Produit archivé avec succès",
     "archiveError": "Échec de l'archivage du produit",
     "confirmArchive": "Êtes-vous sûr de vouloir archiver ce produit ?",
+    "cancel": "Annuler",
     "showing": "Affichage {from}-{to} sur {total}",
     "previous": "Précédent",
     "next": "Suivant",
@@ -606,7 +607,7 @@
     "maxImagesReached": "Nombre maximum d'images atteint",
     "dropImages": "Déposez les images ici",
     "browseFiles": "parcourir les fichiers",
-    "imageRequirements": "PNG, JPG ou WebP — 5 Mo maximum par image",
+    "imageRequirements": "PNG, JPG, WebP ou GIF — 5 Mo maximum par image",
     "fileTooLarge": "Le fichier dépasse la limite de 5 Mo",
     "invalidFileType": "Type de fichier non valide. Seuls PNG, JPG, WebP et GIF sont autorisés",
     "setPrimary": "Définir comme image principale",
@@ -633,7 +634,12 @@
     "shareOnTwitter": "X / Twitter",
     "shareViaEmail": "Email",
     "generatingLink": "Génération du lien d'affiliation...",
-    "previewTitle": "Carte d'aperçu"
+    "previewTitle": "Carte d'aperçu",
+    "shareLinkTitle": "Découvrez ce produit",
+    "shareLinkText": "{targetUrl} — Utilisez mon lien : {url}",
+    "shareLinkTooltip": "Partager le lien",
+    "copyLinkTooltip": "Copier le lien",
+    "copyError": "Échec de la copie"
   },
   "home": {
     "heroTitle": "Tech Premium, Prix Imbattables",

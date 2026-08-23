@@ -660,18 +660,37 @@ export async function getOrCreateProductAffiliateLink(productSlugOrId: string) {
     })
 
     if (!link) {
-      // Generate a clean deterministic/random unique code
-      const cleanSlug = product.slug.slice(0, 8).replace(/[^a-zA-Z0-9]/g, "")
-      const randSuffix = Math.random().toString(36).substring(2, 6)
-      const code = `${cleanSlug}-${randSuffix}`.toLowerCase()
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const cleanSlug = product.slug.slice(0, 8).replace(/[^a-zA-Z0-9]/g, "")
+        const randSuffix = Math.random().toString(36).substring(2, 6)
+        const code = `${cleanSlug}-${randSuffix}`.toLowerCase()
 
-      link = await db.affiliateLink.create({
-        data: {
-          affiliateId: profile.id,
-          code,
-          targetUrl,
-        },
-      })
+        try {
+          link = await db.affiliateLink.create({
+            data: {
+              affiliateId: profile.id,
+              code,
+              targetUrl,
+            },
+          })
+          break
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            error.message.includes("Unique constraint failed on the fields: (`code`)")
+          ) {
+            if (attempt === 4) {
+              return { isAffiliate: false, url: null, code: null }
+            }
+            continue
+          }
+          throw error
+        }
+      }
+    }
+
+    if (!link) {
+      return { isAffiliate: false, url: null, code: null }
     }
 
     return {

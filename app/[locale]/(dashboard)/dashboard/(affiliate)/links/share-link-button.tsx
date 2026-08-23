@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Share2Icon, CopyIcon, CheckIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface ShareLinkButtonProps {
   code: string;
@@ -12,12 +13,15 @@ interface ShareLinkButtonProps {
 
 export function ShareLinkButton({ code, targetUrl }: ShareLinkButtonProps) {
   const [copied, setCopied] = useState(false);
-  const url = `${window.location.origin}/ref/${code}`;
+  const t = useTranslations("productShare");
+
+  const getUrl = () => `${window.location.origin}/ref/${code}`;
 
   const handleShare = async () => {
+    const url = getUrl();
     const shareData = {
-      title: "Check out this product",
-      text: `${targetUrl} — Use my link: ${url}`,
+      title: t("shareLinkTitle"),
+      text: t("shareLinkText", { targetUrl, url }),
       url,
     };
 
@@ -34,12 +38,12 @@ export function ShareLinkButton({ code, targetUrl }: ShareLinkButtonProps) {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(getUrl());
       setCopied(true);
-      toast.success("Link copied!");
+      toast.success(t("linkCopied"));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Failed to copy");
+      toast.error(t("copyError"));
     }
   };
 
@@ -50,7 +54,7 @@ export function ShareLinkButton({ code, targetUrl }: ShareLinkButtonProps) {
         size="icon"
         className="h-8 w-8"
         onClick={handleShare}
-        title="Share link"
+        title={t("shareLinkTooltip")}
       >
         <Share2Icon className="h-4 w-4" />
       </Button>
@@ -59,7 +63,7 @@ export function ShareLinkButton({ code, targetUrl }: ShareLinkButtonProps) {
         size="icon"
         className="h-8 w-8"
         onClick={handleCopy}
-        title="Copy link"
+        title={t("copyLinkTooltip")}
       >
         {copied ? (
           <CheckIcon className="h-4 w-4 text-green-600" />
