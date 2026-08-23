@@ -2,6 +2,7 @@
 
 import { db } from "@/server/db"
 import { resend, FROM_EMAIL } from "@/server/resend"
+import { serverEnv } from "@/server/env-server"
 import { contactFormSchema } from "@/lib/validators/contact.schema"
 import { ContactSubmissionEmail } from "@/components/email/contact-submission"
 import { stripHtml } from "@/lib/sanitize"
@@ -49,7 +50,7 @@ export async function submitContactForm(formData: {
   try {
     await resend.emails.send({
       from: FROM_EMAIL,
-      to: process.env.CONTACT_EMAIL ?? "contact@theeyeinformatique.cm",
+      to: serverEnv.CONTACT_EMAIL,
       replyTo: email,
       subject: `[Contact] ${subject}`,
       react: ContactSubmissionEmail({ name, email, phone, subject, message }),

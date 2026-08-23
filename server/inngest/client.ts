@@ -1,6 +1,7 @@
 import { Inngest } from "inngest"
+import { serverEnv } from "@/server/env-server"
 
 export const inngest = new Inngest({
   id: "tei-store",
-  eventKey: process.env.INNGEST_EVENT_KEY,
+  eventKey: serverEnv.INNGEST_EVENT_KEY,
 })

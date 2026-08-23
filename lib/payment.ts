@@ -1,5 +1,6 @@
 import { db } from "@/server/db"
 import { initiatePayment, verifyTransaction } from "@/server/payunit"
+import { serverEnv } from "@/server/env-server"
 import { APP_URL } from "@/lib/constants"
 import { confirmReferralCommission } from "@/actions/affiliate.actions"
 
@@ -18,7 +19,7 @@ export async function createCheckoutSession(params: {
     ? `/dashboard/orders/${params.orderId}?installment=paid`
     : `/dashboard/orders/${params.orderId}?payment=complete`
 
-  const isDevelopment = process.env.NODE_ENV === "development"
+  const isDevelopment = serverEnv.NODE_ENV === "development"
   const baseUrl = isDevelopment
     ? "https://drake-whole-poorly.ngrok-free.app"
     : APP_URL

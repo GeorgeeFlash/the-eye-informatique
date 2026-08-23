@@ -9,6 +9,7 @@ import type {
   DisbursementInitResponse,
   DisbursementConfirmResponse,
 } from "@payunit/nodejs-sdk"
+import { serverEnv } from "@/server/env-server"
 
 // ---------------------------------------------------------------------------
 // Singleton client — reused across all server calls
@@ -19,10 +20,10 @@ let _client: PayunitClient | null = null
 function getClient(): PayunitClient {
   if (!_client) {
     _client = new PayunitClient({
-      apiKey: process.env.PAYUNIT_API_KEY!,
-      apiUsername: process.env.PAYUNIT_API_USERNAME!,
-      apiPassword: process.env.PAYUNIT_API_PASSWORD!,
-      mode: (process.env.PAYUNIT_MODE as "test" | "live") ?? "test",
+      apiKey: serverEnv.PAYUNIT_API_KEY,
+      apiUsername: serverEnv.PAYUNIT_API_USERNAME,
+      apiPassword: serverEnv.PAYUNIT_API_PASSWORD,
+      mode: serverEnv.PAYUNIT_MODE,
     })
   }
   return _client
@@ -145,7 +146,7 @@ export async function createDisbursement(params: {
   return client.disbursement.createDisbursement({
     destination_currency: "XAF",
     debit_currency: "XAF",
-    account_number: Number(params.accountNumber),
+    account_number: params.accountNumber,
     amount: params.amount,
     beneficiary_name: params.beneficiaryName,
     deposit_type: "MOBILE_MONEY",

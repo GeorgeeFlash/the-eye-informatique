@@ -1,6 +1,6 @@
 import { Resend } from "resend"
+import { serverEnv } from "@/server/env-server"
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+export const resend = new Resend(serverEnv.RESEND_API_KEY)
 
-export const FROM_EMAIL =
-  process.env.RESEND_FROM_EMAIL ?? "The Eye Informatique <onboarding@resend.dev>"
+export const FROM_EMAIL = serverEnv.RESEND_FROM_EMAIL

@@ -2,9 +2,10 @@ import { headers } from "next/headers"
 import { Webhook } from "svix"
 import { WebhookEvent } from "@clerk/nextjs/server"
 import { db } from "@/server/db"
+import { serverEnv } from "@/server/env-server"
 
 export async function POST(req: Request) {
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
+  const WEBHOOK_SECRET = serverEnv.CLERK_WEBHOOK_SECRET
 
   if (!WEBHOOK_SECRET) {
     return new Response("Missing CLERK_WEBHOOK_SECRET", { status: 500 })

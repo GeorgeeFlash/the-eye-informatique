@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
 } from "@react-pdf/renderer";
+import { clientEnv } from "@/lib/env-client"
 
 // ---------------------------------------------------------------------------
 // Types
@@ -259,7 +260,7 @@ export function GuaranteeCertificate({
         <View style={styles.header}>
           {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image does not support alt */}
           <Image
-            src={`${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/favicon-96x96.png`}
+            src={`${clientEnv.NEXT_PUBLIC_APP_URL}/favicon-96x96.png`}
             style={styles.logo}
           />
           <View style={styles.headerText}>

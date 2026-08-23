@@ -1,7 +1,9 @@
 // App-wide constants for Tei Store
 
+import { clientEnv } from "@/lib/env-client"
+
 export const APP_NAME = "The Eye Informatique"
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+export const APP_URL = clientEnv.NEXT_PUBLIC_APP_URL
 
 // Localisation
 export const LOCALES = ["en", "fr"] as const
