@@ -23,11 +23,13 @@ import {
   StarIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  Share2Icon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Locale } from "@/lib/constants";
 import { getProductReviews } from "@/actions/review.actions";
 import { ReviewForm } from "@/components/storefront/review-form";
+import { ProductShareDialog, type ShareableProduct } from "@/components/shared/product-share-dialog";
 
 type Variant = {
   id: string;
@@ -51,6 +53,7 @@ type ProductData = {
   basePrice: number;
   brand: string | null;
   category: { id: string; name: string } | null;
+  images: { url: string }[];
   variants: Variant[];
   reviews: {
     id: string;
@@ -117,6 +120,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [paginatedReviews, setPaginatedReviews] = useState(product.reviews);
   const [reviewTotalPages, setReviewTotalPages] = useState(1);
   const [isLoadingReviews, startReviewTransition] = useTransition();
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     startReviewTransition(async () => {
@@ -272,11 +276,21 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         </div>
       </div>
 
-      <Button
-        size="lg"
-        className="w-full"
-        disabled={!canAddToCart}
-        onClick={() => {
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="lg"
+          className="flex-1"
+          onClick={() => setShareOpen(true)}
+        >
+          <Share2Icon className="mr-2 h-5 w-5" />
+          {t("share")}
+        </Button>
+        <Button
+          size="lg"
+          className="flex-1"
+          disabled={!canAddToCart}
+          onClick={() => {
           if (!selectedVariant || availableToAdd <= 0) {
             toast.error(t("outOfStock"));
             return;
@@ -314,6 +328,25 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         <ShoppingCartIcon className="mr-2 h-5 w-5" />
         {inStock ? t("addToCart") : t("outOfStock")}
       </Button>
+      </div>
+
+      <ProductShareDialog
+        product={
+          {
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            description: product.description ?? undefined,
+            basePrice: product.basePrice,
+            brand: product.brand ?? undefined,
+            categoryName: product.category?.name ?? undefined,
+            imageUrl: product.images[0]?.url ?? undefined,
+            condition: selectedVariant?.condition ?? product.variants[0]?.condition ?? "NEW",
+          } as ShareableProduct
+        }
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+      />
 
       {/* Description */}
       {product.description && (

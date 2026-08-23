@@ -2,7 +2,7 @@ import { z } from "zod"
 
 export const productSchemaBase = z.object({
   name: z.string().min(2).max(200),
-  slug: z.string().min(2).max(200),
+  slug: z.string().min(2).max(200).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase alphanumeric with hyphens only"),
   description: z.string().optional(),
   basePrice: z.coerce.number().positive(),
   categoryId: z.string().min(1),
@@ -23,6 +23,7 @@ export const productSchema = productSchemaBase.superRefine((data, ctx) => {
 })
 
 export const productVariantSchema = z.object({
+  id: z.string().cuid().optional(),
   sku: z.string().min(1),
   color: z.string().optional(),
   condition: z.enum(["NEW", "REFURBISHED"]).default("NEW"),

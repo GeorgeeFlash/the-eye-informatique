@@ -48,6 +48,11 @@ const updateProductInput = productSchemaBase.partial().extend({
     )
     .optional(),
   featureValues: z.array(featureValueInput).optional(),
+  variants: z
+    .array(productVariantSchema)
+    .min(1, "At least one variant is required")
+    .optional(),
+  branchId: z.string().cuid().optional(),
 })
 
 type UpdateProductInput = z.infer<typeof updateProductInput>
@@ -93,7 +98,31 @@ export async function createProduct(data: CreateProductInput) {
   const existing = await db.product.findUnique({ where: { slug } })
   if (existing) return { error: "A product with this slug already exists." }
 
+  // Check if any variant SKU already exists in DB
+  const skus = variants.map((v) => v.sku)
+  const existingSkus = await db.productVariant.findMany({
+    where: { sku: { in: skus } },
+    select: { sku: true },
+  })
+  if (existingSkus.length > 0) {
+    return { error: `SKU "${existingSkus[0].sku}" already exists in the system.` }
+  }
+
   const sanitizedDesc = description ? sanitizeHtml(description) : null
+
+  // Validate required feature fields if category is selected
+  if (productData.categoryId) {
+    const requiredFields = await db.categoryFeatureField.findMany({
+      where: { categoryId: productData.categoryId, isRequired: true },
+      select: { id: true, name: true },
+    })
+    for (const req of requiredFields) {
+      const match = featureValues?.find((fv) => fv.featureFieldId === req.id && fv.value.trim() !== "")
+      if (!match) {
+        return { error: `Feature field "${req.name}" is required.` }
+      }
+    }
+  }
 
   const product = await db.$transaction(async (tx) => {
     // Create the product
@@ -141,15 +170,24 @@ export async function createProduct(data: CreateProductInput) {
       })
     }
 
-    // Create feature values
-    if (featureValues && featureValues.length > 0) {
-      await tx.productFeatureValue.createMany({
-        data: featureValues.map((fv) => ({
-          productId: p.id,
-          featureFieldId: fv.featureFieldId,
-          value: fv.value,
-        })),
+    // Create feature values (filtering only valid fields for category)
+    if (featureValues && featureValues.length > 0 && productData.categoryId) {
+      const validCategoryFields = await tx.categoryFeatureField.findMany({
+        where: { categoryId: productData.categoryId },
+        select: { id: true },
       })
+      const validFieldIds = new Set(validCategoryFields.map((f) => f.id))
+      const filteredFeatureValues = featureValues.filter((fv) => validFieldIds.has(fv.featureFieldId) && fv.value.trim() !== "")
+
+      if (filteredFeatureValues.length > 0) {
+        await tx.productFeatureValue.createMany({
+          data: filteredFeatureValues.map((fv) => ({
+            productId: p.id,
+            featureFieldId: fv.featureFieldId,
+            value: fv.value,
+          })),
+        })
+      }
     }
 
     return p
@@ -177,7 +215,7 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
   const parsed = updateProductInput.safeParse(data)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
-  const { images, description, slug, featureValues, ...fields } = parsed.data
+  const { images, description, slug, featureValues, variants, branchId: inputBranchId, ...fields } = parsed.data
 
   // Slug uniqueness check if changing
   if (slug) {
@@ -187,9 +225,28 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
     if (conflict) return { error: "A product with this slug already exists." }
   }
 
+  // Branch context
+  const branchId = user.role === "CENTRAL_ADMIN" ? inputBranchId : user.branchId
+
   const sanitizedDesc = description !== undefined ? (description ? sanitizeHtml(description) : null) : undefined
 
+  // Validate required category features if categoryId is updated or existing
+  const targetCategoryId = fields.categoryId ?? (await db.product.findUnique({ where: { id }, select: { categoryId: true } }))?.categoryId
+  if (targetCategoryId && featureValues) {
+    const requiredFields = await db.categoryFeatureField.findMany({
+      where: { categoryId: targetCategoryId, isRequired: true },
+      select: { id: true, name: true },
+    })
+    for (const req of requiredFields) {
+      const match = featureValues.find((fv) => fv.featureFieldId === req.id && fv.value.trim() !== "")
+      if (!match) {
+        return { error: `Feature field "${req.name}" is required.` }
+      }
+    }
+  }
+
   await db.$transaction(async (tx) => {
+    // 1. Update product base record
     await tx.product.update({
       where: { id },
       data: {
@@ -199,7 +256,7 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
       },
     })
 
-    // Replace images if provided
+    // 2. Replace images if provided
     if (images) {
       await tx.productImage.deleteMany({ where: { productId: id } })
       if (images.length > 0) {
@@ -215,17 +272,112 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
       }
     }
 
-    // Replace feature values if provided
-    if (featureValues) {
+    // 3. Replace feature values if provided (filtered to target category)
+    if (featureValues && targetCategoryId) {
       await tx.productFeatureValue.deleteMany({ where: { productId: id } })
-      if (featureValues.length > 0) {
+      const validCategoryFields = await tx.categoryFeatureField.findMany({
+        where: { categoryId: targetCategoryId },
+        select: { id: true },
+      })
+      const validFieldIds = new Set(validCategoryFields.map((f) => f.id))
+      const filteredFeatureValues = featureValues.filter((fv) => validFieldIds.has(fv.featureFieldId) && fv.value.trim() !== "")
+
+      if (filteredFeatureValues.length > 0) {
         await tx.productFeatureValue.createMany({
-          data: featureValues.map((fv) => ({
+          data: filteredFeatureValues.map((fv) => ({
             productId: id,
             featureFieldId: fv.featureFieldId,
             value: fv.value,
           })),
         })
+      }
+    }
+
+    // 4. Reconcile variants if provided
+    if (variants && variants.length > 0) {
+      const existingVariants = await tx.productVariant.findMany({
+        where: { productId: id },
+        include: { stockByBranch: true },
+      })
+
+      const incomingIds = new Set(variants.map((v) => v.id).filter(Boolean) as string[])
+
+      // Update or create incoming variants
+      for (const v of variants) {
+        if (v.id && existingVariants.some((ev) => ev.id === v.id)) {
+          // Update existing variant
+          await tx.productVariant.update({
+            where: { id: v.id },
+            data: {
+              sku: v.sku,
+              color: v.color ?? null,
+              condition: v.condition,
+              price: v.price,
+              weight: v.weight ?? null,
+              stock: v.stock,
+            },
+          })
+
+          // Sync stockByBranch if branchId is known
+          if (branchId) {
+            await tx.productStockByBranch.upsert({
+              where: {
+                variantId_branchId: { variantId: v.id, branchId },
+              },
+              create: { variantId: v.id, branchId, stock: v.stock },
+              update: { stock: v.stock },
+            })
+          }
+        } else {
+          // Check SKU conflict for new variant
+          const skuConflict = await tx.productVariant.findFirst({
+            where: { sku: v.sku },
+          })
+          if (skuConflict && skuConflict.productId !== id) {
+            throw new Error(`SKU "${v.sku}" already belongs to another product.`)
+          }
+
+          const createdVariant = await tx.productVariant.create({
+            data: {
+              productId: id,
+              sku: v.sku,
+              color: v.color ?? null,
+              condition: v.condition,
+              price: v.price,
+              weight: v.weight ?? null,
+              stock: v.stock,
+            },
+          })
+
+          if (branchId) {
+            await tx.productStockByBranch.create({
+              data: { variantId: createdVariant.id, branchId, stock: v.stock },
+            })
+          }
+        }
+      }
+
+      // Handle removed variants
+      const removedVariants = existingVariants.filter((ev) => !incomingIds.has(ev.id))
+      for (const rv of removedVariants) {
+        const orderCount = await tx.orderItem.count({
+          where: { variantId: rv.id },
+        })
+        if (orderCount > 0) {
+          // Order references exist — zero out stock to keep data intact
+          await tx.productVariant.update({
+            where: { id: rv.id },
+            data: { stock: 0 },
+          })
+          await tx.productStockByBranch.updateMany({
+            where: { variantId: rv.id },
+            data: { stock: 0 },
+          })
+        } else {
+          // Safe to delete variant & associated records
+          await tx.productStockByBranch.deleteMany({ where: { variantId: rv.id } })
+          await tx.productVariant.delete({ where: { id: rv.id } })
+        }
       }
     }
   })
@@ -234,7 +386,7 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
     action: "PRODUCT_UPDATED",
     entityType: "Product",
     entityId: id,
-    metadata: { updatedFields: Object.keys(fields) },
+    metadata: { updatedFields: Object.keys(fields), variantsUpdated: Boolean(variants) },
   })
 
   revalidateProducts()
@@ -466,6 +618,7 @@ interface GetProductsParams {
   isActive?: boolean
   isFeatured?: boolean
   condition?: "NEW" | "REFURBISHED"
+  stockStatus?: "all" | "in_stock" | "low_stock" | "out_of_stock"
   featureFilters?: Record<string, string>
   page?: number
   pageSize?: number
@@ -478,6 +631,7 @@ export async function getProducts({
   isActive,
   isFeatured,
   condition,
+  stockStatus,
   featureFilters,
   page = 1,
   pageSize = 20,
@@ -504,15 +658,41 @@ export async function getProducts({
     }))
   }
 
+  // Stock status filter
+  if (stockStatus && stockStatus !== "all") {
+    if (stockStatus === "in_stock") {
+      where.variants = {
+        some: {
+          stock: { gt: 0 },
+          ...(branchId ? { stockByBranch: { some: { branchId } } } : {}),
+        },
+      }
+    } else if (stockStatus === "low_stock") {
+      where.variants = {
+        some: {
+          stock: { lte: 3, gt: 0 },
+          ...(branchId ? { stockByBranch: { some: { branchId } } } : {}),
+        },
+      }
+    } else if (stockStatus === "out_of_stock") {
+      where.variants = {
+        every: {
+          stock: 0,
+        },
+      }
+    }
+  }
+
   // Condition filter: products that have at least one variant with given condition
   if (condition) {
     where.variants = {
+      ...(where.variants ?? {}),
       some: {
         condition,
         ...(branchId ? { stockByBranch: { some: { branchId } } } : {}),
       },
     }
-  } else if (branchId) {
+  } else if (branchId && !stockStatus) {
     // Branch scoping: only show products that have stock at the given branch
     where.variants = {
       some: { stockByBranch: { some: { branchId } } },

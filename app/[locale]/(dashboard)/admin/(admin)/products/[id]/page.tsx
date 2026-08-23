@@ -7,7 +7,11 @@ import {
 } from "@/actions/category.actions";
 import { getBranches } from "@/actions/user.actions";
 import { ProductFormWrapper } from "@/components/dashboard/product-form-wrapper";
+import { ProductShareDialog, type ShareableProduct } from "@/components/shared/product-share-dialog";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ExternalLinkIcon, Share2Icon } from "lucide-react";
 
 export default async function AdminProductEditorPage({
   params,
@@ -61,6 +65,7 @@ export default async function AdminProductEditorPage({
     isActive: product.isActive,
     isFeatured: product.isFeatured,
     variants: product.variants.map((v) => ({
+      id: v.id,
       sku: v.sku,
       color: v.color ?? undefined,
       condition: v.condition as "NEW" | "REFURBISHED",
@@ -81,11 +86,44 @@ export default async function AdminProductEditorPage({
       })) ?? [],
   };
 
+  const primaryImage = product.images.find((img) => img.isPrimary) ?? product.images[0];
+
+  const shareableProduct: ShareableProduct = {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    description: product.description ?? undefined,
+    basePrice: Number(product.basePrice),
+    brand: product.brand ?? undefined,
+    categoryName: product.category?.name ?? undefined,
+    imageUrl: primaryImage?.url ?? undefined,
+    condition: product.variants[0]?.condition ?? "NEW",
+  };
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("editTitle")}</h1>
-        <p className="text-muted-foreground">{t("editSubtitle")}</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{t("editTitle")}</h1>
+          <p className="text-muted-foreground">{t("editSubtitle")}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/products/${product.slug}`} target="_blank">
+              <ExternalLinkIcon className="mr-2 h-4 w-4" />
+              {t("viewStorefront")}
+            </Link>
+          </Button>
+          <ProductShareDialog
+            product={shareableProduct}
+            trigger={
+              <Button variant="outline" size="sm">
+                <Share2Icon className="mr-2 h-4 w-4" />
+                {t("shareProduct")}
+              </Button>
+            }
+          />
+        </div>
       </div>
 
       <ProductFormWrapper

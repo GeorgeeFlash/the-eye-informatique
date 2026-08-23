@@ -93,7 +93,7 @@ export function CheckoutForm({
       deliveryMethod: "PICKUP",
       paymentMethod: "MOBILE_MONEY",
       installments: false,
-      branchId: branches[0].id,
+      branchId: branches[0]?.id,
       notes: "",
     },
   });
@@ -112,7 +112,7 @@ export function CheckoutForm({
       ? calculateOrderShipping(
           selectedAddress.city,
           branchCities,
-          interCityShippingFee
+          interCityShippingFee,
         )
       : 0;
 
@@ -125,7 +125,7 @@ export function CheckoutForm({
   // Split installment amount using exact dinero allocation
   const installmentBreakdown = allocateInstallments(
     totalMoney,
-    installmentCount
+    installmentCount,
   );
   const firstInstallmentAmount = installmentBreakdown[0] ?? 0;
 
@@ -404,11 +404,9 @@ export function CheckoutForm({
                 <div className="flex items-center gap-3 rounded-lg border p-4 bg-muted/30">
                   <CreditCardIcon className="size-5 text-primary" />
                   <div className="text-sm">
-                    <p className="font-medium">
-                      PayUnit (MTN Mobile Money / Orange Money)
-                    </p>
+                    <p className="font-medium">{t("payunitProviders")}</p>
                     <p className="text-xs text-muted-foreground">
-                      You will be redirected to PayUnit to securely complete your payment.
+                      {t("payunitRedirectNotice")}
                     </p>
                   </div>
                 </div>
@@ -443,7 +441,7 @@ export function CheckoutForm({
                       {t("installmentsBreakdown", {
                         amount: formatCurrency(
                           firstInstallmentAmount,
-                          locale as Locale
+                          locale as Locale,
                         ),
                         months: installmentCount,
                       })}
@@ -514,7 +512,7 @@ export function CheckoutForm({
                   <span>
                     {formatCurrency(
                       item.price * item.quantity,
-                      locale as Locale
+                      locale as Locale,
                     )}
                   </span>
                 </div>

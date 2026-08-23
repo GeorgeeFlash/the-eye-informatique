@@ -1,5 +1,6 @@
 import { CustomerSidebar } from "@/components/dashboard/sidebar/customer-sidebar"
 import { DashboardNavbar } from "@/components/dashboard/navbar/dashboard-navbar"
+import { DashboardBreadcrumb } from "@/components/dashboard/breadcrumb"
 import {
   SidebarInset,
   SidebarProvider,
@@ -29,7 +30,10 @@ export default async function DashboardPortalLayout({
       <CustomerSidebar variant={isAffiliate ? "affiliate" : "customer"} />
       <SidebarInset>
         <DashboardNavbar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6">
+          <DashboardBreadcrumb />
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   )

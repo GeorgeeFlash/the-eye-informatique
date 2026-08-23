@@ -627,3 +627,60 @@ export async function confirmReferralCommission(orderId: string) {
     })
   }
 }
+
+// ─── Customer / Affiliate: Get or create product affiliate link ────────
+
+export async function getOrCreateProductAffiliateLink(productSlugOrId: string) {
+  try {
+    const user = await requireAuth()
+    const profile = await db.affiliateProfile.findUnique({
+      where: { userId: user.id },
+    })
+
+    if (!profile || profile.status !== "APPROVED") {
+      return { isAffiliate: false, url: null, code: null }
+    }
+
+    const product = await db.product.findFirst({
+      where: {
+        OR: [{ id: productSlugOrId }, { slug: productSlugOrId }],
+      },
+      select: { id: true, slug: true, name: true },
+    })
+
+    if (!product) {
+      return { isAffiliate: false, url: null, code: null }
+    }
+
+    const targetUrl = `/products/${product.slug}`
+
+    // Check if link already exists for this affiliate & target
+    let link = await db.affiliateLink.findFirst({
+      where: { affiliateId: profile.id, targetUrl },
+    })
+
+    if (!link) {
+      // Generate a clean deterministic/random unique code
+      const cleanSlug = product.slug.slice(0, 8).replace(/[^a-zA-Z0-9]/g, "")
+      const randSuffix = Math.random().toString(36).substring(2, 6)
+      const code = `${cleanSlug}-${randSuffix}`.toLowerCase()
+
+      link = await db.affiliateLink.create({
+        data: {
+          affiliateId: profile.id,
+          code,
+          targetUrl,
+        },
+      })
+    }
+
+    return {
+      isAffiliate: true,
+      code: link.code,
+      url: `${APP_URL}/ref/${link.code}`,
+    }
+  } catch {
+    return { isAffiliate: false, url: null, code: null }
+  }
+}
+

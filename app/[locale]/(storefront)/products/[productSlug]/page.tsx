@@ -40,6 +40,7 @@ export default async function ProductDetailPage({ params }: Props) {
     basePrice: Number(product.basePrice),
     brand: product.brand,
     category: product.category,
+    images: product.images.map((img) => ({ url: img.url })),
     variants: product.variants.map((v) => ({
       id: v.id,
       sku: v.sku,

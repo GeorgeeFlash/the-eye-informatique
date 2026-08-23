@@ -13,6 +13,7 @@ import {
 import { APP_URL } from "@/lib/constants";
 import { CreateLinkForm } from "./create-link-form";
 import { DeleteLinkButton } from "./delete-link-button";
+import { ShareLinkButton } from "./share-link-button";
 import { Locale } from "@/lib/constants";
 
 export default async function AffiliateLinksPage() {
@@ -49,9 +50,12 @@ export default async function AffiliateLinksPage() {
                 {profile.links.map((link) => (
                   <TableRow key={link.id}>
                     <TableCell>
-                      <code className="rounded bg-muted px-2 py-1 text-sm">
-                        {APP_URL}/ref/{link.code}
-                      </code>
+                      <div className="flex items-center gap-2">
+                        <code className="rounded bg-muted px-2 py-1 text-sm">
+                          {APP_URL}/ref/{link.code}
+                        </code>
+                        <ShareLinkButton code={link.code} targetUrl={link.targetUrl} />
+                      </div>
                     </TableCell>
                     <TableCell className="max-w-50 truncate text-sm">
                       {link.targetUrl}

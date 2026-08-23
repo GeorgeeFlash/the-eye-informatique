@@ -3,7 +3,7 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { useTransition, useCallback, useRef, useEffect } from "react";
+import { useTransition, useCallback, useRef, useEffect, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/dashboard/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -23,16 +23,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   PlusIcon,
   MoreHorizontalIcon,
   PencilIcon,
   TrashIcon,
   SearchIcon,
+  ExternalLinkIcon,
+  Share2Icon,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/utils";
 import { deleteProduct } from "@/actions/product.actions";
+import { ProductShareDialog, type ShareableProduct } from "@/components/shared/product-share-dialog";
+import { toast } from "sonner";
 import { Locale } from "@/lib/constants";
 
 type ProductRow = {
@@ -81,6 +95,9 @@ export function ProductListClient({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const [productToArchive, setProductToArchive] = useState<string | null>(null);
+  const [shareProduct, setShareProduct] = useState<ProductRow | null>(null);
 
   useEffect(() => {
     return () => {
@@ -115,7 +132,20 @@ export function ProductListClient({
   );
 
   const handleDelete = async (id: string) => {
-    await deleteProduct(id);
+    try {
+      await deleteProduct(id);
+      toast.success(t("archiveSuccess"));
+    } catch {
+      toast.error(t("archiveError"));
+    } finally {
+      setArchiveDialogOpen(false);
+      setProductToArchive(null);
+    }
+  };
+
+  const confirmArchive = (id: string) => {
+    setProductToArchive(id);
+    setArchiveDialogOpen(true);
   };
 
   const totalStock = (variants: ProductRow["variants"]) =>
@@ -226,30 +256,55 @@ export function ProductListClient({
     },
     {
       id: "actions",
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={`/admin/products/${row.original.id}`}>
-                <PencilIcon className="mr-2 h-4 w-4" />
-                {t("edit")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => handleDelete(row.original.id)}
-            >
-              <TrashIcon className="mr-2 h-4 w-4" />
-              {t("archive")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+      cell: ({ row }) => {
+        const product = row.original;
+        const primaryImage = product.images[0] ?? null;
+        const shareable: ShareableProduct = {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          basePrice: product.basePrice,
+          brand: product.brand ?? undefined,
+          categoryName: product.category?.name ?? undefined,
+          imageUrl: primaryImage?.url ?? undefined,
+          condition: product.variants[0]?.condition ?? "NEW",
+        };
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontalIcon className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/products/${product.id}`}>
+                  <PencilIcon className="mr-2 h-4 w-4" />
+                  {t("edit")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/products/${product.slug}`} target="_blank">
+                  <ExternalLinkIcon className="mr-2 h-4 w-4" />
+                  {t("viewInStore")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShareProduct(product)}>
+                <Share2Icon className="mr-2 h-4 w-4" />
+                {t("share")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onSelect={() => confirmArchive(product.id)}
+              >
+                <TrashIcon className="mr-2 h-4 w-4" />
+                {t("archive")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
     },
   ];
 
@@ -257,7 +312,7 @@ export function ProductListClient({
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 gap-2">
+        <div className="flex flex-1 gap-2 flex-wrap">
           <div className="relative max-w-sm flex-1">
             <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -267,6 +322,37 @@ export function ProductListClient({
               className="pl-9"
             />
           </div>
+          <Select
+            value={searchParams.get("status") ?? "all"}
+            onValueChange={(v) =>
+              updateParams("status", v === "all" ? "" : v)
+            }
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder={t("allStatuses")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("allStatuses")}</SelectItem>
+              <SelectItem value="active">{t("statusActive")}</SelectItem>
+              <SelectItem value="archived">{t("statusArchived")}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={searchParams.get("stockStatus") ?? "all"}
+            onValueChange={(v) =>
+              updateParams("stockStatus", v === "all" ? "" : v)
+            }
+          >
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder={t("allStock")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("allStock")}</SelectItem>
+              <SelectItem value="in_stock">{t("stockIn")}</SelectItem>
+              <SelectItem value="low_stock">{t("stockLow")}</SelectItem>
+              <SelectItem value="out_of_stock">{t("stockOut")}</SelectItem>
+            </SelectContent>
+          </Select>
           <Select
             defaultValue={searchParams.get("categoryId") ?? "all"}
             onValueChange={(v) =>
@@ -322,6 +408,47 @@ export function ProductListClient({
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Archive Confirmation Dialog */}
+      <AlertDialog open={archiveDialogOpen} onOpenChange={setArchiveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirmArchiveTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("confirmArchiveDesc")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => productToArchive && handleDelete(productToArchive)}
+            >
+              {t("archive")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Share Dialog */}
+      {shareProduct && (
+        <ProductShareDialog
+          product={{
+            id: shareProduct.id,
+            name: shareProduct.name,
+            slug: shareProduct.slug,
+            basePrice: shareProduct.basePrice,
+            brand: shareProduct.brand ?? undefined,
+            categoryName: shareProduct.category?.name ?? undefined,
+            imageUrl: shareProduct.images[0]?.url ?? undefined,
+            condition: shareProduct.variants[0]?.condition ?? "NEW",
+          }}
+          open
+          onOpenChange={(open) => {
+            if (!open) setShareProduct(null);
+          }}
+        />
       )}
     </div>
   );

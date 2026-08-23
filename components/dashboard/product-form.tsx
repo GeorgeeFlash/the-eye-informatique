@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useTransition, useState, useEffect, useCallback } from "react";
+import { useTransition, useState, useEffect, useCallback, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { PlusIcon, TrashIcon, Loader2Icon } from "lucide-react";
+import { PlusIcon, TrashIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
 import {
   ImageUploader,
   type UploadedImage,
@@ -154,6 +154,19 @@ export function ProductForm({
     }
   }, [watchCategoryId, onCategoryChange]);
 
+  // Clean feature values when category changes to avoid mismatched fields
+  const previousCategoryId = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (
+      watchCategoryId &&
+      previousCategoryId.current &&
+      watchCategoryId !== previousCategoryId.current
+    ) {
+      form.setValue("featureValues", []);
+    }
+    previousCategoryId.current = watchCategoryId;
+  }, [watchCategoryId, form]);
+
   // Auto-generate slug from name
   const watchName = form.watch("name");
   const handleNameBlur = () => {
@@ -161,6 +174,10 @@ export function ProductForm({
       form.setValue("slug", slugify(watchName));
     }
   };
+
+  const handleRegenerateSlug = useCallback(() => {
+    form.setValue("slug", slugify(form.getValues("name") || ""));
+  }, [form]);
 
   const handleImagesChange = useCallback(
     (images: UploadedImage[]) => {
@@ -171,6 +188,24 @@ export function ProductForm({
 
   async function onSubmit(values: FormValues) {
     setServerError(null);
+
+    // Client-side validation for required dynamic feature fields
+    const missingRequired = featureFields
+      .filter((ff) => ff.isRequired)
+      .find((ff) => {
+        const fv = values.featureValues?.find(
+          (f) => f.featureFieldId === ff.id,
+        );
+        return !fv || fv.value.trim() === "";
+      });
+
+    if (missingRequired) {
+      form.setError("featureValues", {
+        type: "required",
+        message: t("featureRequiredError"),
+      });
+      return;
+    }
 
     startTransition(async () => {
       const result = isEditing
@@ -271,7 +306,18 @@ export function ProductForm({
                       <FormItem>
                         <FormLabel>{t("slug")}</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <div className="flex gap-2">
+                            <Input {...field} className="flex-1" />
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="icon"
+                              title={t("regenerateSlug")}
+                              onClick={handleRegenerateSlug}
+                            >
+                              <RefreshCwIcon className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </FormControl>
                         <FormDescription>{t("slugHint")}</FormDescription>
                         <FormMessage />
@@ -303,8 +349,8 @@ export function ProductForm({
                       <FormItem>
                         <FormLabel>{t("category")}</FormLabel>
                         <Select
+                          value={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -371,12 +417,12 @@ export function ProductForm({
                       <FormItem>
                         <FormLabel>{t("commissionType")}</FormLabel>
                         <Select
+                          value={field.value ?? "NONE"}
                           onValueChange={(v) => {
                             field.onChange(v === "NONE" ? null : v);
                             if (v === "NONE")
                               form.setValue("commissionValue", null);
                           }}
-                          defaultValue={field.value ?? "NONE"}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -626,8 +672,8 @@ export function ProductForm({
                           <FormItem>
                             <FormLabel>{t("condition")}</FormLabel>
                             <Select
+                              value={field.value}
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
                             >
                               <FormControl>
                                 <SelectTrigger>
@@ -736,8 +782,8 @@ export function ProductForm({
                       <FormItem>
                         <FormLabel>{t("branch")}</FormLabel>
                         <Select
+                          value={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>

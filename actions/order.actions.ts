@@ -187,6 +187,10 @@ export async function createOrder(data: CreateOrderInput) {
   const subtotal = moneyToNumber(subtotalMoney)
   const total = moneyToNumber(totalMoney)
 
+  const installmentAmounts = parsed.data.installments
+    ? allocateInstallments(totalMoney, await getSetting<number>("installmentCount", 3))
+    : []
+
   // -----------------------------------------------------------------------
   // Create order + decrement stock in a transaction
   // -----------------------------------------------------------------------
@@ -235,7 +239,7 @@ export async function createOrder(data: CreateOrderInput) {
             create: {
               method: parsed.data.paymentMethod,
               gateway: "CM_MTNMOMO",
-              amount: total,
+              amount: parsed.data.installments ? installmentAmounts[0] : total,
               status: "PENDING",
             },
           },
@@ -253,12 +257,6 @@ export async function createOrder(data: CreateOrderInput) {
 
       // Create installment records if requested
       if (parsed.data.installments) {
-        const installmentCount = await getSetting<number>("installmentCount", 3)
-        const installmentAmounts = allocateInstallments(
-          totalMoney,
-          installmentCount
-        )
-
         for (let i = 0; i < installmentAmounts.length; i++) {
           const dueDate = new Date()
           dueDate.setMonth(dueDate.getMonth() + i + 1)
@@ -269,6 +267,8 @@ export async function createOrder(data: CreateOrderInput) {
               sequenceNumber: i + 1,
               amount: installmentAmounts[i],
               dueDate,
+              status: i === 0 ? "PAID" : "PENDING",
+              paidAt: i === 0 ? new Date() : undefined,
             },
           })
         }
@@ -336,7 +336,7 @@ export async function createOrder(data: CreateOrderInput) {
   try {
     const session = await createCheckoutSession({
       orderId: order.id,
-      amount: total,
+      amount: parsed.data.installments ? installmentAmounts[0] : total,
       gateway: "CM_MTNMOMO",
       customerName: user.name ?? undefined,
       customerEmail: user.email,
