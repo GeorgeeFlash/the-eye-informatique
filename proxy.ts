@@ -24,8 +24,9 @@ const isAuthRoute = createRouteMatcher([
   "/sign-up(.*)",
 ])
 
-// API routes that must never be touched by the intl middleware
+// API and Serwist routes that must never be touched by the intl middleware
 const isApiRoute = createRouteMatcher(["/api/(.*)", "/trpc/(.*)"])
+const isSerwistRoute = createRouteMatcher(["/serwist/(.*)"])
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const ip = getIp(req)
@@ -58,9 +59,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   }
 
   // 3. next-intl — locale detection & routing
-  // API / tRPC routes must NOT be processed by the intl middleware because
-  // next-intl would redirect them to /<locale>/api/… which has no handler → 404
-  if (isApiRoute(req)) {
+  // API, tRPC, and Serwist routes must NOT be processed by the intl middleware
+  if (isApiRoute(req) || isSerwistRoute(req)) {
     return NextResponse.next()
   }
 

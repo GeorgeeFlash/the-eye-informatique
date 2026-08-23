@@ -5,10 +5,19 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { checkoutSchema } from "@/lib/validators/order.schema";
+import {
+  checkoutFormSchema,
+  type CheckoutFormValues,
+} from "@/lib/validators/order.schema";
 import { createOrder } from "@/actions/order.actions";
 import { useCart } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
+import {
+  createMoney,
+  addMoney,
+  moneyToNumber,
+  allocateInstallments,
+} from "@/lib/money";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,9 +42,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2Icon, MapPinIcon, StoreIcon, TruckIcon } from "lucide-react";
+import {
+  Loader2Icon,
+  MapPinIcon,
+  StoreIcon,
+  TruckIcon,
+  CreditCardIcon,
+} from "lucide-react";
 import { Locale } from "@/lib/constants";
-import { calculateOrderShipping } from "@/lib/shipping";
+import { calculateOrderShipping, DEFAULT_INTER_CITY_FEE } from "@/lib/shipping";
 
 type Address = {
   id: string;
@@ -49,23 +64,14 @@ interface CheckoutFormProps {
   addresses: Address[];
   branches: { id: string; name: string; city: string }[];
   installmentCount: number;
+  interCityShippingFee?: number;
 }
-
-type CheckoutFormValues = {
-  deliveryMethod: "PICKUP" | "DELIVERY";
-  paymentMethod: "MOBILE_MONEY" | "CHECKOUT";
-  installments: boolean;
-  addressId?: string;
-  branchId?: string;
-  notes?: string;
-  phone?: string;
-  gateway?: "CM_MTNMOMO" | "CM_ORANGE";
-};
 
 export function CheckoutForm({
   addresses,
   branches,
   installmentCount,
+  interCityShippingFee = DEFAULT_INTER_CITY_FEE,
 }: CheckoutFormProps) {
   const t = useTranslations("checkout");
   const locale = useLocale() as Locale;
@@ -82,20 +88,17 @@ export function CheckoutForm({
   const { items, clearCart, totalPrice, totalItems } = useCart();
 
   const form = useForm<CheckoutFormValues>({
-    resolver: zodResolver(checkoutSchema) as never,
+    resolver: zodResolver(checkoutFormSchema),
     defaultValues: {
       deliveryMethod: "PICKUP",
       paymentMethod: "MOBILE_MONEY",
       installments: false,
-      gateway: "CM_MTNMOMO",
-      phone: "",
+      branchId: branches[0].id,
       notes: "",
     },
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const deliveryMethod = form.watch("deliveryMethod");
-  const paymentMethod = form.watch("paymentMethod");
   const installments = form.watch("installments");
   const selectedAddressId = form.watch("addressId");
 
@@ -106,8 +109,25 @@ export function CheckoutForm({
     .filter((c): c is string => Boolean(c));
   const shippingFee =
     deliveryMethod === "DELIVERY" && selectedAddress && branchCities.length > 0
-      ? calculateOrderShipping(selectedAddress.city, branchCities)
+      ? calculateOrderShipping(
+          selectedAddress.city,
+          branchCities,
+          interCityShippingFee
+        )
       : 0;
+
+  // Safe centralized currency arithmetic using Dinero.js
+  const subtotalMoney = createMoney(totalPrice);
+  const shippingMoney = createMoney(shippingFee);
+  const totalMoney = addMoney(subtotalMoney, shippingMoney);
+  const grandTotal = moneyToNumber(totalMoney);
+
+  // Split installment amount using exact dinero allocation
+  const installmentBreakdown = allocateInstallments(
+    totalMoney,
+    installmentCount
+  );
+  const firstInstallmentAmount = installmentBreakdown[0] ?? 0;
 
   function onSubmit(data: CheckoutFormValues) {
     setServerError(null);
@@ -381,91 +401,17 @@ export function CheckoutForm({
                 <CardTitle>{t("paymentMethod")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="paymentMethod"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="MOBILE_MONEY">
-                            {t("mobileMoney")}
-                          </SelectItem>
-                          <SelectItem value="CHECKOUT">
-                            {t("cardPayment")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Mobile Money gateway */}
-                {paymentMethod === "MOBILE_MONEY" && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="gateway"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("gateway")}</FormLabel>
-                          <div className="grid grid-cols-2 gap-3">
-                            <Button
-                              type="button"
-                              variant={
-                                field.value === "CM_MTNMOMO"
-                                  ? "default"
-                                  : "outline"
-                              }
-                              onClick={() => field.onChange("CM_MTNMOMO")}
-                            >
-                              MTN MoMo
-                            </Button>
-                            <Button
-                              type="button"
-                              variant={
-                                field.value === "CM_ORANGE"
-                                  ? "default"
-                                  : "outline"
-                              }
-                              onClick={() => field.onChange("CM_ORANGE")}
-                            >
-                              Orange Money
-                            </Button>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("phoneNumber")}</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              value={field.value ?? ""}
-                              type="tel"
-                              placeholder="6XXXXXXXX"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
+                <div className="flex items-center gap-3 rounded-lg border p-4 bg-muted/30">
+                  <CreditCardIcon className="size-5 text-primary" />
+                  <div className="text-sm">
+                    <p className="font-medium">
+                      PayUnit (MTN Mobile Money / Orange Money)
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      You will be redirected to PayUnit to securely complete your payment.
+                    </p>
+                  </div>
+                </div>
 
                 {/* Installments toggle */}
                 <FormField
@@ -496,8 +442,8 @@ export function CheckoutForm({
                     <AlertDescription>
                       {t("installmentsBreakdown", {
                         amount: formatCurrency(
-                          Math.ceil(totalPrice / installmentCount),
-                          locale as Locale,
+                          firstInstallmentAmount,
+                          locale as Locale
                         ),
                         months: installmentCount,
                       })}
@@ -568,7 +514,7 @@ export function CheckoutForm({
                   <span>
                     {formatCurrency(
                       item.price * item.quantity,
-                      locale as Locale,
+                      locale as Locale
                     )}
                   </span>
                 </div>
@@ -602,9 +548,7 @@ export function CheckoutForm({
             <Separator />
             <div className="flex justify-between font-semibold text-lg">
               <span>{t("total")}</span>
-              <span>
-                {formatCurrency(totalPrice + shippingFee, locale as Locale)}
-              </span>
+              <span>{formatCurrency(grandTotal, locale as Locale)}</span>
             </div>
           </CardContent>
         </Card>

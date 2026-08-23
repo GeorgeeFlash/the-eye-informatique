@@ -17,9 +17,17 @@ export async function GET(req: Request) {
   const orderId = searchParams.get("orderId")
   const installmentId = searchParams.get("installmentId")
 
-  const path = installmentId
-    ? `/dashboard/orders/${orderId}?installment=paid`
-    : `/dashboard/orders/${orderId}?payment=complete`
+  // Validate identifiers to prevent path traversal or open redirect vulnerabilities
+  const isValidId = (id: string | null) => Boolean(id && /^[a-zA-Z0-9_-]{1,64}$/.test(id))
+
+  if (!isValidId(orderId)) {
+    return NextResponse.redirect(`${APP_URL}/dashboard/orders`)
+  }
+
+  const safeInstallmentQuery = isValidId(installmentId) ? `&installmentId=${encodeURIComponent(installmentId!)}` : ""
+  const path = isValidId(installmentId)
+    ? `/dashboard/orders/${encodeURIComponent(orderId!)}?installment=paid${safeInstallmentQuery}`
+    : `/dashboard/orders/${encodeURIComponent(orderId!)}?payment=complete`
 
   // Always redirect to APP_URL (localhost:3000 in dev, real domain in prod)
   return NextResponse.redirect(`${APP_URL}${path}`)

@@ -5,6 +5,7 @@ import { getUserAddresses } from "@/actions/order.actions";
 import { getBranches } from "@/actions/user.actions";
 import { getSetting } from "@/actions/settings.actions";
 import { CheckoutForm } from "@/components/storefront/checkout-form";
+import { DEFAULT_INTER_CITY_FEE } from "@/lib/shipping";
 
 export async function generateMetadata() {
   const t = await getTranslations("checkout");
@@ -15,11 +16,13 @@ export default async function CheckoutPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 
-  const [addresses, branches, installmentCount] = await Promise.all([
-    getUserAddresses(),
-    getBranches(),
-    getSetting<number>("installmentCount", 3),
-  ]);
+  const [addresses, branches, installmentCount, interCityShippingFee] =
+    await Promise.all([
+      getUserAddresses(),
+      getBranches(),
+      getSetting<number>("installmentCount", 3),
+      getSetting<number>("interCityShippingFee", DEFAULT_INTER_CITY_FEE),
+    ]);
 
   const t = await getTranslations("checkout");
 
@@ -36,6 +39,7 @@ export default async function CheckoutPage() {
         }))}
         branches={branches}
         installmentCount={installmentCount}
+        interCityShippingFee={interCityShippingFee}
       />
     </div>
   );

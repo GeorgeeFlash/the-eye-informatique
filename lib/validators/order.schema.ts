@@ -8,16 +8,24 @@ export const addressSchema = z.object({
   country: z.string().length(2).default("CM"),
 })
 
-export const checkoutSchema = z.object({
+export const cartLineItemSchema = z.object({
+  variantId: z.string().min(1),
+  quantity: z.number().int().min(1),
+})
+
+export const checkoutFormSchema = z.object({
   deliveryMethod: z.enum(["PICKUP", "DELIVERY"]),
   addressId: z.string().min(1).optional(),
   branchId: z.string().min(1).optional(),
   notes: z.string().optional(),
-  paymentMethod: z.enum(["MOBILE_MONEY", "CHECKOUT"]),
-  phone: z.string().optional(),
-  gateway: z.enum(["CM_MTNMOMO", "CM_ORANGE"]).optional(),
-  installments: z.boolean().default(false),
+  paymentMethod: z.enum(["MOBILE_MONEY"]),
+  installments: z.boolean(),
 })
 
-export type CheckoutFormValues = z.infer<typeof checkoutSchema>
+export const checkoutSchema = checkoutFormSchema.extend({
+  items: z.array(cartLineItemSchema).min(1, "Cart is empty"),
+})
+
+export type CheckoutFormValues = z.infer<typeof checkoutFormSchema>
 export type AddressFormValues = z.infer<typeof addressSchema>
+export type CartLineItem = z.infer<typeof cartLineItemSchema>

@@ -39,12 +39,6 @@ export default async function BlogArticlePage({
 
   if (!article) notFound();
 
-  // Simple JSON content renderer — works for plain text and basic BlockNote output
-  const contentHtml =
-    typeof article.content === "string"
-      ? article.content
-      : JSON.stringify(article.content);
-
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
       <Link

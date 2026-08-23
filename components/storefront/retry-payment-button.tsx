@@ -1,30 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { retryPayment } from "@/actions/order.actions";
 import { Button } from "@/components/ui/button";
 import { RefreshCwIcon, Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
 
 export function RetryPaymentButton({
   orderId,
   label,
+  gateway = "CM_MTNMOMO",
 }: {
   orderId: string;
   label: string;
+  gateway?: string;
 }) {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleRetry() {
     setLoading(true);
     try {
-      const result = await retryPayment(orderId, "CM_MTNMOMO");
+      const result = await retryPayment(orderId, gateway);
       if ("redirectUrl" in result && result.redirectUrl) {
-        router.push(result.redirectUrl);
+        window.location.href = result.redirectUrl;
       } else if ("error" in result) {
-        alert(result.error);
+        toast.error(result.error);
       }
+    } catch {
+      toast.error("Failed to retry payment. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -91,9 +91,13 @@ export default async function LocaleLayout({
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <NextIntlClientProvider messages={messages}>
-              <SerwistProvider swUrl="/serwist/sw.js">
+              {process.env.NODE_ENV === "production" ? (
+                <SerwistProvider swUrl="/serwist/sw.js">
+                  <CartSyncProvider>{children}</CartSyncProvider>
+                </SerwistProvider>
+              ) : (
                 <CartSyncProvider>{children}</CartSyncProvider>
-              </SerwistProvider>
+              )}
               <Toaster richColors />
               <SanityLive />
             </NextIntlClientProvider>

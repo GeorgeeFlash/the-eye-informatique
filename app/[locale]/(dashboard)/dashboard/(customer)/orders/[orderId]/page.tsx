@@ -252,6 +252,7 @@ export default async function OrderDetailPage({
                     <RetryPaymentButton
                       orderId={order.id}
                       label={t("retryPayment")}
+                      gateway={order.payment.gateway ?? "CM_MTNMOMO"}
                     />
                   </div>
                 )}

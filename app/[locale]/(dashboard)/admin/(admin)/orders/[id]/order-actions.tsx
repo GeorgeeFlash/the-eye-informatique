@@ -45,9 +45,9 @@ export function AdminOrderActions({
   const [note, setNote] = useState("");
 
   // Keep local status in sync when the server refreshes with new currentStatus
-  const prevStatusRef = useRef(currentStatus);
-  if (prevStatusRef.current !== currentStatus) {
-    prevStatusRef.current = currentStatus;
+  const [prevStatus, setPrevStatus] = useState(currentStatus);
+  if (prevStatus !== currentStatus) {
+    setPrevStatus(currentStatus);
     setStatus(currentStatus);
   }
 

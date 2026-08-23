@@ -1,20 +1,20 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 import { ShoppingCartIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCartStore } from "@/stores/cart.store"
 import { useUiStore } from "@/stores/ui.store"
 import { useTranslations } from "next-intl"
 
+const emptySubscribe = () => () => {}
+
 export function CartButton() {
   const count = useCartStore((s) => s.items.reduce((n, i) => n + i.quantity, 0))
   const toggleCartSheet = useUiStore((s) => s.toggleCartSheet)
   const t = useTranslations("nav")
-  // Zustand `persist` rehydrates from localStorage on the client, so `count` can
-  // differ from the server (always 0). Defer the badge until after hydration.
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  // Use useSyncExternalStore for hydration-safe rendering without setState-in-effect
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false)
 
   return (
     <Button

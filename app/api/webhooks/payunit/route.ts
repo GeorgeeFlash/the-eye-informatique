@@ -17,14 +17,16 @@ export async function POST(req: Request) {
     }
 
     const transactionId = payload.transaction_id
-    if (!transactionId) {
+    if (!transactionId || typeof transactionId !== "string" || !/^[a-zA-Z0-9_-]{1,128}$/.test(transactionId)) {
       return NextResponse.json(
-        { error: "Missing transaction_id" },
+        { error: "Invalid or missing transaction_id" },
         { status: 400 },
       )
     }
 
-    // Verify the transaction with PayUnit to prevent spoofed webhooks
+    // Security Note: We never trust the payload's `status` directly.
+    // Instead, processPaymentResult calls `verifyTransaction(transactionId)` against
+    // the official PayUnit Collections API server-to-server to fetch the genuine state.
     const result = await processPaymentResult(transactionId)
 
     logActivity({

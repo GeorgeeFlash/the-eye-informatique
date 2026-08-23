@@ -24,7 +24,7 @@ export default async function BlogPage({
   const t = await getTranslations("blog")
   const page = Math.max(1, Number(pageParam) || 1)
 
-  const [{ articles, total, totalPages }, tags] = await Promise.all([
+  const [{ articles, totalPages }, tags] = await Promise.all([
     getPublishedArticles({ page, pageSize: 10, tag, search: q, locale }),
     getTags(),
   ])
