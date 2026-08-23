@@ -221,7 +221,7 @@ export async function sendBroadcast({
   })
 
   // Save broadcast record for history
-  await db.broadcast.create({
+  const broadcast = await db.broadcast.create({
     data: {
       senderId: admin.id,
       subject: sanitizedTitle,
@@ -235,25 +235,30 @@ export async function sendBroadcast({
 
   // Queue email copies via Inngest if requested
   if (sendEmailCopy) {
-    await Promise.all(
-      users.map(async (u) => {
-        const isFr =
-          u.preferredLocale === "fr" && sanitizedTitleFr && sanitizedBodyFr
-        return inngest.send({
-          id: `broadcast-email-${u.id}`,
-          name: "email/send",
-          data: {
-            to: u.email,
+    const CHUNK_SIZE = 20
+    const events = users.map((u) => {
+      const isFr =
+        u.preferredLocale === "fr" && sanitizedTitleFr && sanitizedBodyFr
+      return {
+        id: `broadcast-email-${broadcast.id}-${u.id}`,
+        name: "email/send",
+        data: {
+          to: u.email,
+          subject: isFr ? sanitizedTitleFr : sanitizedTitle,
+          template: "broadcast-notification",
+          messageId: `broadcast-${broadcast.id}-${u.id}`,
+          props: {
             subject: isFr ? sanitizedTitleFr : sanitizedTitle,
-            template: "broadcast-notification",
-            props: {
-              subject: isFr ? sanitizedTitleFr : sanitizedTitle,
-              body: isFr ? sanitizedBodyFr : sanitizedBody,
-            },
+            body: isFr ? sanitizedBodyFr : sanitizedBody,
           },
-        })
-      }),
-    )
+        },
+      }
+    })
+
+    for (let i = 0; i < events.length; i += CHUNK_SIZE) {
+      const chunk = events.slice(i, i + CHUNK_SIZE)
+      await inngest.send(chunk)
+    }
   }
 
   logActivity({

@@ -24,13 +24,11 @@ export type SendEmailEventData = {
   to: string
   subject: string
   template: EmailTemplateName
-  // Props are passed as a plain object and cast to the component's prop type
-  // inside the step, keeping the event payload JSON-safe.
+  messageId: string
   props: Record<string, unknown>
-  // Optional file attachments (base64-encoded content)
   attachments?: Array<{
     filename: string
-    content: string // base64
+    content: string
   }>
 }
 
@@ -38,7 +36,7 @@ export type SendEmailEventData = {
 export const sendEmail = inngest.createFunction(
   {
     id: "send-email",
-    idempotency: "event.data.to + '-' + event.data.template",
+    idempotency: "event.data.to + '-' + event.data.template + '-' + event.data.messageId",
     concurrency: { limit: 10 },
     throttle: {
       key: "event.data.to",

@@ -396,6 +396,7 @@ export async function approveAffiliate(profileId: string) {
       to: profile.user.email,
       subject: "Welcome to the Affiliate Program!",
       template: "affiliate-welcome" as const,
+      messageId: `welcome-${profile.user.id}`,
       props: {
         affiliateName: profile.user.name ?? "Affiliate",
         commissionRate: Number(profile.commissionRate) * 100,

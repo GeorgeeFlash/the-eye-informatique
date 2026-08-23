@@ -6,7 +6,7 @@ import { createNotification } from "@/actions/notification.actions"
 // Runs on the 1st of every month at midnight
 // Only processes affiliates with MONTHLY payout preference
 export const monthlyAffiliatePayout = inngest.createFunction(
-  { id: "monthly-affiliate-payout", concurrency: { limit: 1 } },
+  { id: "monthly-affiliate-payout", concurrency: { limit: 5 } },
   { cron: "0 0 1 * *" },
   async ({ step }) => {
     // 1. Find all approved affiliates with MONTHLY preference and confirmed referrals
@@ -83,6 +83,7 @@ export const monthlyAffiliatePayout = inngest.createFunction(
                   to: affiliate.userEmail,
                   subject: "Monthly Commission Payout",
                   template: "payout-notification" as const,
+                  messageId: `monthly-payout-${affiliate.id}`,
                   props: {
                     affiliateName: affiliate.userName ?? "Affiliate",
                     amount: Math.round(affiliate.total),

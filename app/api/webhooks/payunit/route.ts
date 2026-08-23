@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       const order = await db.order.findUnique({
         where: { id: result.orderId },
         include: {
-          user: { select: { email: true, name: true } },
+          user: { select: { email: true, name: true, preferredLocale: true } },
           items: {
             include: {
               variant: {
@@ -61,6 +61,7 @@ export async function POST(req: Request) {
               to: order.user.email,
               subject: `Order ${order.orderNumber} — Payment Confirmed`,
               template: "order-confirmation",
+              messageId: `order-confirmation-${order.orderNumber}`,
               props: {
                 customerName: order.user.name ?? "Customer",
                 orderId: order.orderNumber,
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
                 })),
                 total: Number(order.total),
                 deliveryMethod: order.deliveryMethod,
-                guaranteePdfUrl: `${APP_URL}/api/guarantee-pdf/${order.id}?locale=en`,
+                guaranteePdfUrl: `${APP_URL}/api/guarantee-pdf/${order.id}?locale=${order.user?.preferredLocale === "fr" ? "fr" : "en"}`,
               },
             },
           })
