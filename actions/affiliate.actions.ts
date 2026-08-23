@@ -390,6 +390,7 @@ export async function approveAffiliate(profileId: string) {
 
   // Send welcome email
   await inngest.send({
+    id: `welcome-email-${profile.user.id}`,
     name: "email/send",
     data: {
       to: profile.user.email,
@@ -619,6 +620,7 @@ export async function confirmReferralCommission(orderId: string) {
   // If affiliate prefers immediate payout, trigger it
   if (referral.affiliate.payoutPreference === "IMMEDIATE") {
     await inngest.send({
+      id: `immediate-payout-${referral.id}`,
       name: "affiliate/immediate-payout",
       data: { referralId: referral.id, affiliateId: referral.affiliate.id },
     })

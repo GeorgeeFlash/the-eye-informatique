@@ -11,7 +11,12 @@ import { APP_URL } from "@/lib/constants"
 export const immediateAffiliatePayout = inngest.createFunction(
   {
     id: "immediate-affiliate-payout",
-    retries: 3,
+    retries: 1,
+    idempotency: "event.data.referralId",
+    concurrency: [
+      { limit: 2, key: "event.data.affiliateId" },
+      { limit: 20 },
+    ],
   },
   { event: "affiliate/immediate-payout" },
   async ({ event, step }) => {
@@ -89,6 +94,7 @@ export const immediateAffiliatePayout = inngest.createFunction(
       })
       if (user?.email) {
         await inngest.send({
+          id: `immediate-payout-email-${affiliateId}`,
           name: "email/send",
           data: {
             to: user.email,

@@ -8,7 +8,7 @@ import { createLocalizedNotification } from "@/lib/notifications"
 // the branch's ADMIN and all CENTRAL_ADMIN users. Each (admin, variant+branch)
 // pair only fires once until the admin reads the notification.
 export const lowStockAlertCheck = inngest.createFunction(
-  { id: "low-stock-alert-check" },
+  { id: "low-stock-alert-check", concurrency: { limit: 1 } },
   { cron: "0 8 * * *" }, // every day at 08:00
   async ({ step }) => {
     const result = await step.run("check-low-stock", async () => {

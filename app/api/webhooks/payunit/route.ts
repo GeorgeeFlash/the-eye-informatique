@@ -2,9 +2,7 @@ import { NextResponse } from "next/server"
 import { processPaymentResult } from "@/lib/payment"
 import { inngest } from "@/server/inngest/client"
 import { db } from "@/server/db"
-import { renderToBuffer } from "@react-pdf/renderer"
-import { GuaranteeCertificate } from "@/components/pdf/guarantee-certificate"
-import { createElement } from "react"
+import { APP_URL } from "@/lib/constants"
 import { logActivity } from "@/lib/activity-log"
 
 /**
@@ -55,24 +53,9 @@ export async function POST(req: Request) {
       })
 
       if (order?.user?.email) {
-        // Send confirmation email in background — do not let email failures
-        // break the webhook response since payment is already processed.
         try {
-          const guaranteeElement = createElement(GuaranteeCertificate, {
-            customerName: order.user.name ?? "Customer",
-            orderNumber: order.orderNumber,
-            purchaseDate: order.createdAt.toISOString(),
-            items: order.items.map((i) => ({
-              productName: i.variant?.product?.name ?? "Product",
-              variant: i.variant?.color ?? undefined,
-              quantity: i.quantity,
-            })),
-            locale: "en",
-          })
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const pdfBuffer = await renderToBuffer(guaranteeElement as any)
-
           await inngest.send({
+            id: `order-confirmation-email-${order.user.email}-${order.orderNumber}`,
             name: "email/send",
             data: {
               to: order.user.email,
@@ -88,18 +71,12 @@ export async function POST(req: Request) {
                 })),
                 total: Number(order.total),
                 deliveryMethod: order.deliveryMethod,
+                guaranteePdfUrl: `${APP_URL}/api/guarantee-pdf/${order.id}?locale=en`,
               },
-              attachments: [
-                {
-                  filename: `guarantee-${order.orderNumber}.pdf`,
-                  content: Buffer.from(pdfBuffer).toString("base64"),
-                },
-              ],
             },
           })
         } catch (emailError) {
           console.error("Failed to send confirmation email:", emailError)
-          // Payment is already processed — email can be resent manually
         }
       }
     }

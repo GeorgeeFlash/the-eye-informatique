@@ -6,7 +6,7 @@ const PAGE_VIEW_RETENTION_DAYS = 90
 
 // M7.3 — Weekly activity log cleanup (retain last 90 days)
 export const activityLogCleanup = inngest.createFunction(
-  { id: "activity-log-cleanup" },
+  { id: "activity-log-cleanup", concurrency: { limit: 1 } },
   { cron: "0 2 * * 0" }, // every Sunday at 02:00
   async ({ step }) => {
     const result = await step.run("delete-old-logs", async () => {
@@ -26,7 +26,7 @@ export const activityLogCleanup = inngest.createFunction(
 
 // M8 — Weekly product page view cleanup (retain last 90 days)
 export const productPageViewCleanup = inngest.createFunction(
-  { id: "product-page-view-cleanup" },
+  { id: "product-page-view-cleanup", concurrency: { limit: 1 } },
   { cron: "0 3 * * 0" }, // every Sunday at 03:00
   async ({ step }) => {
     const result = await step.run("delete-old-page-views", async () => {

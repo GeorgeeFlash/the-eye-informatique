@@ -6,7 +6,7 @@ import { createNotification } from "@/actions/notification.actions"
 // Runs on the 1st of every month at midnight
 // Only processes affiliates with MONTHLY payout preference
 export const monthlyAffiliatePayout = inngest.createFunction(
-  { id: "monthly-affiliate-payout" },
+  { id: "monthly-affiliate-payout", concurrency: { limit: 1 } },
   { cron: "0 0 1 * *" },
   async ({ step }) => {
     // 1. Find all approved affiliates with MONTHLY preference and confirmed referrals
@@ -40,67 +40,65 @@ export const monthlyAffiliatePayout = inngest.createFunction(
       }))
     })
 
-    // 2. Process each affiliate payout
-    let processed = 0
-    for (const affiliate of affiliates) {
-      if (affiliate.total <= 0) continue
+    // 2. Process each affiliate payout in parallel
+    const payoutResults = await Promise.all(
+      affiliates
+        .filter((affiliate) => affiliate.total > 0)
+        .map((affiliate) =>
+          step.run(`payout-${affiliate.id}`, async () => {
+            await db.$transaction(async (tx) => {
+              await tx.commissionPayout.create({
+                data: {
+                  affiliateId: affiliate.id,
+                  amount: affiliate.total,
+                  currency: "XAF",
+                  status: "PENDING",
+                },
+              })
 
-      await step.run(`payout-${affiliate.id}`, async () => {
-        await db.$transaction(async (tx) => {
-          // Create payout record
-          await tx.commissionPayout.create({
-            data: {
-              affiliateId: affiliate.id,
-              amount: affiliate.total,
-              currency: "XAF",
-              status: "PENDING",
-            },
-          })
+              await tx.affiliateReferral.updateMany({
+                where: { id: { in: affiliate.referralIds } },
+                data: { status: "PAID" },
+              })
 
-          // Mark referrals as paid
-          await tx.affiliateReferral.updateMany({
-            where: { id: { in: affiliate.referralIds } },
-            data: { status: "PAID" },
-          })
+              await tx.affiliateProfile.update({
+                where: { id: affiliate.id },
+                data: { totalPaid: { increment: affiliate.total } },
+              })
+            })
 
-          // Update profile totals
-          await tx.affiliateProfile.update({
-            where: { id: affiliate.id },
-            data: { totalPaid: { increment: affiliate.total } },
-          })
-        })
+            await createNotification({
+              userId: affiliate.userId,
+              type: "COMMISSION",
+              title: "Monthly payout processed",
+              body: `Your monthly payout of ${Math.round(affiliate.total)} FCFA has been initiated.`,
+              link: "/dashboard/affiliate/payouts",
+            })
 
-        // Notify affiliate
-        await createNotification({
-          userId: affiliate.userId,
-          type: "COMMISSION",
-          title: "Monthly payout processed",
-          body: `Your monthly payout of ${Math.round(affiliate.total)} FCFA has been initiated.`,
-          link: "/dashboard/affiliate/payouts",
-        })
+            if (affiliate.userEmail) {
+              await inngest.send({
+                id: `monthly-payout-email-${affiliate.id}`,
+                name: "email/send",
+                data: {
+                  to: affiliate.userEmail,
+                  subject: "Monthly Commission Payout",
+                  template: "payout-notification" as const,
+                  props: {
+                    affiliateName: affiliate.userName ?? "Affiliate",
+                    amount: Math.round(affiliate.total),
+                    currency: "XAF",
+                    payoutMethod: affiliate.payoutMethod,
+                  },
+                },
+              })
+            }
 
-        // Send payout notification email
-        if (affiliate.userEmail) {
-          await inngest.send({
-            name: "email/send",
-            data: {
-              to: affiliate.userEmail,
-              subject: "Monthly Commission Payout",
-              template: "payout-notification" as const,
-              props: {
-                affiliateName: affiliate.userName ?? "Affiliate",
-                amount: Math.round(affiliate.total),
-                currency: "XAF",
-                payoutMethod: affiliate.payoutMethod,
-              },
-            },
-          })
-        }
-      })
+            return { id: affiliate.id, success: true }
+          }),
+        ),
+    )
 
-      processed++
-    }
-
+    const processed = payoutResults.filter((r) => r?.success).length
     return { processed, total: affiliates.length }
   },
 )

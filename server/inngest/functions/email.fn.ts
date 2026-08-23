@@ -36,7 +36,17 @@ export type SendEmailEventData = {
 
 // M7.1 — Async email dispatch triggered by "email/send" events
 export const sendEmail = inngest.createFunction(
-  { id: "send-email" },
+  {
+    id: "send-email",
+    idempotency: "event.data.to + '-' + event.data.template",
+    concurrency: { limit: 10 },
+    throttle: {
+      key: "event.data.to",
+      limit: 20,
+      period: "1m",
+    },
+    retries: 1,
+  },
   { event: "email/send" },
   async ({ event, step }) => {
     const { to, subject, template, props, attachments } =

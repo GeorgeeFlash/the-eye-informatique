@@ -235,22 +235,25 @@ export async function sendBroadcast({
 
   // Queue email copies via Inngest if requested
   if (sendEmailCopy) {
-    for (const u of users) {
-      const isFr =
-        u.preferredLocale === "fr" && sanitizedTitleFr && sanitizedBodyFr
-      await inngest.send({
-        name: "email/send",
-        data: {
-          to: u.email,
-          subject: isFr ? sanitizedTitleFr : sanitizedTitle,
-          template: "broadcast-notification",
-          props: {
+    await Promise.all(
+      users.map(async (u) => {
+        const isFr =
+          u.preferredLocale === "fr" && sanitizedTitleFr && sanitizedBodyFr
+        return inngest.send({
+          id: `broadcast-email-${u.id}`,
+          name: "email/send",
+          data: {
+            to: u.email,
             subject: isFr ? sanitizedTitleFr : sanitizedTitle,
-            body: isFr ? sanitizedBodyFr : sanitizedBody,
+            template: "broadcast-notification",
+            props: {
+              subject: isFr ? sanitizedTitleFr : sanitizedTitle,
+              body: isFr ? sanitizedBodyFr : sanitizedBody,
+            },
           },
-        },
-      })
-    }
+        })
+      }),
+    )
   }
 
   logActivity({

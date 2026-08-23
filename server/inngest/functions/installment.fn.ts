@@ -5,7 +5,7 @@ import { InstallmentReminderEmail } from "@/components/email/installment-reminde
 
 // CON-3 — Daily check for overdue installment payments
 export const installmentDeadlineCheck = inngest.createFunction(
-  { id: "installment-deadline-check" },
+  { id: "installment-deadline-check", concurrency: { limit: 1 } },
   { cron: "0 8 * * *" }, // daily at 08:00
   async ({ step }) => {
     const overdue = await step.run("mark-overdue", async () => {
@@ -42,26 +42,35 @@ export const installmentDeadlineCheck = inngest.createFunction(
 
     // Send reminder emails for each overdue installment
     await step.run("send-reminders", async () => {
-      for (const installment of overdue) {
-        const { order } = installment
-        if (!order.user?.email) continue
+      const results = await Promise.all(
+        overdue.map(async (installment) => {
+          const { order } = installment
+          if (!order.user?.email) return { skipped: true }
 
-        await resend.emails.send({
-          from: FROM_EMAIL,
-          to: order.user.email,
-          subject: `Installment overdue — Order ${order.orderNumber}`,
-          react: InstallmentReminderEmail({
-            customerName: order.user.name ?? "Customer",
-            orderId: order.orderNumber,
-            dueDate: new Date(installment.dueDate),
-            amount: Number(installment.amount),
-            installmentNumber: installment.sequenceNumber,
-            totalInstallments: order._count.installments,
-          }),
-        })
-      }
+          try {
+            await resend.emails.send({
+              from: FROM_EMAIL,
+              to: order.user.email,
+              subject: `Installment overdue — Order ${order.orderNumber}`,
+              react: InstallmentReminderEmail({
+                customerName: order.user.name ?? "Customer",
+                orderId: order.orderNumber,
+                dueDate: new Date(installment.dueDate),
+                amount: Number(installment.amount),
+                installmentNumber: installment.sequenceNumber,
+                totalInstallments: order._count.installments,
+              }),
+            })
+            return { sent: true }
+          } catch (error) {
+            console.error("Failed to send overdue reminder:", error)
+            return { sent: false, error }
+          }
+        }),
+      )
 
-      return { sent: overdue.length }
+      const sent = results.filter((r) => r?.sent).length
+      return { sent, skipped: results.filter((r) => r?.skipped).length }
     })
 
     return { overdue: overdue.length }

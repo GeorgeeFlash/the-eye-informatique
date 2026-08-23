@@ -17,6 +17,7 @@ interface OrderConfirmationEmailProps {
   items: { name: string; quantity: number; price: number }[]
   total: number
   deliveryMethod: string
+  guaranteePdfUrl?: string
 }
 
 export function OrderConfirmationEmail({
@@ -25,6 +26,7 @@ export function OrderConfirmationEmail({
   items,
   total,
   deliveryMethod,
+  guaranteePdfUrl,
 }: OrderConfirmationEmailProps) {
   return (
     <Html>
@@ -50,6 +52,11 @@ export function OrderConfirmationEmail({
           <Text>
             <strong>Mode de livraison :</strong> {deliveryMethod}
           </Text>
+          {guaranteePdfUrl && (
+            <Text>
+              <a href={guaranteePdfUrl}>Télécharger votre certificat de garantie</a>
+            </Text>
+          )}
           <Hr />
           <Text style={{ color: "#666", fontSize: "12px" }}>
             Merci de votre confiance — {APP_NAME}
