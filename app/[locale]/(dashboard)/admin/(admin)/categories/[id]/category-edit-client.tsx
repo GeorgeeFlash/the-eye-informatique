@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { MultiInput } from "@/components/ui/multi-input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -390,17 +390,9 @@ export function CategoryEditClient({
                         <FormItem>
                           <FormLabel>{t("fieldOptions")}</FormLabel>
                           <FormControl>
-                            <Textarea
-                              rows={4}
-                              value={(field.value ?? []).join("\n")}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value
-                                    .split("\n")
-                                    .map((s) => s.trim())
-                                    .filter(Boolean),
-                                )
-                              }
+                            <MultiInput
+                              value={field.value ?? []}
+                              onChange={field.onChange}
                             />
                           </FormControl>
                           <FormDescription>
