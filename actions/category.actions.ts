@@ -114,7 +114,7 @@ export async function deleteCategory(id: string) {
  * Public: returns all categories as a flat list (with parentId for tree building).
  */
 export async function getCategories() {
-  return db.category.findMany({
+  const categories = await db.category.findMany({
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     include: {
       _count: { select: { products: true } },
@@ -132,6 +132,22 @@ export async function getCategories() {
       },
     },
   })
+
+  return categories.map((category) => ({
+    ...category,
+    variantAxes: category.variantAxes.map((axis) => ({
+      ...axis,
+      values: axis.values.map((v) => {
+        const raw = v.priceDelta
+        const numeric =
+          raw == null ? null : typeof raw.toNumber === "function" ? raw.toNumber() : Number(raw)
+        return {
+          ...v,
+          priceDelta: numeric,
+        }
+      }),
+    })),
+  }))
 }
 
 /**

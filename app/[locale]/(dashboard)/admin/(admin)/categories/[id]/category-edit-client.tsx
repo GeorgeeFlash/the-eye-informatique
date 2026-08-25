@@ -124,12 +124,28 @@ export function CategoryEditClient({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  const normalizedAxes = useMemo(() => {
+    return initialVariantAxes.map((axis) => ({
+      ...axis,
+      values: axis.values.map((v) => ({
+        ...v,
+        priceDelta:
+          v.priceDelta == null
+            ? null
+            : typeof v.priceDelta === "object"
+              ? Number((v.priceDelta as { toNumber?: () => number }).toNumber?.() ?? v.priceDelta)
+              : Number(v.priceDelta),
+      })),
+    }));
+  }, [initialVariantAxes]);
+
+  const axes = normalizedAxes
+
   // Feature field state
   const [fieldDialogOpen, setFieldDialogOpen] = useState(false);
   const [editingField, setEditingField] = useState<FeatureFieldRow | null>(null);
 
   // Axis state
-  const axes = initialVariantAxes
   const [axisDialogOpen, setAxisDialogOpen] = useState(false);
   const [editingAxis, setEditingAxis] = useState<VariantAxisRow | null>(null);
   const [valueDialogOpen, setValueDialogOpen] = useState(false);
@@ -871,9 +887,9 @@ export function CategoryEditClient({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <FormLabel className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {t("previewSlug")}
-              </FormLabel>
+              </span>
               <Input
                 value={previewSlug}
                 onChange={(e) => setPreviewSlug(e.target.value)}
@@ -881,9 +897,9 @@ export function CategoryEditClient({
               />
             </div>
             <div>
-              <FormLabel className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {t("skuPreview")}
-              </FormLabel>
+              </span>
               <div className="mt-1 rounded-md border bg-muted/50 px-3 py-2 font-mono text-sm">
                 {previewSku || (
                   <span className="text-muted-foreground">—</span>

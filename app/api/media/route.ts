@@ -48,6 +48,14 @@ export async function GET(request: NextRequest) {
   })
   const referencedUrls = new Set(referenced.map((c) => c.iconUrl))
 
+  const blogReferences = await db.blogArticle.findMany({
+    where: { coverImageUrl: { not: null } },
+    select: { coverImageUrl: true },
+  })
+  for (const ref of blogReferences) {
+    if (ref.coverImageUrl) referencedUrls.add(ref.coverImageUrl)
+  }
+
   const images = page.map((a) => ({ ...a, inUse: referencedUrls.has(a.url) }))
 
   return Response.json({ images, nextCursor })
@@ -71,6 +79,13 @@ export async function DELETE(request: NextRequest) {
     where: { iconUrl: asset.url },
   })
   if (inUse > 0) {
+    return Response.json({ error: "in_use" }, { status: 409 })
+  }
+
+  const blogInUse = await db.blogArticle.count({
+    where: { coverImageUrl: asset.url },
+  })
+  if (blogInUse > 0) {
     return Response.json({ error: "in_use" }, { status: 409 })
   }
 

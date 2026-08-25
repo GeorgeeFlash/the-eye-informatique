@@ -69,7 +69,15 @@ export function ProductFormWrapper({
         sortOrder: f.sortOrder,
       })),
     );
-    setVariantAxes(axesData.axes)
+    setVariantAxes(
+      axesData.axes.map((axis: { id: string; name: string; sortOrder: number; values: Array<{ id: string; value: string; sortOrder: number; priceDelta: number | null }> }) => ({
+        ...axis,
+        values: axis.values.map((v) => ({
+          ...v,
+          priceDelta: v.priceDelta == null ? null : Number(v.priceDelta),
+        })),
+      })),
+    )
     setSkuTemplate(axesData.skuTemplate)
   }, []);
 

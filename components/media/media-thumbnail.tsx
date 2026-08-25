@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { CheckIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface MediaThumbnailProps {
   src: string;
@@ -19,6 +20,7 @@ export function MediaThumbnail({
   inUse = false,
   onClick,
 }: MediaThumbnailProps) {
+  const t = useTranslations("media");
   const interactive = Boolean(onClick);
   return (
     <button
@@ -45,7 +47,7 @@ export function MediaThumbnail({
       )}
       {inUse && (
         <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1 text-[10px] font-medium text-white">
-          In use
+          {t("inUse")}
         </span>
       )}
     </button>

@@ -43,18 +43,30 @@ export function ImagePicker({ value, onChange }: ImagePickerProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  async function loadImages(query: string) {
+  async function loadImages(
+    query: string,
+    append = false,
+    pageCursor: string | null = null,
+  ) {
     setLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams({ take: "48" });
       if (query) params.set("search", query);
+      if (pageCursor) params.set("cursor", pageCursor);
       const res = await fetch(`/api/media?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to load images");
-      const json = (await res.json()) as { images: MediaImage[] };
-      setImages(json.images);
+      const json = (await res.json()) as {
+        images: MediaImage[];
+        nextCursor: string | null;
+      };
+      setImages((prev) => (append ? [...prev, ...json.images] : json.images));
+      setHasMore(!!json.nextCursor);
+      setCursor(json.nextCursor);
     } catch {
       setError(t("loadError"));
     } finally {
@@ -64,12 +76,20 @@ export function ImagePicker({ value, onChange }: ImagePickerProps) {
 
   function handleOpen() {
     setOpen(true);
+    setCursor(null);
     void loadImages(search);
   }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
+    setCursor(null);
     void loadImages(search);
+  }
+
+  function handleLoadMore() {
+    if (!loading && hasMore) {
+      void loadImages(search, true, cursor);
+    }
   }
 
   function handleSelect(url: string) {
@@ -97,7 +117,7 @@ export function ImagePicker({ value, onChange }: ImagePickerProps) {
       const json = await res.json();
 
       if (!res.ok) {
-        setError(json.error ?? "Upload failed");
+        setError(t("uploadFailed"));
         return;
       }
 
@@ -105,7 +125,7 @@ export function ImagePicker({ value, onChange }: ImagePickerProps) {
       onChange(uploaded[0]!.url);
       setOpen(false);
     } catch {
-      setError("Upload failed. Please try again.");
+      setError(t("uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -135,12 +155,13 @@ export function ImagePicker({ value, onChange }: ImagePickerProps) {
             className="object-cover"
             sizes="96px"
           />
-          <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100">
+          <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100 group-focus-within:bg-black/40 group-focus-within:opacity-100">
             <Button
               type="button"
               variant="secondary"
               size="sm"
               onClick={handleOpen}
+              aria-label={t("changeImage")}
             >
               <UploadIcon className="size-3" />
             </Button>
@@ -149,6 +170,7 @@ export function ImagePicker({ value, onChange }: ImagePickerProps) {
               variant="destructive"
               size="sm"
               onClick={handleClear}
+              aria-label={t("removeImage")}
             >
               <TrashIcon className="size-3" />
             </Button>
@@ -226,17 +248,35 @@ export function ImagePicker({ value, onChange }: ImagePickerProps) {
                 {t("noImages")}
               </p>
             ) : (
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {images.map((img) => (
-                  <MediaThumbnail
-                    key={img.id}
-                    src={img.url}
-                    alt={img.fileName}
-                    selected={img.url === value}
-                    inUse={img.inUse}
-                    onClick={() => handleSelect(img.url)}
-                  />
-                ))}
+              <div className="space-y-2">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {images.map((img) => (
+                    <MediaThumbnail
+                      key={img.id}
+                      src={img.url}
+                      alt={img.fileName}
+                      selected={img.url === value}
+                      inUse={img.inUse}
+                      onClick={() => handleSelect(img.url)}
+                    />
+                  ))}
+                </div>
+                {hasMore && (
+                  <div className="flex justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLoadMore}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <Loader2Icon className="mr-2 size-4 animate-spin" />
+                      ) : null}
+                      {t("loadMore")}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

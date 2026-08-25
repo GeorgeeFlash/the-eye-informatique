@@ -208,16 +208,33 @@ export async function getVariantAxesByCategory(categoryId: string) {
     },
   })
 
-  return {
-    skuTemplate: category?.skuTemplate ?? null,
-    axes: axes.map((axis) => ({
-      ...axis,
-      values: axis.values.map((v) => ({
-        ...v,
-        priceDelta: v.priceDelta ? Number(v.priceDelta) : null,
+  return JSON.parse(
+    JSON.stringify({
+      skuTemplate: category?.skuTemplate ?? null,
+      axes: axes.map((axis) => ({
+        id: axis.id,
+        categoryId: axis.categoryId,
+        name: axis.name,
+        sortOrder: axis.sortOrder,
+        values: axis.values.map((v) => {
+          const raw = v.priceDelta
+          const numeric =
+            raw == null
+              ? null
+              : typeof raw.toNumber === "function"
+                ? raw.toNumber()
+                : Number(raw)
+          return {
+            id: v.id,
+            axisId: v.axisId,
+            value: v.value,
+            sortOrder: v.sortOrder,
+            priceDelta: numeric,
+          }
+        }),
       })),
-    })),
-  }
+    }),
+  )
 }
 
 // ---------------------------------------------------------------------------

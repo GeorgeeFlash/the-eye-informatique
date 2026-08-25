@@ -50,6 +50,7 @@ export function MediaClient({
   useEffect(() => {
     let active = true;
     const params = new URLSearchParams({
+      page: String(currentPage),
       take: String(pageSize),
       ...(search ? { search } : {}),
     });
@@ -61,7 +62,7 @@ export function MediaClient({
     return () => {
       active = false;
     };
-  }, [search, pageSize]);
+  }, [search, pageSize, currentPage]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -83,15 +84,15 @@ export function MediaClient({
         method: "POST",
         body: formData,
       });
-      const json = await res.json();
 
       if (!res.ok) {
-        toast.error(json.error ?? "Upload failed");
+        toast.error(t("uploadFailed"));
         return;
       }
 
       toast.success(t("uploadImage"));
       const params = new URLSearchParams({
+        page: String(currentPage),
         take: String(pageSize),
         ...(query ? { search: query } : {}),
       });
@@ -101,7 +102,7 @@ export function MediaClient({
         setImages(json.images);
       }
     } catch {
-      toast.error("Upload failed. Please try again.");
+      toast.error(t("uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -135,13 +136,13 @@ export function MediaClient({
         return;
       }
       if (!res.ok) {
-        toast.error("Delete failed");
+        toast.error(t("deleteFailed"));
         return;
       }
       toast.success(t("deleteImage"));
       router.refresh();
     } catch {
-      toast.error("Delete failed");
+      toast.error(t("deleteFailed"));
     } finally {
       setDeletingId(null);
     }
@@ -249,7 +250,7 @@ export function MediaClient({
               router.push(`/admin/media?${params.toString()}`);
             }}
           >
-            Previous
+            {t("previous")}
           </Button>
           <span className="text-sm text-muted-foreground">
             {currentPage} / {totalPages}
@@ -266,7 +267,7 @@ export function MediaClient({
               router.push(`/admin/media?${params.toString()}`);
             }}
           >
-            Next
+            {t("next")}
           </Button>
         </div>
       )}
