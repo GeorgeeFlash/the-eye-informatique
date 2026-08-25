@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useTransition, useState } from "react";
+import { useTransition, useState, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   categorySchema,
   featureFieldSchema,
@@ -16,8 +17,16 @@ import {
   createFeatureField,
   updateFeatureField,
   deleteFeatureField,
+  createVariantAxis,
+  updateVariantAxis,
+  deleteVariantAxis,
+  createAxisValue,
+  updateAxisValue,
+  deleteAxisValue,
+  updateCategorySkuTemplate,
 } from "@/actions/category.actions";
 import { slugify } from "@/lib/utils";
+import { generateSkuFromTemplate } from "@/lib/sku-generator";
 import {
   Card,
   CardContent,
@@ -55,6 +64,10 @@ import {
 } from "@/components/ui/dialog";
 import { PlusIcon, TrashIcon, PencilIcon, Loader2Icon } from "lucide-react";
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 type FeatureFieldRow = {
   id: string;
   name: string;
@@ -62,6 +75,20 @@ type FeatureFieldRow = {
   options: unknown;
   sortOrder: number;
   isRequired: boolean;
+};
+
+type VariantAxisRow = {
+  id: string;
+  categoryId: string;
+  name: string;
+  sortOrder: number;
+  values: {
+    id: string;
+    axisId: string;
+    value: string;
+    sortOrder: number;
+    priceDelta: number | null;
+  }[];
 };
 
 interface Props {
@@ -75,20 +102,62 @@ interface Props {
   };
   featureFields: FeatureFieldRow[];
   parentOptions: { id: string; name: string }[];
+  variantAxes: VariantAxisRow[];
+  skuTemplate: string | null;
 }
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function CategoryEditClient({
   category,
   featureFields,
   parentOptions,
+  variantAxes: initialVariantAxes,
+  skuTemplate: initialSkuTemplate,
 }: Props) {
   const t = useTranslations("categoryAdmin");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+
+  // Feature field state
   const [fieldDialogOpen, setFieldDialogOpen] = useState(false);
-  const [editingField, setEditingField] = useState<FeatureFieldRow | null>(
-    null,
-  );
+  const [editingField, setEditingField] = useState<FeatureFieldRow | null>(null);
+
+  // Axis state
+  const axes = initialVariantAxes
+  const [axisDialogOpen, setAxisDialogOpen] = useState(false);
+  const [editingAxis, setEditingAxis] = useState<VariantAxisRow | null>(null);
+  const [valueDialogOpen, setValueDialogOpen] = useState(false);
+  const [editingValue, setEditingValue] = useState<{
+    axisId: string;
+    value: VariantAxisRow["values"][0] | null;
+  } | null>(null);
+
+  // SKU template state
+  const [skuTemplate, setSkuTemplate] = useState(() => initialSkuTemplate ?? "")
+  const [previewSlug, setPreviewSlug] = useState("sample-product");
+
+  const firstAxisFirstValue = useMemo(() => {
+    if (axes.length === 0 || axes[0].values.length === 0) return null
+    return {
+      axisName: axes[0].name,
+      value: axes[0].values[0].value,
+    }
+  }, [axes])
+
+  const previewSku = useMemo(() => {
+    if (!skuTemplate || !firstAxisFirstValue) return ""
+    return generateSkuFromTemplate(skuTemplate, {
+      productSlug: previewSlug,
+      productId: "preview",
+      categorySlug: category.slug,
+      axisValues: {
+        [firstAxisFirstValue.axisName]: firstAxisFirstValue.value,
+      },
+    })
+  }, [skuTemplate, previewSlug, firstAxisFirstValue, category.slug])
 
   // Category form
   const catForm = useForm<CategoryFormValues>({
@@ -171,6 +240,108 @@ export function CategoryEditClient({
       await deleteFeatureField(id);
       router.refresh();
     });
+  }
+
+  // Axis form
+  const axisForm = useForm({
+    resolver: zodResolver(
+      z.object({
+        name: z.string().min(1).max(50),
+        sortOrder: z.coerce.number().int().nonnegative().default(0),
+      }),
+    ) as never,
+    defaultValues: { name: "", sortOrder: 0 },
+  });
+
+  function openNewAxis() {
+    setEditingAxis(null);
+    axisForm.reset({ name: "", sortOrder: 0 });
+    setAxisDialogOpen(true);
+  }
+
+  function openEditAxis(axis: VariantAxisRow) {
+    setEditingAxis(axis);
+    axisForm.reset({ name: axis.name, sortOrder: axis.sortOrder });
+    setAxisDialogOpen(true);
+  }
+
+  async function onAxisSubmit(values: { name: string; sortOrder: number }) {
+    startTransition(async () => {
+      if (editingAxis) {
+        await updateVariantAxis(editingAxis.id, values);
+      } else {
+        await createVariantAxis(category.id, values);
+      }
+      setAxisDialogOpen(false);
+      axisForm.reset();
+      router.refresh();
+    });
+  }
+
+  async function handleDeleteAxis(id: string) {
+    if (!confirm(t("confirmDeleteAxis"))) return;
+    startTransition(async () => {
+      await deleteVariantAxis(id);
+      router.refresh();
+    });
+  }
+
+  // Axis value form
+  const valueForm = useForm({
+    resolver: zodResolver(
+      z.object({
+        value: z.string().min(1).max(50),
+        sortOrder: z.coerce.number().int().nonnegative().default(0),
+        priceDelta: z.coerce.number().default(0),
+      }),
+    ) as never,
+    defaultValues: { value: "", sortOrder: 0, priceDelta: 0 },
+  });
+
+  function openNewValue(axisId: string) {
+    setEditingValue({ axisId, value: null });
+    valueForm.reset({ value: "", sortOrder: 0, priceDelta: 0 });
+    setValueDialogOpen(true);
+  }
+
+  function openEditValue(axis: VariantAxisRow, value: VariantAxisRow["values"][0]) {
+    setEditingValue({ axisId: axis.id, value });
+    valueForm.reset({
+      value: value.value,
+      sortOrder: value.sortOrder,
+      priceDelta: value.priceDelta ?? 0,
+    });
+    setValueDialogOpen(true);
+  }
+
+  async function onValueSubmit(values: { value: string; sortOrder: number; priceDelta: number }) {
+    if (!editingValue) return
+    startTransition(async () => {
+      if (editingValue.value) {
+        await updateAxisValue(editingValue.value.id, values);
+      } else {
+        await createAxisValue(editingValue.axisId, values);
+      }
+      setValueDialogOpen(false);
+      valueForm.reset();
+      router.refresh();
+    });
+  }
+
+  async function handleDeleteValue(id: string) {
+    if (!confirm(t("confirmDeleteAxisValue"))) return;
+    startTransition(async () => {
+      await deleteAxisValue(id);
+      router.refresh();
+    });
+  }
+
+  async function handleSkuTemplateSave() {
+    startTransition(async () => {
+      const result = await updateCategorySkuTemplate(category.id, skuTemplate || null)
+      if ("error" in result && result.error) return
+      router.refresh()
+    })
   }
 
   return (
@@ -504,6 +675,294 @@ export function CategoryEditClient({
           )}
         </CardContent>
       </Card>
+
+      {/* Variant Axes */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>{t("variantAxes")}</CardTitle>
+            <CardDescription>{t("variantAxesHint")}</CardDescription>
+          </div>
+          <Dialog open={axisDialogOpen} onOpenChange={setAxisDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" onClick={openNewAxis}>
+                <PlusIcon className="mr-1 h-4 w-4" />
+                {t("addAxis")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingAxis ? t("editAxis") : t("addAxis")}
+                </DialogTitle>
+              </DialogHeader>
+              <Form {...axisForm}>
+                <form
+                  onSubmit={axisForm.handleSubmit(onAxisSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={axisForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("axisName")}</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormDescription>{t("axisNameHint")}</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={axisForm.control}
+                    name="sortOrder"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("sortOrder")}</FormLabel>
+                        <FormControl>
+                          <Input type="number" min={0} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setAxisDialogOpen(false)}
+                    >
+                      {t("cancel")}
+                    </Button>
+                    <Button type="submit" disabled={isPending}>
+                      {isPending && (
+                        <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      {editingAxis ? t("save") : t("create")}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {axes.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-8">
+              {t("noAxes")}
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {axes.map((axis) => (
+                <div key={axis.id} className="rounded-lg border p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="text-sm font-medium">{axis.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t("valuesCount", { count: axis.values.length })}
+                      </p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => openEditAxis(axis)}
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive"
+                        onClick={() => handleDeleteAxis(axis.id)}
+                        disabled={isPending}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {axis.values.map((v) => (
+                      <div
+                        key={v.id}
+                        className="flex items-center justify-between rounded-md border p-2"
+                      >
+                        <div className="flex items-center gap-3 text-sm">
+                          <span className="font-medium">{v.value}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {t("priceDelta")}: {v.priceDelta ?? 0}
+                          </Badge>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => openEditValue(axis, v)}
+                          >
+                            <PencilIcon className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => handleDeleteValue(v.id)}
+                            disabled={isPending}
+                          >
+                            <TrashIcon className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => openNewValue(axis.id)}
+                  >
+                    <PlusIcon className="mr-1 h-4 w-4" />
+                    {t("addAxisValue")}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* SKU Template */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("skuTemplate")}</CardTitle>
+          <CardDescription>{t("skuTemplateHint")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              value={skuTemplate}
+              onChange={(e) => setSkuTemplate(e.target.value)}
+              placeholder={t("skuTemplateHint")}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              onClick={handleSkuTemplateSave}
+              disabled={isPending}
+            >
+              {isPending && (
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {t("save")}
+            </Button>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <FormLabel className="text-xs text-muted-foreground">
+                {t("previewSlug")}
+              </FormLabel>
+              <Input
+                value={previewSlug}
+                onChange={(e) => setPreviewSlug(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <FormLabel className="text-xs text-muted-foreground">
+                {t("skuPreview")}
+              </FormLabel>
+              <div className="mt-1 rounded-md border bg-muted/50 px-3 py-2 font-mono text-sm">
+                {previewSku || (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Axis Value Dialog */}
+      <Dialog open={valueDialogOpen} onOpenChange={setValueDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingValue?.value ? t("editAxisValue") : t("addAxisValue")}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...valueForm}>
+            <form
+              onSubmit={valueForm.handleSubmit(onValueSubmit)}
+              className="space-y-4"
+            >
+              <FormField
+                control={valueForm.control}
+                name="value"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("axisValue")}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormDescription>{t("axisValueHint")}</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={valueForm.control}
+                  name="sortOrder"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("sortOrder")}</FormLabel>
+                      <FormControl>
+                        <Input type="number" min={0} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={valueForm.control}
+                  name="priceDelta"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("priceDelta")}</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" {...field} />
+                      </FormControl>
+                      <FormDescription>{t("priceDeltaHint")}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setValueDialogOpen(false)}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button type="submit" disabled={isPending}>
+                  {isPending && (
+                    <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {editingValue?.value ? t("save") : t("create")}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

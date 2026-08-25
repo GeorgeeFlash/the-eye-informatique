@@ -45,6 +45,7 @@ export function AppSidebar({
           url: "/admin/categories",
           match: "prefix",
         },
+        { title: t("variants"), url: "/admin/variants", match: "prefix" },
         {
           title: t("inventory"),
           url: "/admin/inventory",

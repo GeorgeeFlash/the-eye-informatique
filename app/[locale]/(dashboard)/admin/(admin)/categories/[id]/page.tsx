@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/auth";
 import {
   getCategories,
   getCategoryWithFeatureFields,
+  getVariantAxesByCategory,
 } from "@/actions/category.actions";
 import { getTranslations } from "next-intl/server";
 import { CategoryEditClient } from "./category-edit-client";
@@ -16,14 +17,14 @@ export default async function AdminCategoryEditPage({
   await requireRole(["CENTRAL_ADMIN"]);
   const t = await getTranslations("categoryAdmin");
 
-  const [category, allCategories] = await Promise.all([
+  const [category, allCategories, variantAxesData] = await Promise.all([
     getCategoryWithFeatureFields(id),
     getCategories(),
+    getVariantAxesByCategory(id),
   ]);
 
   if (!category) notFound();
 
-  // Exclude self and own children from parent options
   const parentOptions = allCategories
     .filter((c) => c.id !== id && c.parentId !== id)
     .map((c) => ({ id: c.id, name: c.name }));
@@ -40,6 +41,8 @@ export default async function AdminCategoryEditPage({
         category={category}
         featureFields={category.featureFields}
         parentOptions={parentOptions}
+        variantAxes={variantAxesData.axes}
+        skuTemplate={variantAxesData.skuTemplate}
       />
     </div>
   );

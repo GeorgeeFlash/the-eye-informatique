@@ -562,11 +562,27 @@ export async function getProduct(id: string) {
   return db.product.findUnique({
     where: { id },
     include: {
-      category: true,
+      category: {
+        include: {
+          variantAxes: {
+            orderBy: { sortOrder: "asc" },
+            include: {
+              values: { orderBy: { sortOrder: "asc" } },
+            },
+          },
+        },
+      },
       images: { orderBy: { sortOrder: "asc" } },
       variants: {
         include: {
           stockByBranch: { include: { branch: { select: { id: true, name: true, city: true } } } },
+          options: {
+            include: {
+              axisValue: {
+                include: { axis: true },
+              },
+            },
+          },
         },
       },
       featureValues: {
@@ -581,11 +597,27 @@ export async function getProductBySlug(slug: string) {
     db.product.findUnique({
       where: { slug, isActive: true },
       include: {
-        category: true,
+        category: {
+          include: {
+            variantAxes: {
+              orderBy: { sortOrder: "asc" },
+              include: {
+                values: { orderBy: { sortOrder: "asc" } },
+              },
+            },
+          },
+        },
         images: { orderBy: { sortOrder: "asc" } },
         variants: {
           include: {
             stockByBranch: { include: { branch: { select: { id: true, name: true, city: true } } } },
+            options: {
+              include: {
+                axisValue: {
+                  include: { axis: true },
+                },
+              },
+            },
           },
         },
         featureValues: {

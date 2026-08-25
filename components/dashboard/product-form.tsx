@@ -11,6 +11,7 @@ import {
   productVariantSchema,
 } from "@/lib/validators/product.schema";
 import { createProduct, updateProduct } from "@/actions/product.actions";
+import { generateVariantsFromAxes } from "@/actions/variant-axis.actions";
 import { slugify } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,12 +91,26 @@ type FeatureField = {
   sortOrder: number;
 };
 
+type VariantAxis = {
+  id: string;
+  name: string;
+  sortOrder: number;
+  values: {
+    id: string;
+    value: string;
+    sortOrder: number;
+    priceDelta: number | null;
+  }[];
+};
+
 interface ProductFormProps {
   categories: CategoryOption[];
   branches?: BranchOption[];
   isCentralAdmin: boolean;
   defaultValues?: Partial<FormValues> & { id?: string };
   featureFields?: FeatureField[];
+  variantAxes?: VariantAxis[];
+  skuTemplate?: string | null;
   onCategoryChange?: (categoryId: string) => void;
 }
 
@@ -109,14 +124,21 @@ export function ProductForm({
   isCentralAdmin,
   defaultValues,
   featureFields = [],
+  variantAxes = [],
+  skuTemplate = null,
   onCategoryChange,
 }: ProductFormProps) {
   const t = useTranslations("productForm");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationMode, setGenerationMode] = useState<"auto" | "manual">(
+    skuTemplate ? "auto" : "manual",
+  );
 
   const isEditing = !!defaultValues?.id;
+  const hasAxes = variantAxes.length > 0;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as never,
@@ -143,6 +165,34 @@ export function ProductForm({
     append: appendVariant,
     remove: removeVariant,
   } = useFieldArray({ control: form.control, name: "variants" });
+
+  const selectedAxisValueIds = variantAxes.map((axis) =>
+    axis.values.map((v) => v.id),
+  )
+
+  async function handleGenerateMatrix() {
+    setIsGenerating(true)
+    startTransition(async () => {
+      const basePrice = Number(form.getValues("basePrice")) || 0
+      const result = await generateVariantsFromAxes(
+        defaultValues!.id!,
+        selectedAxisValueIds,
+        {
+          skuTemplate: skuTemplate ?? undefined,
+          autoGenerateSku: generationMode === "auto",
+          basePrice,
+        },
+      )
+      if ("error" in result && result.error) {
+        setServerError(result.error as string)
+        setIsGenerating(false)
+        return
+      }
+      setServerError(null)
+      setIsGenerating(false)
+      router.refresh()
+    })
+  }
 
   const watchCommissionType = form.watch("commissionType");
   const watchCategoryId = form.watch("categoryId");
@@ -602,167 +652,307 @@ export function ProductForm({
             )}
 
             {/* Variants */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>{t("variants")}</CardTitle>
-                  <CardDescription>{t("variantsHint")}</CardDescription>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    appendVariant({
-                      sku: "",
-                      condition: "NEW",
-                      stock: 0,
-                      price: 0,
-                    })
-                  }
-                >
-                  <PlusIcon className="mr-1 h-4 w-4" />
-                  {t("addVariant")}
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {variantFields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className="space-y-3 rounded-lg border p-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline">
-                        {t("variantNum", { n: index + 1 })}
-                      </Badge>
-                      {variantFields.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive"
-                          onClick={() => removeVariant(index)}
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      <FormField
-                        control={form.control}
-                        name={`variants.${index}.sku`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>SKU</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormDescription>{t("skuHint")}</FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`variants.${index}.condition`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("condition")}</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="NEW">{t("new")}</SelectItem>
-                                <SelectItem value="REFURBISHED">
-                                  {t("refurbished")}
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`variants.${index}.price`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("price")} (XAF)</FormLabel>
-                            <FormControl>
-                              <Input type="number" min={0} {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`variants.${index}.stock`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("stock")}</FormLabel>
-                            <FormControl>
-                              <Input type="number" min={0} {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`variants.${index}.color`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("color")}</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                value={field.value ?? ""}
-                                placeholder={t("colorHint")}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`variants.${index}.weight`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t("weight")}</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min={0}
-                                step={0.001}
-                                {...field}
-                                value={field.value ?? ""}
-                                onChange={(e) =>
-                                  field.onChange(
-                                    e.target.value === ""
-                                      ? undefined
-                                      : Number(e.target.value),
-                                  )
-                                }
-                              />
-                            </FormControl>
-                            <FormDescription>{t("weightHint")}</FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+            {hasAxes ? (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>{t("variantMatrix")}</CardTitle>
+                    <CardDescription>{t("variantMatrixHint")}</CardDescription>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={generationMode}
+                      onValueChange={(v) =>
+                        setGenerationMode(v as "auto" | "manual")
+                      }
+                    >
+                      <SelectTrigger className="w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto">
+                          {t("autoGenerateSku")}
+                        </SelectItem>
+                        <SelectItem value="manual">
+                          {t("manualEntry")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      onClick={handleGenerateMatrix}
+                      disabled={isGenerating || isEditing === false}
+                    >
+                      {isGenerating && (
+                        <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      {t("generateMatrix")}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {variantFields.length === 0 ? (
+                    <p className="text-center text-sm text-muted-foreground py-8">
+                      {t("noVariants")}
+                    </p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2 px-2">SKU</th>
+                            <th className="text-left py-2 px-2">{t("price")} (XAF)</th>
+                            <th className="text-left py-2 px-2">{t("stock")}</th>
+                            <th className="text-left py-2 px-2 w-16"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {variantFields.map((field, index) => (
+                            <tr
+                              key={field.id}
+                              className="border-b last:border-0"
+                            >
+                              <td className="py-2 px-2">
+                                <FormField
+                                  control={form.control}
+                                  name={`variants.${index}.sku`}
+                                  render={({ field }) => (
+                                    <FormItem className="space-y-0">
+                                      <FormControl>
+                                        <Input
+                                          {...field}
+                                          className="h-8 text-xs"
+                                        />
+                                      </FormControl>
+                                      <FormMessage className="text-xs" />
+                                    </FormItem>
+                                  )}
+                                />
+                              </td>
+                              <td className="py-2 px-2">
+                                <FormField
+                                  control={form.control}
+                                  name={`variants.${index}.price`}
+                                  render={({ field }) => (
+                                    <FormItem className="space-y-0">
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          min={0}
+                                          {...field}
+                                          className="h-8 text-xs w-24"
+                                        />
+                                      </FormControl>
+                                      <FormMessage className="text-xs" />
+                                    </FormItem>
+                                  )}
+                                />
+                              </td>
+                              <td className="py-2 px-2">
+                                <FormField
+                                  control={form.control}
+                                  name={`variants.${index}.stock`}
+                                  render={({ field }) => (
+                                    <FormItem className="space-y-0">
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          min={0}
+                                          {...field}
+                                          className="h-8 text-xs w-20"
+                                        />
+                                      </FormControl>
+                                      <FormMessage className="text-xs" />
+                                    </FormItem>
+                                  )}
+                                />
+                              </td>
+                              <td className="py-2 px-2">
+                                {variantFields.length > 1 && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-destructive"
+                                    onClick={() => removeVariant(index)}
+                                  >
+                                    <TrashIcon className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>{t("variants")}</CardTitle>
+                    <CardDescription>{t("variantsHint")}</CardDescription>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      appendVariant({
+                        sku: "",
+                        condition: "NEW",
+                        stock: 0,
+                        price: 0,
+                      })
+                    }
+                  >
+                    <PlusIcon className="mr-1 h-4 w-4" />
+                    {t("addVariant")}
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {variantFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="space-y-3 rounded-lg border p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline">
+                          {t("variantNum", { n: index + 1 })}
+                        </Badge>
+                        {variantFields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => removeVariant(index)}
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <FormField
+                          control={form.control}
+                          name={`variants.${index}.sku`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>SKU</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormDescription>{t("skuHint")}</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`variants.${index}.condition`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("condition")}</FormLabel>
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="NEW">{t("new")}</SelectItem>
+                                  <SelectItem value="REFURBISHED">
+                                    {t("refurbished")}
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`variants.${index}.price`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("price")} (XAF)</FormLabel>
+                              <FormControl>
+                                <Input type="number" min={0} {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`variants.${index}.stock`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("stock")}</FormLabel>
+                              <FormControl>
+                                <Input type="number" min={0} {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`variants.${index}.color`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("color")}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  placeholder={t("colorHint")}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`variants.${index}.weight`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("weight")}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  step={0.001}
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value === ""
+                                        ? undefined
+                                        : Number(e.target.value),
+                                    )
+                                  }
+                                />
+                              </FormControl>
+                              <FormDescription>{t("weightHint")}</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Settings */}
             <Card>

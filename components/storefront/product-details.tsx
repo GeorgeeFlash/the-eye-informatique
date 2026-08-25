@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useCart } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/utils";
@@ -43,6 +43,11 @@ type Variant = {
     stock: number;
     branch: { id: string; name: string; city: string };
   }[];
+  options?: {
+    axisId: string;
+    axisName: string;
+    value: string;
+  }[];
 };
 
 type ProductData = {
@@ -84,30 +89,69 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   );
   const [quantity, setQuantity] = useState(1);
 
-  const selectedVariant = product.variants.find(
-    (v) => v.id === selectedVariantId,
-  );
-  const price = selectedVariant ? selectedVariant.price : product.basePrice;
-  const stockCount = selectedVariant?.stock ?? 0;
-  const quantityInCart = selectedVariant
-    ? (items.find((i) => i.variantId === selectedVariant.id)?.quantity ?? 0)
+  const hasAxisOptions = product.variants.some(
+    (v) => v.options && v.options.length > 0,
+  )
+
+  const axisMap = useMemo(() => {
+    if (!hasAxisOptions) return new Map()
+    const map = new Map<string, { name: string; values: string[] }>()
+    for (const v of product.variants) {
+      for (const opt of v.options ?? []) {
+        if (!map.has(opt.axisId)) {
+          map.set(opt.axisId, { name: opt.axisName, values: [] })
+        }
+        const entry = map.get(opt.axisId)!
+        if (!entry.values.includes(opt.value)) {
+          entry.values.push(opt.value)
+        }
+      }
+    }
+    return map
+  }, [product.variants, hasAxisOptions])
+
+  const [selectedAxisValues, setSelectedAxisValues] = useState<Record<string, string>>(() => {
+    if (!hasAxisOptions) return {}
+    const initial: Record<string, string> = {}
+    for (const [axisId, data] of axisMap) {
+      initial[axisId] = data.values[0]
+    }
+    return initial
+  })
+
+  const axisSelectedVariant = useMemo(() => {
+    if (!hasAxisOptions) return null
+    return product.variants.find((v) => {
+      if (!v.options || v.options.length === 0) return false
+      return v.options.every(
+        (opt) => selectedAxisValues[opt.axisId] === opt.value,
+      )
+    }) ?? null
+  }, [product.variants, selectedAxisValues, hasAxisOptions])
+
+  const activeVariant = hasAxisOptions ? axisSelectedVariant : product.variants.find((v) => v.id === selectedVariantId) ?? null
+
+  const price = activeVariant ? activeVariant.price : product.basePrice;
+  const stockCount = activeVariant?.stock ?? 0;
+  const quantityInCart = activeVariant
+    ? (items.find((i) => i.variantId === activeVariant.id)?.quantity ?? 0)
     : 0;
   const availableToAdd = Math.max(0, stockCount - quantityInCart);
   const inStock = stockCount > 0;
   const isLowStock = inStock && stockCount <= LOW_STOCK_THRESHOLD;
   const maxQuantity = Math.max(1, availableToAdd);
-  const canAddToCart = Boolean(selectedVariant && availableToAdd > 0);
+  const canAddToCart = Boolean(activeVariant && availableToAdd > 0);
 
   useEffect(() => {
     // Keep quantity valid whenever selected variant changes.
-    if (!selectedVariant || availableToAdd <= 0) {
+    if (!activeVariant || availableToAdd <= 0) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuantity(1);
       return;
     }
 
     setQuantity((current) => Math.min(Math.max(current, 1), availableToAdd));
-  }, [availableToAdd, selectedVariant]);
+  }, [availableToAdd, activeVariant]);
 
   const avgRating = product.reviewAggregate.avg;
   const totalReviewCount = product.reviewAggregate.count;
@@ -182,7 +226,40 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       <Separator />
 
       {/* Variant Selector */}
-      {product.variants.length > 1 && (
+      {product.variants.length > 1 && hasAxisOptions && (
+        <div className="space-y-3">
+          {Array.from(axisMap.entries()).map(([axisId, data]) => (
+            <div key={axisId} className="space-y-1">
+              <label className="text-sm font-medium">{data.name}</label>
+              <Select
+                value={selectedAxisValues[axisId] ?? ""}
+                onValueChange={(v) =>
+                  setSelectedAxisValues((prev) => ({ ...prev, [axisId]: v }))
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {data.values.map((val: string) => (
+                    <SelectItem key={val} value={val}>
+                      {val}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
+          {axisSelectedVariant && (
+            <p className="text-sm text-muted-foreground">
+              {formatCurrency(axisSelectedVariant.price, locale as Locale)}
+              {axisSelectedVariant.stock === 0 ? ` — ${t("outOfStock")}` : ""}
+            </p>
+          )}
+        </div>
+      )}
+
+      {product.variants.length > 1 && !hasAxisOptions && (
         <div className="space-y-2">
           <label className="text-sm font-medium">{t("condition")}</label>
           <Select
@@ -208,13 +285,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       )}
 
       {/* Single variant info */}
-      {product.variants.length === 1 && selectedVariant && (
+      {product.variants.length === 1 && activeVariant && (
         <div className="flex gap-2">
           <Badge variant="outline">
-            {selectedVariant.condition === "NEW" ? t("new") : t("refurbished")}
+            {activeVariant.condition === "NEW" ? t("new") : t("refurbished")}
           </Badge>
-          {selectedVariant.color && (
-            <Badge variant="outline">{selectedVariant.color}</Badge>
+          {activeVariant.color && (
+            <Badge variant="outline">{activeVariant.color}</Badge>
           )}
         </div>
       )}
@@ -291,7 +368,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           className="flex-1"
           disabled={!canAddToCart}
           onClick={() => {
-          if (!selectedVariant || availableToAdd <= 0) {
+          if (!activeVariant || availableToAdd <= 0) {
             toast.error(t("outOfStock"));
             return;
           }
@@ -299,24 +376,24 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           const quantityToAdd = Math.min(quantity, availableToAdd);
 
           // Pick the branch with the most stock for this variant
-          const topBranch = selectedVariant.stockByBranch
+          const topBranch = activeVariant.stockByBranch
             .filter((s) => s.stock > 0)
             .sort((a, b) => b.stock - a.stock)[0];
 
           addItem({
-            variantId: selectedVariant.id,
+            variantId: activeVariant.id,
             productId: product.id,
             productName: product.name,
             variantLabel: [
-              selectedVariant.condition === "NEW" ? t("new") : t("refurbished"),
-              selectedVariant.color,
+              activeVariant.condition === "NEW" ? t("new") : t("refurbished"),
+              activeVariant.color,
             ]
               .filter(Boolean)
               .join(" — "),
-            sku: selectedVariant.sku,
+            sku: activeVariant.sku,
             price,
             quantity: quantityToAdd,
-            stockAvailable: selectedVariant.stock,
+            stockAvailable: activeVariant.stock,
             imageUrl: undefined,
             branchId: topBranch?.branch.id,
             branchCity: topBranch?.branch.city,
@@ -341,7 +418,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             brand: product.brand ?? undefined,
             categoryName: product.category?.name ?? undefined,
             imageUrl: product.images[0]?.url ?? undefined,
-            condition: selectedVariant?.condition ?? product.variants[0]?.condition ?? "NEW",
+            condition: activeVariant?.condition ?? product.variants[0]?.condition ?? "NEW",
           } as ShareableProduct
         }
         open={shareOpen}

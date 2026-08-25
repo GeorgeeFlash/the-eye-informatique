@@ -9,6 +9,17 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { logActivity } from "@/lib/activity-log"
 
+export {
+  getVariantAxesByCategory,
+  createVariantAxis,
+  updateVariantAxis,
+  deleteVariantAxis,
+  createAxisValue,
+  updateAxisValue,
+  deleteAxisValue,
+  updateCategorySkuTemplate,
+} from "./variant-axis.actions"
+
 export async function createCategory(
   data: z.infer<typeof categorySchema>,
 ) {
@@ -118,6 +129,12 @@ export async function getCategories() {
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     include: {
       _count: { select: { products: true } },
+      variantAxes: {
+        orderBy: { sortOrder: "asc" },
+        include: {
+          values: { orderBy: { sortOrder: "asc" } },
+        },
+      },
       products: {
         take: 1,
         orderBy: { createdAt: "asc" },

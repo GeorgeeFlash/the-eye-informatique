@@ -4,6 +4,7 @@ import { getProduct } from "@/actions/product.actions";
 import {
   getCategories,
   getFeatureFieldsByCategory,
+  getVariantAxesByCategory,
 } from "@/actions/category.actions";
 import { getBranches } from "@/actions/user.actions";
 import { ProductFormWrapper } from "@/components/dashboard/product-form-wrapper";
@@ -30,7 +31,6 @@ export default async function AdminProductEditorPage({
 
   if (!product) notFound();
 
-  // Pre-load feature fields for the product's current category
   const categoryFeatureFields = product.categoryId
     ? await getFeatureFieldsByCategory(product.categoryId)
     : [];
@@ -44,12 +44,15 @@ export default async function AdminProductEditorPage({
     sortOrder: f.sortOrder,
   }));
 
+  const variantAxesData = product.categoryId
+    ? await getVariantAxesByCategory(product.categoryId)
+    : { axes: [], skuTemplate: null }
+
   const categoryOptions = categories.map((c) => ({ id: c.id, name: c.name }));
   const branchOptions = Array.isArray(branches)
     ? branches.map((b) => ({ id: b.id, name: b.name }))
     : [];
 
-  // Map product to form defaults
   const defaultValues = {
     id: product.id,
     name: product.name,
@@ -132,6 +135,8 @@ export default async function AdminProductEditorPage({
         isCentralAdmin={user.role === "CENTRAL_ADMIN"}
         defaultValues={defaultValues}
         initialFeatureFields={initialFeatureFields}
+        variantAxes={variantAxesData.axes}
+        skuTemplate={variantAxesData.skuTemplate}
       />
     </div>
   );

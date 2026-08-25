@@ -76,6 +76,8 @@ model Category {
   children      Category[]             @relation("CategoryTree")
   featureFields CategoryFeatureField[]
   products      Product[]
+  variantAxes   CategoryVariantAxis[]
+  skuTemplate   String?
 }
 
 model Tag {
@@ -127,6 +129,7 @@ model ProductVariant {
   stockByBranch ProductStockByBranch[]
   product       Product                @relation(fields: [productId], references: [id], onDelete: Cascade)
   cartItems     ServerCartItem[]
+  options       ProductVariantOption[]
 }
 
 model ProductImage {
@@ -407,6 +410,41 @@ model ProductStockByBranch {
   variant           ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@unique([variantId, branchId])
+}
+
+model CategoryVariantAxis {
+  id        String                 @id @default(cuid())
+  categoryId String
+  name      String
+  sortOrder Int                    @default(0)
+  category  Category               @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  values    CategoryVariantAxisValue[]
+
+  @@index([categoryId])
+}
+
+model CategoryVariantAxisValue {
+  id        String                 @id @default(cuid())
+  axisId    String
+  value     String
+  sortOrder Int                    @default(0)
+  priceDelta Decimal?              @db.Decimal(10, 2) @default(0)
+  axis      CategoryVariantAxis    @relation(fields: [axisId], references: [id], onDelete: Cascade)
+  options   ProductVariantOption[]
+
+  @@index([axisId])
+}
+
+model ProductVariantOption {
+  id          String                @id @default(cuid())
+  variantId   String
+  axisValueId String
+  axisValue   CategoryVariantAxisValue @relation(fields: [axisValueId], references: [id], onDelete: Cascade)
+  variant     ProductVariant        @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, axisValueId])
+  @@index([variantId])
+  @@index([axisValueId])
 }
 
 model ProductReview {

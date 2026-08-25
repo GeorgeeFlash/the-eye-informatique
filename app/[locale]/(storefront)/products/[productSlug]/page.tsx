@@ -50,6 +50,11 @@ export default async function ProductDetailPage({ params }: Props) {
       price: Number(v.price),
       weight: v.weight ? Number(v.weight) : null,
       stockByBranch: v.stockByBranch,
+      options: v.options?.map((o) => ({
+        axisId: o.axisValue.axisId,
+        axisName: o.axisValue.axis.name,
+        value: o.axisValue.value,
+      })),
     })),
     reviews: product.reviews,
     reviewAggregate: product.reviewAggregate,
