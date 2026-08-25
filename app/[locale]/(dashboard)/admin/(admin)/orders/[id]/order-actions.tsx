@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { useState, useRef, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Loader2Icon } from "lucide-react";
 
 const STATUSES = [

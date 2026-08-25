@@ -11,6 +11,7 @@ import {
   BriefcaseIcon,
   ChevronRightIcon,
   GitBranchIcon,
+  ImagesIcon,
   LayoutDashboardIcon,
   type LucideIcon,
   MegaphoneIcon,
@@ -44,6 +45,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   users: UsersIcon,
   branch: Building2Icon,
   knowledge: BookOpenTextIcon,
+  images: ImagesIcon,
 };
 import {
   SidebarGroup,

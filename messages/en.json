@@ -369,8 +369,27 @@
       "storeManagement": "Store",
       "insights": "Insights",
       "system": "System",
-      "viewStore": "View Store"
+      "viewStore": "View Store",
+      "media": "Media"
     }
+  },
+  "media": {
+    "title": "Media Library",
+    "subtitle": "Browse, upload, and select images for your categories.",
+    "searchPlaceholder": "Search images...",
+    "uploadImage": "Image uploaded",
+    "uploadNew": "Upload an image",
+    "uploading": "Uploading...",
+    "browseFiles": "browse files",
+    "deleteImage": "Image deleted",
+    "noImages": "No images found.",
+    "selectImage": "Select image",
+    "urlCopied": "URL copied to clipboard",
+    "confirmDelete": "Are you sure you want to delete this image?",
+    "cancel": "Cancel",
+    "inUse": "In use",
+    "deleteInUseError": "This image is used by a category and can't be deleted.",
+    "loadError": "Failed to load images."
   },
   "customerDashboard": {
     "welcome": "Welcome back, {name}",
@@ -516,15 +535,13 @@
     "priceDeltaHint": "Additional price for this value. Use negative for cheaper options.",
     "noAxes": "No variant axes defined yet.",
     "skuTemplate": "SKU Template",
-    "skuTemplateHint": "Use {product_slug}, {RAM}, {Storage} etc. Leave empty for manual SKUs.",
+    "skuTemplateHint": "'Use {product_slug}, {RAM}, {Storage} etc. Leave empty for manual SKUs.'",
     "skuPreview": "SKU Preview",
     "previewSlug": "Preview slug",
     "deleteAxis": "Delete Axis",
     "deleteAxisValue": "Delete Value",
     "confirmDeleteAxis": "Delete this axis and all its values?",
     "confirmDeleteAxisValue": "Delete this value?",
-    "sortOrder": "Sort Order",
-    "sortOrderHint": "Lower numbers appear first.",
     "valuesCount": "{count, plural, one {# value} other {# values}}"
   },
   "productAdmin": {

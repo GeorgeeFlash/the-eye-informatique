@@ -33,6 +33,7 @@ model User {
   productPageViews   ProductPageView[]
   productReviews     ProductReview[]
   cartItems          ServerCartItem[]
+  uploadedAssets     ImageAsset[]            @relation("UploadedImages")
   branch             Branch?                 @relation(fields: [branchId], references: [id])
 }
 
@@ -421,6 +422,7 @@ model CategoryVariantAxis {
   values    CategoryVariantAxisValue[]
 
   @@index([categoryId])
+  @@unique([categoryId, name])
 }
 
 model CategoryVariantAxisValue {
@@ -433,6 +435,7 @@ model CategoryVariantAxisValue {
   options   ProductVariantOption[]
 
   @@index([axisId])
+  @@unique([axisId, value])
 }
 
 model ProductVariantOption {
@@ -653,4 +656,18 @@ enum FeatureFieldType {
 enum CommissionType {
   PERCENTAGE
   FIXED
+}
+
+model ImageAsset {
+  id           String   @id @default(cuid())
+  url          String
+  fileName     String
+  mimeType     String
+  size         Int
+  uploadedById String?
+  createdAt    DateTime @default(now())
+
+  uploadedBy User? @relation("UploadedImages", fields: [uploadedById], references: [id])
+
+  @@index([createdAt])
 }

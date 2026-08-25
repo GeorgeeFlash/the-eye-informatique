@@ -17,6 +17,8 @@ import {
   createFeatureField,
   updateFeatureField,
   deleteFeatureField,
+} from "@/actions/category.actions";
+import {
   createVariantAxis,
   updateVariantAxis,
   deleteVariantAxis,
@@ -24,7 +26,7 @@ import {
   updateAxisValue,
   deleteAxisValue,
   updateCategorySkuTemplate,
-} from "@/actions/category.actions";
+} from "@/actions/variant-axis.actions";
 import { slugify } from "@/lib/utils";
 import { generateSkuFromTemplate } from "@/lib/sku-generator";
 import {
@@ -63,6 +65,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PlusIcon, TrashIcon, PencilIcon, Loader2Icon } from "lucide-react";
+import { ImagePicker } from "@/components/media/image-picker";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -440,7 +443,10 @@ export function CategoryEditClient({
                   <FormItem>
                     <FormLabel>{t("iconUrl")}</FormLabel>
                     <FormControl>
-                      <Input {...field} value={field.value ?? ""} />
+                      <ImagePicker
+                        value={field.value ?? undefined}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormDescription>{t("iconUrlHint")}</FormDescription>
                     <FormMessage />

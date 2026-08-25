@@ -3,8 +3,8 @@ import { requireRole } from "@/lib/auth";
 import {
   getCategories,
   getCategoryWithFeatureFields,
-  getVariantAxesByCategory,
 } from "@/actions/category.actions";
+import { getVariantAxesByCategory } from "@/actions/variant-axis.actions";
 import { getTranslations } from "next-intl/server";
 import { CategoryEditClient } from "./category-edit-client";
 

@@ -4,8 +4,8 @@ import { getProduct } from "@/actions/product.actions";
 import {
   getCategories,
   getFeatureFieldsByCategory,
-  getVariantAxesByCategory,
 } from "@/actions/category.actions";
+import { getVariantAxesByCategory } from "@/actions/variant-axis.actions";
 import { getBranches } from "@/actions/user.actions";
 import { ProductFormWrapper } from "@/components/dashboard/product-form-wrapper";
 import { ProductShareDialog, type ShareableProduct } from "@/components/shared/product-share-dialog";

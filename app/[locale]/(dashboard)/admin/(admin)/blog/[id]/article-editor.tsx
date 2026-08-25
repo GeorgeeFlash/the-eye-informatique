@@ -43,7 +43,7 @@ const Editor = dynamic(
     ),
   },
 );
-import { CoverImageUploader } from "@/components/blog/cover-image-uploader";
+import { ImagePicker } from "@/components/media/image-picker";
 import { toast } from "sonner";
 import {
   SaveIcon,
@@ -459,9 +459,12 @@ export function ArticleEditor({
           <CardHeader>
             <CardTitle className="text-base">{t("coverImage")}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <CoverImageUploader value={coverImage} onChange={setCoverImage} />
-          </CardContent>
+            <CardContent>
+              <ImagePicker
+                value={coverImage || undefined}
+                onChange={(url) => setCoverImage(url ?? "")}
+              />
+            </CardContent>
         </Card>
 
         {/* Language */}

@@ -1,6 +1,8 @@
 import { put } from "@vercel/blob"
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
+import { db } from "@/server/db"
+import { requireAuth } from "@/lib/auth"
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 const ALLOWED_MIME_TYPES = [
@@ -13,11 +15,11 @@ const ALLOWED_MIME_TYPES = [
   "video/webm",
 ]
 
-const ALLOWED_FOLDERS = ["products", "blog"] as const
+const ALLOWED_FOLDERS = ["products", "blog", "media"] as const
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth()
-  if (!userId) {
+  const user = await requireAuth()
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -64,6 +66,22 @@ export async function POST(request: NextRequest) {
       access: "public",
       addRandomSuffix: true,
     })
+
+    if (folder === "media") {
+      try {
+        await db.imageAsset.create({
+          data: {
+            url: blob.url,
+            fileName: file.name,
+            mimeType: file.type,
+            size: file.size,
+            uploadedById: user.id,
+          },
+        })
+      } catch {
+        // Recording the asset is best-effort — never break the upload response.
+      }
+    }
 
     results.push({
       url: blob.url,

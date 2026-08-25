@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { slugify } from "@/lib/utils";
+import { ImagePicker } from "@/components/media/image-picker";
 
 type CategoryRow = {
   id: string;
@@ -195,6 +196,23 @@ export function CategoryListClient({ categories }: Props) {
                         <Input type="number" min={0} {...field} />
                       </FormControl>
                       <FormDescription>{t("sortOrderHint")}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="iconUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("iconUrl")}</FormLabel>
+                      <FormControl>
+                        <ImagePicker
+                          value={field.value ?? undefined}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormDescription>{t("iconUrlHint")}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

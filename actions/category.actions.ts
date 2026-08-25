@@ -9,17 +9,6 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { logActivity } from "@/lib/activity-log"
 
-export {
-  getVariantAxesByCategory,
-  createVariantAxis,
-  updateVariantAxis,
-  deleteVariantAxis,
-  createAxisValue,
-  updateAxisValue,
-  deleteAxisValue,
-  updateCategorySkuTemplate,
-} from "./variant-axis.actions"
-
 export async function createCategory(
   data: z.infer<typeof categorySchema>,
 ) {
@@ -38,7 +27,7 @@ export async function createCategory(
       name: parsed.data.name,
       slug,
       parentId: parsed.data.parentId ?? null,
-      iconUrl: parsed.data.iconUrl,
+      iconUrl: parsed.data.iconUrl ?? null,
       sortOrder: parsed.data.sortOrder,
     },
   })

@@ -369,8 +369,27 @@
       "storeManagement": "Boutique",
       "insights": "Analyses",
       "system": "Système",
-      "viewStore": "Voir la boutique"
+      "viewStore": "Voir la boutique",
+      "media": "Médias"
     }
+  },
+  "media": {
+    "title": "Bibliothèque multimédia",
+    "subtitle": "Parcourez, téléchargez et sélectionnez des images pour vos catégories.",
+    "searchPlaceholder": "Rechercher des images...",
+    "uploadImage": "Image téléchargée",
+    "uploadNew": "Télécharger une image",
+    "uploading": "Téléchargement...",
+    "browseFiles": "parcourir les fichiers",
+    "deleteImage": "Image supprimée",
+    "noImages": "Aucune image trouvée.",
+    "selectImage": "Sélectionner une image",
+    "urlCopied": "URL copiée dans le presse-papiers",
+    "confirmDelete": "Voulez-vous vraiment supprimer cette image ?",
+    "cancel": "Annuler",
+    "inUse": "Utilisée",
+    "deleteInUseError": "Cette image est utilisée par une catégorie et ne peut pas être supprimée.",
+    "loadError": "Échec du chargement des images."
   },
   "customerDashboard": {
     "welcome": "Bon retour, {name}",
@@ -516,15 +535,13 @@
     "priceDeltaHint": "Prix supplémentaire pour cette valeur. Utilisez une valeur négative pour les options moins chères.",
     "noAxes": "Aucun axe de variante défini.",
     "skuTemplate": "Modèle de SKU",
-    "skuTemplateHint": "Utilisez {product_slug}, {RAM}, {Storage} etc. Laissez vide pour des SKUs manuels.",
+    "skuTemplateHint": "'Utilisez {product_slug}, {RAM}, {Storage} etc. Laissez vide pour des SKUs manuels.'",
     "skuPreview": "Aperçu SKU",
     "previewSlug": "Slug d'aperçu",
     "deleteAxis": "Supprimer l'axe",
     "deleteAxisValue": "Supprimer la valeur",
     "confirmDeleteAxis": "Supprimer cet axe et toutes ses valeurs ?",
     "confirmDeleteAxisValue": "Supprimer cette valeur ?",
-    "sortOrder": "Ordre de tri",
-    "sortOrderHint": "Les nombres plus bas apparaissent en premier.",
     "valuesCount": "{count, plural, one {# valeur} other {# valeurs}}"
   },
   "productAdmin": {

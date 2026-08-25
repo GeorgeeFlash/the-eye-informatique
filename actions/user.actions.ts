@@ -2,7 +2,7 @@
 
 import { db } from "@/server/db"
 import { profileSchema } from "@/lib/validators/auth.schema"
-import { requireAuth, requireRole, getCurrentUser } from "@/lib/auth"
+import { requireAuth, requireRole } from "@/lib/auth"
 import { stripHtml } from "@/lib/sanitize"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -105,7 +105,7 @@ const VALID_ROLES: Role[] = ["CUSTOMER", "AFFILIATE", "STAFF", "ADMIN", "CENTRAL
 
 const assignRoleSchema = z.object({
   userId: z.string().min(1),
-  role: z.enum(["CUSTOMER", "AFFILIATE", "STAFF", "ADMIN", "CENTRAL_ADMIN"]),
+  role: z.enum(VALID_ROLES),
   branchId: z.string().min(1).optional(),
 })
 

@@ -71,18 +71,19 @@ export function AppSidebar({
         },
       ],
     },
-    {
-      title: t("content"),
-      icon: "newspaper",
-      items: [
-        { title: t("blog"), url: "/admin/blog", match: "prefix" },
-        {
-          title: t("blogAnalytics"),
-          url: "/admin/blog/analytics",
-          match: "prefix",
-        },
-      ],
-    },
+      {
+        title: t("content"),
+        icon: "newspaper",
+        items: [
+          { title: t("blog"), url: "/admin/blog", match: "prefix" },
+          {
+            title: t("blogAnalytics"),
+            url: "/admin/blog/analytics",
+            match: "prefix",
+          },
+          { title: t("media"), url: "/admin/media", match: "prefix" },
+        ],
+      },
     {
       title: t("insights"),
       icon: "bar-chart",
