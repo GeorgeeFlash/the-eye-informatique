@@ -1,4 +1,5 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata, ResolvingMetadata, Viewport } from "next";
+import { cache } from "react";
 import { geistSans, geistMono } from "@/lib/fonts";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from "next-intl";
@@ -8,8 +9,11 @@ import { Toaster } from "@/components/ui/sonner";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { SerwistProvider } from "@/app/serwist";
+import { sanityFetch } from "@/sanity/lib/live";
 import { SanityLive } from "@/sanity/lib/live";
 import { CartSyncProvider } from "@/components/shared/cart-sync-provider";
+import { HERO_BANNER_QUERY } from "@/sanity/lib/queries";
+import { urlFor } from "@/sanity/lib/image";
 import "../globals.css";
 import { Locale } from "@/lib/constants";
 
@@ -20,43 +24,70 @@ const APP_DESCRIPTION =
   "Votre boutique tech au Cameroun — téléphones, ordinateurs, accessoires et réparations.";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(APP_URL),
-  applicationName: APP_NAME,
-  title: {
-    default: APP_DEFAULT_TITLE,
-    template: APP_TITLE_TEMPLATE,
-  },
-  description: APP_DESCRIPTION,
-  manifest: "/site.webmanifest",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: APP_DEFAULT_TITLE,
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  openGraph: {
-    type: "website",
-    siteName: APP_NAME,
+const getHeroBanner = cache(async () => {
+  try {
+    const { data } = await sanityFetch({ query: HERO_BANNER_QUERY });
+    return data;
+  } catch {
+    return null;
+  }
+});
+
+export async function generateMetadata(
+  _: unknown,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const previousImages = (await parent).openGraph?.images || [];
+
+  const heroBanner = await getHeroBanner();
+  let heroImage = "/assets/banner.png";
+
+  if (heroBanner?.image) {
+    try {
+      heroImage = urlFor(heroBanner.image).width(1200).height(630).url();
+    } catch {
+      // keep fallback
+    }
+  }
+
+  return {
+    metadataBase: new URL(APP_URL),
+    applicationName: APP_NAME,
     title: {
       default: APP_DEFAULT_TITLE,
       template: APP_TITLE_TEMPLATE,
     },
     description: APP_DESCRIPTION,
-    images: ["/assets/banner.png"],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: {
-      default: APP_DEFAULT_TITLE,
-      template: APP_TITLE_TEMPLATE,
+    manifest: "/site.webmanifest",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: APP_DEFAULT_TITLE,
     },
-    description: APP_DESCRIPTION,
-    images: ["/assets/banner.png"],
-  },
-};
+    formatDetection: {
+      telephone: false,
+    },
+    openGraph: {
+      type: "website",
+      siteName: APP_NAME,
+      title: {
+        default: APP_DEFAULT_TITLE,
+        template: APP_TITLE_TEMPLATE,
+      },
+      description: APP_DESCRIPTION,
+      images: [heroImage, ...previousImages],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: {
+        default: APP_DEFAULT_TITLE,
+        template: APP_TITLE_TEMPLATE,
+      },
+      description: APP_DESCRIPTION,
+      images: [heroImage],
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#ffffff",

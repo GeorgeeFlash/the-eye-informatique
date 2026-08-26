@@ -4,7 +4,7 @@ import { trackAffiliateClick, getAffiliateLink } from "@/actions/affiliate.actio
 import { getProductBySlug } from "@/actions/product.actions";
 import { APP_URL, REFERRAL_COOKIE_NAME, REFERRAL_COOKIE_TTL_DAYS } from "@/lib/constants";
 import { cookies } from "next/headers";
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
 const getProductBySlugCached = cache(getProductBySlug);
 const getAffiliateLinkCached = cache(getAffiliateLink);
@@ -23,13 +23,18 @@ function resolveSlugFromTargetUrl(targetUrl: string): string | null {
   }
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
   const { code } = await params;
   const result = await getAffiliateLinkCached(code);
 
   if (!result?.targetUrl) {
     return { title: "Not Found" };
   }
+
+  const previousImages = (await parent).openGraph?.images || [];
 
   const slug = resolveSlugFromTargetUrl(result.targetUrl);
 
@@ -44,6 +49,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const image = product.images[0]?.url ?? "/assets/banner.png";
+  const productImage = {
+    url: image,
+    width: 1200,
+    height: 630,
+    alt: product.name,
+  };
 
   return {
     title: product.name,
@@ -51,13 +62,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: product.name,
       description: product.description?.slice(0, 160) ?? "",
-      images: [image],
+      images: [productImage, ...previousImages],
     },
     twitter: {
       card: "summary_large_image",
       title: product.name,
       description: product.description?.slice(0, 160) ?? "",
-      images: [image],
+      images: [productImage],
     },
   };
 }

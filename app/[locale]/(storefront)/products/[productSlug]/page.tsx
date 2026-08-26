@@ -3,30 +3,40 @@ import { getProductBySlug } from "@/actions/product.actions";
 import { ProductGallery } from "@/components/storefront/product-gallery";
 import { ProductDetails } from "@/components/storefront/product-details";
 import { ProductViewTracker } from "@/components/storefront/product-view-tracker";
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
 interface Props {
   params: Promise<{ productSlug: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
   const { productSlug } = await params;
   const product = await getProductBySlug(productSlug);
   if (!product) return {};
+  const previousImages = (await parent).openGraph?.images || [];
   const image = product.images[0]?.url ?? "/assets/banner.png";
+  const productImage = {
+    url: image,
+    width: 1200,
+    height: 630,
+    alt: product.name,
+  };
   return {
     title: product.name,
     description: product.description?.slice(0, 160) ?? "",
     openGraph: {
       title: product.name,
       description: product.description?.slice(0, 160) ?? "",
-      images: [image],
+      images: [productImage, ...previousImages],
     },
     twitter: {
       card: "summary_large_image",
       title: product.name,
       description: product.description?.slice(0, 160) ?? "",
-      images: [image],
+      images: [productImage],
     },
   };
 }
