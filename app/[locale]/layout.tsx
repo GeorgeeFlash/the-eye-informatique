@@ -18,8 +18,10 @@ const APP_DEFAULT_TITLE = "The Eye Informatique";
 const APP_TITLE_TEMPLATE = "%s - The Eye Informatique";
 const APP_DESCRIPTION =
   "Votre boutique tech au Cameroun — téléphones, ordinateurs, accessoires et réparations.";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
   applicationName: APP_NAME,
   title: {
     default: APP_DEFAULT_TITLE,
@@ -43,14 +45,16 @@ export const metadata: Metadata = {
       template: APP_TITLE_TEMPLATE,
     },
     description: APP_DESCRIPTION,
+    images: ["/assets/banner.png"],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: {
       default: APP_DEFAULT_TITLE,
       template: APP_TITLE_TEMPLATE,
     },
     description: APP_DESCRIPTION,
+    images: ["/assets/banner.png"],
   },
 };
 

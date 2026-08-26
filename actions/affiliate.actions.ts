@@ -522,9 +522,9 @@ export async function revokeAffiliate(profileId: string, reason: string) {
   return { success: true }
 }
 
-// ─── Public: Track referral click ───────────────────────────────────
+// ─── Public: Get affiliate link without tracking ───────────────────────
 
-export async function trackAffiliateClick(code: string) {
+export async function getAffiliateLink(code: string) {
   const link = await db.affiliateLink.findUnique({ where: { code } })
   if (!link) return null
 
@@ -533,12 +533,21 @@ export async function trackAffiliateClick(code: string) {
   })
   if (!affiliate || affiliate.status !== "APPROVED") return null
 
+  return { targetUrl: link.targetUrl, affiliateId: affiliate.id, linkId: link.id }
+}
+
+// ─── Public: Track referral click ─────────────────────────────────────
+
+export async function trackAffiliateClick(code: string) {
+  const result = await getAffiliateLink(code)
+  if (!result) return null
+
   await db.affiliateLink.update({
-    where: { id: link.id },
+    where: { id: result.linkId },
     data: { clickCount: { increment: 1 } },
   })
 
-  return { targetUrl: link.targetUrl, affiliateId: affiliate.id, linkId: link.id }
+  return result
 }
 
 // ─── Internal: Record referral from order ───────────────────────────

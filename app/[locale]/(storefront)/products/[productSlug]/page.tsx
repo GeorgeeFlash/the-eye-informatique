@@ -13,9 +13,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { productSlug } = await params;
   const product = await getProductBySlug(productSlug);
   if (!product) return {};
+  const image = product.images[0]?.url ?? "/assets/banner.png";
   return {
     title: product.name,
     description: product.description?.slice(0, 160) ?? "",
+    openGraph: {
+      title: product.name,
+      description: product.description?.slice(0, 160) ?? "",
+      images: [image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.description?.slice(0, 160) ?? "",
+      images: [image],
+    },
   };
 }
 

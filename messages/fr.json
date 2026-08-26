@@ -60,7 +60,8 @@
     "sortHighest": "Mieux notés",
     "sortLowest": "Moins bien notés",
     "noReviews": "Aucun avis pour le moment.",
-    "anonymous": "Anonyme"
+    "anonymous": "Anonyme",
+    "share": "Partager"
   },
   "storefront": {
     "productsTitle": "Produits",
