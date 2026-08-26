@@ -502,6 +502,8 @@
     "newCategory": "New Category",
     "name": "Name",
     "slug": "Slug",
+    "slugHint": "Auto-generated from name. This appears in the URL.",
+    "regenerateSlug": "Regenerate slug",
     "parentCategory": "Parent Category",
     "none": "None (top level)",
     "iconUrl": "Icon URL",

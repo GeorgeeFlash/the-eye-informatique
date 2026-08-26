@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useTransition, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useTransition, useState, useCallback } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   categorySchema,
@@ -43,6 +43,7 @@ import {
   TrashIcon,
   Loader2Icon,
   FolderIcon,
+  RefreshCwIcon,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { slugify } from "@/lib/utils";
@@ -76,18 +77,25 @@ export function CategoryListClient({ categories }: Props) {
     },
   });
 
-  const watchedName = useWatch({ control: form.control, name: "name" });
-
   async function onSubmit(values: CategoryFormValues) {
     startTransition(async () => {
-      const slug = values.slug || slugify(values.name);
-      const result = await createCategory({ ...values, slug });
+      const result = await createCategory(values);
       if ("error" in result && result.error) return;
       setDialogOpen(false);
       form.reset();
       router.refresh();
     });
   }
+
+  const handleNameBlur = useCallback(() => {
+    if (!form.getValues("slug")) {
+      form.setValue("slug", slugify(form.getValues("name") || ""));
+    }
+  }, [form]);
+
+  const handleRegenerateSlug = useCallback(() => {
+    form.setValue("slug", slugify(form.getValues("name") || ""));
+  }, [form]);
 
   async function handleDelete(id: string) {
     if (!confirm(t("confirmDelete"))) return;
@@ -134,7 +142,7 @@ export function CategoryListClient({ categories }: Props) {
                     <FormItem>
                       <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} onBlur={handleNameBlur} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -147,11 +155,20 @@ export function CategoryListClient({ categories }: Props) {
                     <FormItem>
                       <FormLabel>{t("slug")}</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          placeholder={slugify(watchedName || "")}
-                        />
+                        <div className="flex gap-2">
+                          <Input {...field} className="flex-1" />
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="icon"
+                            title={t("regenerateSlug")}
+                            onClick={handleRegenerateSlug}
+                          >
+                            <RefreshCwIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </FormControl>
+                      <FormDescription>{t("slugHint")}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

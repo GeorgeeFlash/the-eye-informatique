@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useTransition, useState, useMemo } from "react";
+import { useTransition, useState, useMemo, useCallback } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -64,7 +64,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PlusIcon, TrashIcon, PencilIcon, Loader2Icon } from "lucide-react";
+import { PlusIcon, TrashIcon, PencilIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
 import { ImagePicker } from "@/components/media/image-picker";
 
 // ---------------------------------------------------------------------------
@@ -192,12 +192,21 @@ export function CategoryEditClient({
 
   async function onCategorySubmit(values: CategoryFormValues) {
     startTransition(async () => {
-      const slug = values.slug || slugify(values.name);
-      const result = await updateCategory(category.id, { ...values, slug });
+      const result = await updateCategory(category.id, values);
       if ("error" in result && result.error) return;
       router.refresh();
     });
   }
+
+  const handleNameBlur = useCallback(() => {
+    if (!catForm.getValues("slug")) {
+      catForm.setValue("slug", slugify(catForm.getValues("name") || ""));
+    }
+  }, [catForm]);
+
+  const handleRegenerateSlug = useCallback(() => {
+    catForm.setValue("slug", slugify(catForm.getValues("name") || ""));
+  }, [catForm]);
 
   // Feature field form
   const fieldForm = useForm<FeatureFieldFormValues>({
@@ -384,7 +393,7 @@ export function CategoryEditClient({
                     <FormItem>
                       <FormLabel>{t("name")}</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} onBlur={handleNameBlur} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -397,8 +406,20 @@ export function CategoryEditClient({
                     <FormItem>
                       <FormLabel>{t("slug")}</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <div className="flex gap-2">
+                          <Input {...field} className="flex-1" />
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="icon"
+                            title={t("regenerateSlug")}
+                            onClick={handleRegenerateSlug}
+                          >
+                            <RefreshCwIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </FormControl>
+                      <FormDescription>{t("slugHint")}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
