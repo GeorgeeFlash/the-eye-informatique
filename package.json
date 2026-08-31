@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:seed": "prisma db seed",
-    "prisma:setup": "prisma migrate deploy && prisma db seed",
+    "prisma:seed:prod": "tsx prisma/prod-seed.ts",
+    "prisma:setup": "prisma migrate deploy",
     "postinstall": "prisma generate"
   },
   "dependencies": {
