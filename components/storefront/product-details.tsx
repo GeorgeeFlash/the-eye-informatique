@@ -287,7 +287,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       {/* Single variant info */}
       {product.variants.length === 1 && activeVariant && (
         <div className="flex gap-2">
-          <Badge variant="outline">
+          <Badge
+            variant={activeVariant.condition === "REFURBISHED" ? "destructive" : "default"}
+            className="font-bold uppercase tracking-wider text-[10px]"
+          >
             {activeVariant.condition === "NEW" ? t("new") : t("refurbished")}
           </Badge>
           {activeVariant.color && (
@@ -300,8 +303,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       <div className="flex items-center gap-2 text-sm">
         {inStock ? (
           <>
-            <CheckCircleIcon className="h-4 w-4 text-green-500" />
-            <span className="text-green-600 font-medium">{t("inStock")}</span>
+            <CheckCircleIcon className="h-4 w-4 text-emerald-500" />
+            <span className="text-emerald-600 dark:text-emerald-400 font-medium">{t("inStock")}</span>
             <span className="text-muted-foreground">
               {t("stockCount", { count: stockCount })}
             </span>
@@ -334,7 +337,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             <MinusIcon className="size-4" />
           </Button>
 
-          <span className="w-10 text-center text-sm tabular-nums">
+          <span className="w-10 text-center text-sm tabular-nums font-semibold">
             {quantity}
           </span>
 
@@ -357,7 +360,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         <Button
           variant="outline"
           size="lg"
-          className="flex-1"
+          className="flex-1 font-semibold"
           onClick={() => setShareOpen(true)}
         >
           <Share2Icon className="mr-2 h-5 w-5" />
@@ -365,7 +368,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         </Button>
         <Button
           size="lg"
-          className="flex-1"
+          className="flex-1 font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/25 transition-all hover:scale-[1.01]"
           disabled={!canAddToCart}
           onClick={() => {
           if (!activeVariant || availableToAdd <= 0) {

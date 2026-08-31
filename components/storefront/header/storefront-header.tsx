@@ -52,27 +52,29 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
   const t = useTranslations("nav");
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/90 backdrop-blur-md transition-all">
+      {/* Brand Accent Top Stripe */}
+      <div className="h-0.75 w-full bg-linear-to-r from-primary via-primary/80 to-destructive" />
+
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left: mobile menu + logo */}
         <div className="flex items-center gap-3">
           <MobileNav />
-
-          <Logo />
+          <Logo size="md" />
         </div>
 
         {/* Center: desktop navigation */}
         <NavigationMenu className="hidden md:flex">
-          <NavigationMenuList>
+          <NavigationMenuList className="gap-1">
             {/* Products mega-menu */}
             <NavigationMenuItem>
               {/* suppressHydrationWarning: Radix generates id/aria-controls via useId(),
                   which differs between Next.js SSR and client due to RSC fiber tree depth */}
-              <NavigationMenuTrigger suppressHydrationWarning>
+              <NavigationMenuTrigger suppressHydrationWarning className="font-semibold transition-colors hover:text-primary">
                 {t("products")}
               </NavigationMenuTrigger>
               <NavigationMenuContent>
-                <ul className="grid w-125 gap-2 p-4 md:grid-cols-2">
+                <ul className="grid w-130 gap-2.5 p-4 md:grid-cols-2">
                   {CATEGORY_KEYS.map((cat) => (
                     <ListItem
                       key={cat.href}
@@ -90,7 +92,7 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
             <NavigationMenuItem>
               <NavigationMenuLink
                 asChild
-                className={navigationMenuTriggerStyle()}
+                className={cn(navigationMenuTriggerStyle(), "font-semibold transition-colors hover:text-primary")}
               >
                 <Link href="/blog">{t("blog")}</Link>
               </NavigationMenuLink>
@@ -100,7 +102,7 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
             <NavigationMenuItem>
               <NavigationMenuLink
                 asChild
-                className={navigationMenuTriggerStyle()}
+                className={cn(navigationMenuTriggerStyle(), "font-semibold transition-colors hover:text-primary")}
               >
                 <Link href="/about">{t("about")}</Link>
               </NavigationMenuLink>
@@ -109,7 +111,7 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
         </NavigationMenu>
 
         {/* Right: actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <LocaleSwitcher />
           <ThemeToggle />
           <CartButton />
@@ -139,12 +141,15 @@ function ListItem({
         <Link
           href={href}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            "group block select-none space-y-1 rounded-lg border border-transparent p-3 leading-none no-underline outline-none transition-all hover:border-primary/20 hover:bg-primary/5 hover:text-primary focus:border-primary/20 focus:bg-primary/5",
             className,
           )}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+            <span className="size-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
+            {title}
+          </div>
+          <p className="line-clamp-2 text-xs leading-snug text-muted-foreground group-hover:text-muted-foreground/90">
             {children}
           </p>
         </Link>

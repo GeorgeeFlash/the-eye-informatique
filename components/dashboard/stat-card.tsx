@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ArrowDownRightIcon, ArrowUpRightIcon, LucideIcon } from "lucide-react";
 
-type StatCardTone = "violet" | "mint" | "rose" | "amber" | "sky";
+type StatCardTone = "blue" | "red" | "emerald" | "amber" | "indigo";
 
 const TONES: Record<
   StatCardTone,
@@ -15,54 +15,54 @@ const TONES: Record<
     sparkline: string;
   }
 > = {
-  violet: {
-    card: "border-violet-100/80 bg-gradient-to-br from-violet-100/70 via-violet-50 to-white",
-    iconWrap: "bg-violet-200/60",
-    icon: "text-violet-700",
-    trendPositive: "text-emerald-700",
-    trendNegative: "text-rose-700",
-    sparkline: "bg-violet-500/55",
+  blue: {
+    card: "border-primary/20 bg-linear-to-br from-primary/10 via-primary/5 to-card dark:from-primary/15 dark:via-primary/5 dark:to-card/80",
+    iconWrap: "bg-primary/15 text-primary border border-primary/20",
+    icon: "text-primary",
+    trendPositive: "text-emerald-600 dark:text-emerald-400",
+    trendNegative: "text-destructive",
+    sparkline: "bg-primary/50 dark:bg-primary/70",
   },
-  mint: {
-    card: "border-emerald-100/80 bg-gradient-to-br from-emerald-100/60 via-emerald-50 to-white",
-    iconWrap: "bg-emerald-200/60",
-    icon: "text-emerald-700",
-    trendPositive: "text-emerald-700",
-    trendNegative: "text-rose-700",
-    sparkline: "bg-emerald-500/60",
+  red: {
+    card: "border-destructive/20 bg-linear-to-br from-destructive/10 via-destructive/5 to-card dark:from-destructive/15 dark:via-destructive/5 dark:to-card/80",
+    iconWrap: "bg-destructive/15 text-destructive border border-destructive/20",
+    icon: "text-destructive",
+    trendPositive: "text-emerald-600 dark:text-emerald-400",
+    trendNegative: "text-destructive",
+    sparkline: "bg-destructive/50 dark:bg-destructive/70",
   },
-  rose: {
-    card: "border-rose-100/80 bg-gradient-to-br from-rose-100/70 via-rose-50 to-white",
-    iconWrap: "bg-rose-200/60",
-    icon: "text-rose-700",
-    trendPositive: "text-emerald-700",
-    trendNegative: "text-rose-700",
-    sparkline: "bg-indigo-500/60",
+  emerald: {
+    card: "border-emerald-500/20 bg-linear-to-br from-emerald-500/10 via-emerald-500/5 to-card dark:from-emerald-500/15 dark:via-emerald-500/5 dark:to-card/80",
+    iconWrap: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+    icon: "text-emerald-600 dark:text-emerald-400",
+    trendPositive: "text-emerald-600 dark:text-emerald-400",
+    trendNegative: "text-destructive",
+    sparkline: "bg-emerald-500/50 dark:bg-emerald-500/70",
   },
   amber: {
-    card: "border-amber-100/80 bg-gradient-to-br from-amber-100/65 via-amber-50 to-white",
-    iconWrap: "bg-amber-200/60",
-    icon: "text-amber-700",
-    trendPositive: "text-emerald-700",
-    trendNegative: "text-rose-700",
-    sparkline: "bg-pink-500/60",
+    card: "border-amber-500/20 bg-linear-to-br from-amber-500/10 via-amber-500/5 to-card dark:from-amber-500/15 dark:via-amber-500/5 dark:to-card/80",
+    iconWrap: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+    icon: "text-amber-600 dark:text-amber-400",
+    trendPositive: "text-emerald-600 dark:text-emerald-400",
+    trendNegative: "text-destructive",
+    sparkline: "bg-amber-500/50 dark:bg-amber-500/70",
   },
-  sky: {
-    card: "border-sky-100/80 bg-gradient-to-br from-sky-100/70 via-sky-50 to-white",
-    iconWrap: "bg-sky-200/60",
-    icon: "text-sky-700",
-    trendPositive: "text-emerald-700",
-    trendNegative: "text-rose-700",
-    sparkline: "bg-sky-500/60",
+  indigo: {
+    card: "border-indigo-500/20 bg-linear-to-br from-indigo-500/10 via-indigo-500/5 to-card dark:from-indigo-500/15 dark:via-indigo-500/5 dark:to-card/80",
+    iconWrap: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20",
+    icon: "text-indigo-600 dark:text-indigo-400",
+    trendPositive: "text-emerald-600 dark:text-emerald-400",
+    trendNegative: "text-destructive",
+    sparkline: "bg-indigo-500/50 dark:bg-indigo-500/70",
   },
 };
 
 const TONE_SEQUENCE: StatCardTone[] = [
-  "violet",
-  "mint",
-  "rose",
+  "blue",
+  "red",
+  "emerald",
   "amber",
-  "sky",
+  "indigo",
 ];
 
 function pickTone(title: string): StatCardTone {
@@ -88,23 +88,23 @@ export function StatCard({
   tone,
 }: StatCardProps) {
   const resolvedTone = tone ?? pickTone(title);
-  const toneClasses = TONES[resolvedTone];
+  const toneClasses = TONES[resolvedTone] ?? TONES.blue;
 
   return (
     <Card
       className={cn(
-        "relative overflow-hidden border shadow-sm transition-transform duration-200 hover:-translate-y-0.5",
+        "relative overflow-hidden border shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md",
         toneClasses.card,
       )}
     >
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-1">
-        <CardTitle className="text-sm font-semibold text-foreground/80">
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-1 pt-5 px-5">
+        <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           {title}
         </CardTitle>
         {Icon && (
           <div
             className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-2xl",
+              "flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105",
               toneClasses.iconWrap,
             )}
           >
@@ -112,26 +112,26 @@ export function StatCard({
           </div>
         )}
       </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="text-4xl font-bold tracking-tight text-foreground/85">
+      <CardContent className="space-y-2 px-5 pb-5">
+        <div className="text-3xl font-extrabold tracking-tight text-foreground">
           {value}
         </div>
         {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
         )}
         {trend && (
           <p
             className={cn(
-              "mt-1 inline-flex items-center gap-1 text-base font-medium",
+              "mt-1 inline-flex items-center gap-1 text-xs font-bold",
               trend.positive
                 ? toneClasses.trendPositive
                 : toneClasses.trendNegative,
             )}
           >
             {trend.positive ? (
-              <ArrowUpRightIcon className="h-4 w-4" />
+              <ArrowUpRightIcon className="h-3.5 w-3.5" />
             ) : (
-              <ArrowDownRightIcon className="h-4 w-4" />
+              <ArrowDownRightIcon className="h-3.5 w-3.5" />
             )}
             {trend.positive ? "+" : ""}
             {trend.value}%
@@ -139,13 +139,12 @@ export function StatCard({
         )}
 
         <div className="pt-2">
-          <div className="flex h-10 items-end gap-1.5" aria-hidden>
+          <div className="flex h-8 items-end gap-1.5" aria-hidden>
             {[4, 8, 6, 12, 7, 14, 9, 16, 5, 11, 8, 15].map((bar, index) => (
               <span
-                // Decorative bars to emulate compact trend sparkline cards
                 key={`${title}-${bar}-${index}`}
-                className={cn("w-1.5 rounded-full", toneClasses.sparkline)}
-                style={{ height: `${bar * 2}px` }}
+                className={cn("w-1.5 rounded-full transition-all duration-300", toneClasses.sparkline)}
+                style={{ height: `${bar * 1.8}px` }}
               />
             ))}
           </div>

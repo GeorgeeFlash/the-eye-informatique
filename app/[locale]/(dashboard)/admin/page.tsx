@@ -95,44 +95,49 @@ export default async function AdminDashboardPage() {
           title={t("totalOrders")}
           value={orderCount}
           icon={ShoppingCartIcon}
+          tone="blue"
         />
         <StatCard
           title={t("pendingOrders")}
           value={pendingOrders}
           icon={ClockIcon}
+          tone="amber"
         />
         <StatCard
           title={isCentralAdmin ? t("totalUsers") : t("totalProducts")}
           value={isCentralAdmin ? totalUsers : totalProducts}
           icon={isCentralAdmin ? UsersIcon : PackageIcon}
+          tone="indigo"
         />
       </div>
 
       {/* Central Admin: Branch Overview */}
       {isCentralAdmin && branches.length > 0 && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+        <Card className="rounded-xl border border-border/80 bg-card shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
             <div>
-              <CardTitle>{t("branches")}</CardTitle>
-              <CardDescription>{t("branchesDesc")}</CardDescription>
+              <CardTitle className="text-lg font-bold">{t("branches")}</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">{t("branchesDesc")}</CardDescription>
             </div>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="font-semibold text-primary hover:text-primary hover:bg-primary/10" asChild>
               <Link href="/admin/branches">
                 {t("manage")}
                 <ArrowRightIcon className="ml-1 h-4 w-4" />
               </Link>
             </Button>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {branches.map((branch) => (
                 <div
                   key={branch.id}
-                  className="flex items-center gap-3 rounded-lg border p-4"
+                  className="flex items-center gap-3 rounded-xl border border-border/70 p-4 transition-colors hover:border-primary/40 hover:bg-primary/5"
                 >
-                  <BuildingIcon className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <BuildingIcon className="size-5" />
+                  </div>
                   <div>
-                    <p className="text-sm font-medium">{branch.name}</p>
+                    <p className="text-sm font-bold text-foreground">{branch.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {branch.city}
                     </p>
@@ -146,34 +151,36 @@ export default async function AdminDashboardPage() {
 
       {/* Low Stock Alerts */}
       {lowStockProducts.length > 0 && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertTriangleIcon className="h-5 w-5 text-amber-500" />
+        <Card className="rounded-xl border border-destructive/30 bg-destructive/5 shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-destructive/20 pb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-destructive/15 text-destructive">
+                <AlertTriangleIcon className="size-5" />
+              </div>
               <div>
-                <CardTitle>{t("lowStockAlerts")}</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-lg font-bold text-destructive">{t("lowStockAlerts")}</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">
                   {t("lowStockAlertsDesc", { count: lowStockProducts.length })}
                 </CardDescription>
               </div>
             </div>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="font-semibold text-destructive hover:bg-destructive/10" asChild>
               <Link href="/admin/products">
                 {t("viewAll")}
                 <ArrowRightIcon className="ml-1 h-4 w-4" />
               </Link>
             </Button>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+          <CardContent className="pt-4">
+            <div className="space-y-2.5">
               {lowStockProducts.slice(0, 10).map((record) => (
                 <Link
                   key={`${record.variantId}-${record.branchId}`}
                   href={`/admin/products/${record.variant.product.id}`}
-                  className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent/50"
+                  className="flex items-center justify-between rounded-xl border border-border/70 bg-card p-4 transition-all hover:border-destructive/40 hover:shadow-xs"
                 >
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-bold text-foreground">
                       {record.variant.product.name}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -186,7 +193,7 @@ export default async function AdminDashboardPage() {
                       )}
                     </p>
                   </div>
-                  <Badge variant="destructive" className="text-xs">
+                  <Badge variant="destructive" className="font-bold text-xs">
                     {record.stock} / {record.lowStockThreshold}
                   </Badge>
                 </Link>
@@ -197,26 +204,26 @@ export default async function AdminDashboardPage() {
       )}
 
       {/* Recent Orders */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="rounded-xl border border-border/80 bg-card shadow-xs">
+        <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
           <div>
-            <CardTitle>{t("recentOrders")}</CardTitle>
-            <CardDescription>{t("recentOrdersDesc")}</CardDescription>
+            <CardTitle className="text-lg font-bold">{t("recentOrders")}</CardTitle>
+            <CardDescription className="text-xs text-muted-foreground">{t("recentOrdersDesc")}</CardDescription>
           </div>
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" className="font-semibold text-primary hover:text-primary hover:bg-primary/10" asChild>
             <Link href="/admin/orders">
               {t("viewAll")}
               <ArrowRightIcon className="ml-1 h-4 w-4" />
             </Link>
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           {recentOrders.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
+            <p className="py-8 text-center text-sm font-semibold text-muted-foreground">
               {t("noOrders")}
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {recentOrders.map((order) => (
                 <Link
                   key={order.id}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { DashboardBreadcrumb } from "@/components/dashboard/breadcrumb";
 import { ExternalLinkIcon } from "lucide-react";
 
 const SearchCommand = dynamic(
@@ -38,25 +39,26 @@ export function DashboardNavbar() {
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
-      <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mr-2 h-4" />
-
-      <div className="flex flex-1 items-center gap-2 pl-1">
-        <SearchCommand />
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border/80 bg-background/90 px-4 backdrop-blur-md transition-all">
+      <div className="flex items-center gap-3">
+        <SidebarTrigger className="-ml-1 hover:bg-primary/10 hover:text-primary transition-colors" />
+        <Separator orientation="vertical" className="h-4 hidden sm:block" />
+        <DashboardBreadcrumb />
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
+        <SearchCommand />
+
         {isAdminRoute && (
           <Button
             asChild
             variant="outline"
             size="sm"
-            className="hidden lg:inline-flex"
+            className="hidden xl:inline-flex font-semibold border-border hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-colors"
           >
             <Link href="/studio">
               {t("openStudio")}
-              <ExternalLinkIcon className="ml-1 h-3.5 w-3.5" />
+              <ExternalLinkIcon className="ml-1.5 h-3.5 w-3.5" />
             </Link>
           </Button>
         )}

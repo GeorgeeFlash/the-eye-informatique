@@ -34,10 +34,10 @@ export function CartSheet() {
       >
         <SheetHeader className="px-6 pt-6 pb-4 border-b">
           <SheetTitle className="flex items-center gap-2">
-            <ShoppingBagIcon className="size-5" />
-            {t("title")}
+            <ShoppingBagIcon className="size-5 text-primary" />
+            <span>{t("title")}</span>
             {totalItems > 0 && (
-              <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+              <span className="ml-1 rounded-full bg-destructive px-2 py-0.5 text-xs font-bold text-white shadow-xs">
                 {totalItems}
               </span>
             )}
@@ -46,14 +46,16 @@ export function CartSheet() {
 
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-12 text-center">
-            <ShoppingBagIcon className="size-12 text-muted-foreground/50" />
+            <div className="flex size-16 items-center justify-center rounded-full bg-muted/60">
+              <ShoppingBagIcon className="size-8 text-muted-foreground/60" />
+            </div>
             <div>
-              <p className="font-semibold">{t("emptyTitle")}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="font-bold text-lg">{t("emptyTitle")}</p>
+              <p className="mt-1 text-sm text-muted-foreground max-w-xs">
                 {t("emptyDescription")}
               </p>
             </div>
-            <Button asChild onClick={() => setCartSheetOpen(false)}>
+            <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" onClick={() => setCartSheetOpen(false)}>
               <Link href="/products">{t("continueShopping")}</Link>
             </Button>
           </div>
@@ -64,14 +66,14 @@ export function CartSheet() {
                 {items.map((item) => (
                   <li key={item.variantId} className="flex gap-4 py-5">
                     {/* Thumbnail */}
-                    <div className="relative size-20 shrink-0 overflow-hidden rounded-md bg-muted">
+                    <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-muted/50 border border-border/60">
                       {item.imageUrl ? (
                         <Image
                           src={item.imageUrl}
                           alt={item.productName}
                           fill
                           sizes="80px"
-                          className="object-cover"
+                          className="object-contain p-1"
                         />
                       ) : (
                         <div className="flex size-full items-center justify-center">
@@ -84,11 +86,11 @@ export function CartSheet() {
                     <div className="flex flex-1 flex-col justify-between">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-sm font-medium leading-snug line-clamp-2">
+                          <p className="text-sm font-semibold leading-snug line-clamp-2">
                             {item.productName}
                           </p>
                           {item.variantLabel && (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
+                            <p className="mt-0.5 text-xs font-medium text-muted-foreground">
                               {item.variantLabel}
                             </p>
                           )}
@@ -96,7 +98,7 @@ export function CartSheet() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-7 shrink-0 text-muted-foreground hover:text-destructive"
+                          className="size-7 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           onClick={() => removeItem(item.variantId)}
                           aria-label={t("remove")}
                         >
@@ -118,7 +120,7 @@ export function CartSheet() {
                           >
                             <MinusIcon className="size-3" />
                           </Button>
-                          <span className="w-6 text-center text-sm tabular-nums">
+                          <span className="w-6 text-center text-sm font-semibold tabular-nums">
                             {item.quantity}
                           </span>
                           <Button
@@ -139,7 +141,7 @@ export function CartSheet() {
                         </div>
 
                         {/* Line total */}
-                        <p className="text-sm font-semibold">
+                        <p className="text-sm font-extrabold text-foreground">
                           {formatCurrency(
                             item.price * item.quantity,
                             locale as Locale,
@@ -153,12 +155,12 @@ export function CartSheet() {
             </ScrollArea>
 
             {/* Footer */}
-            <div className="shrink-0 space-y-4 border-t px-6 py-5">
+            <div className="shrink-0 space-y-4 border-t px-6 py-5 bg-muted/10">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("subtotal")} ({t("items", { count: totalItems })})
                 </span>
-                <span className="text-lg font-bold">
+                <span className="text-xl font-extrabold text-foreground">
                   {formatCurrency(totalPrice, locale as Locale)}
                 </span>
               </div>
@@ -167,15 +169,7 @@ export function CartSheet() {
                 <Button
                   asChild
                   size="lg"
-                  className="w-full"
-                  onClick={() => setCartSheetOpen(false)}
-                >
-                  <Link href="/cart">{t("viewFullCart")}</Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  className="w-full"
+                  className="w-full font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/25"
                   onClick={() => setCartSheetOpen(false)}
                 >
                   <Link href="/checkout">{t("checkout")}</Link>
@@ -183,10 +177,11 @@ export function CartSheet() {
                 <Button
                   asChild
                   variant="outline"
-                  className="w-full"
+                  size="lg"
+                  className="w-full font-semibold border-border hover:bg-muted"
                   onClick={() => setCartSheetOpen(false)}
                 >
-                  <Link href="/products">{t("continueShopping")}</Link>
+                  <Link href="/cart">{t("viewFullCart")}</Link>
                 </Button>
               </div>
             </div>

@@ -110,28 +110,30 @@ export default async function ProductsPage({ searchParams }: Props) {
       />
 
       {/* Condition Tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         {[
-          { label: t("all"), value: undefined },
-          { label: t("new"), value: "NEW" },
-          { label: t("refurbished"), value: "REFURBISHED" },
-        ].map(({ label, value }) => (
-          <Link
-            key={label}
-            href={`/products?${qs({ condition: value, page: undefined })}`}
-          >
-            <Button
-              variant={
-                condition === value || (!condition && !value)
-                  ? "default"
-                  : "outline"
-              }
-              size="sm"
+          { label: t("all"), value: undefined, isRefurb: false },
+          { label: t("new"), value: "NEW", isRefurb: false },
+          { label: t("refurbished"), value: "REFURBISHED", isRefurb: true },
+        ].map(({ label, value, isRefurb }) => {
+          const isActive = condition === value || (!condition && !value);
+          return (
+            <Link
+              key={label}
+              href={`/products?${qs({ condition: value, page: undefined })}`}
             >
-              {label}
-            </Button>
-          </Link>
-        ))}
+              <Button
+                variant={isActive ? (isRefurb ? "destructive" : "default") : "outline"}
+                size="sm"
+                className={`font-semibold transition-all ${
+                  !isActive && isRefurb ? "hover:border-destructive/40 hover:text-destructive hover:bg-destructive/5" : ""
+                }`}
+              >
+                {label}
+              </Button>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Branch Filter */}

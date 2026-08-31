@@ -72,51 +72,55 @@ export default async function DashboardHomePage() {
           title={t("totalOrders")}
           value={totalOrders}
           icon={ShoppingCartIcon}
+          tone="blue"
         />
         <StatCard
           title={t("browseProducts")}
           value={t("shopNow")}
           icon={PackageIcon}
+          tone="indigo"
         />
       </div>
 
       {/* Recent Orders */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="rounded-xl border border-border/80 bg-card shadow-xs">
+        <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
           <div>
-            <CardTitle>{t("recentOrders")}</CardTitle>
-            <CardDescription>{t("recentOrdersDesc")}</CardDescription>
+            <CardTitle className="text-lg font-bold">{t("recentOrders")}</CardTitle>
+            <CardDescription className="text-xs text-muted-foreground">{t("recentOrdersDesc")}</CardDescription>
           </div>
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" className="font-semibold text-primary hover:text-primary hover:bg-primary/10" asChild>
             <Link href="/dashboard/orders">
               {t("viewAll")}
               <ArrowRightIcon className="ml-1 h-4 w-4" />
             </Link>
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           {recentOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <ShoppingCartIcon className="h-12 w-12 text-muted-foreground/50" />
-              <p className="mt-4 text-sm text-muted-foreground">
+              <ShoppingCartIcon className="h-12 w-12 text-muted-foreground/40" />
+              <p className="mt-4 text-sm font-semibold text-muted-foreground">
                 {t("noOrdersYet")}
               </p>
-              <Button variant="outline" size="sm" className="mt-4" asChild>
+              <Button size="sm" className="mt-4 font-semibold bg-primary text-primary-foreground hover:bg-primary/90" asChild>
                 <Link href="/products">{t("startShopping")}</Link>
               </Button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {recentOrders.map((order) => (
                 <Link
                   key={order.id}
                   href={`/dashboard/orders/${order.id}`}
-                  className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent/50"
+                  className="group flex items-center justify-between rounded-xl border border-border/70 p-4 transition-all hover:border-primary/40 hover:bg-primary/5"
                 >
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">#{order.orderNumber}</p>
+                    <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                      #{order.orderNumber}
+                    </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <ClockIcon className="h-3 w-3" />
+                      <ClockIcon className="h-3.5 w-3.5 text-primary/70" />
                       {formatDate(order.createdAt, "dd/MM/yyyy", locale)}
                       <span>&middot;</span>
                       {order.items.length}{" "}
@@ -124,7 +128,7 @@ export default async function DashboardHomePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium">
+                    <span className="text-sm font-extrabold text-foreground">
                       {formatCurrency(Number(order.total), locale)}
                     </span>
                     <OrderStatusBadge status={order.status} t={t} />

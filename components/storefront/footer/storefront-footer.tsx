@@ -5,7 +5,7 @@ import { Logo } from "@/components/shared/logo";
 import { SOCIAL_LINKS, APP_NAME } from "@/lib/constants";
 import { Facebook, Instagram, MessageCircle } from "lucide-react";
 
-// TikTok icon is not in lucide — small inline SVG
+// TikTok icon
 function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -28,61 +28,68 @@ export function StorefrontFooter() {
   const tNav = useTranslations("nav");
 
   return (
-    <footer className="border-t bg-background">
+    <footer className="border-t border-border/80 bg-card/60 relative">
+      {/* Brand accent top stripe */}
+      <div className="h-0.5 w-full bg-linear-to-r from-primary via-primary/50 to-destructive" />
+
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div className="space-y-4">
-            <Logo asLink={false} />
-            <p className="text-sm text-muted-foreground">{t("tagline")}</p>
+            <Logo asLink={false} size="lg" />
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {t("tagline")}
+            </p>
             {/* Social links */}
-            <div className="space-y-2">
-              <p className="text-sm font-medium">{t("followUs")}</p>
+            <div className="space-y-2 pt-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {t("followUs")}
+              </p>
               <div className="flex items-center gap-3">
                 <a
                   href={SOCIAL_LINKS.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex size-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
                   aria-label="Facebook"
                 >
-                  <Facebook className="size-5" />
+                  <Facebook className="size-4.5" />
                 </a>
                 <a
                   href={SOCIAL_LINKS.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex size-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
                   aria-label="Instagram"
                 >
-                  <Instagram className="size-5" />
+                  <Instagram className="size-4.5" />
                 </a>
                 <a
                   href={SOCIAL_LINKS.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex size-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
                   aria-label="X"
                 >
-                  <XIcon className="size-5" />
+                  <XIcon className="size-4.5" />
                 </a>
                 <a
                   href={SOCIAL_LINKS.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex size-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400"
                   aria-label="WhatsApp"
                 >
-                  <MessageCircle className="size-5" />
+                  <MessageCircle className="size-4.5" />
                 </a>
                 <a
                   href={SOCIAL_LINKS.tiktok}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex size-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
                   aria-label="TikTok"
                 >
-                  <TikTokIcon className="size-5" />
+                  <TikTokIcon className="size-4.5" />
                 </a>
               </div>
             </div>
@@ -90,12 +97,14 @@ export function StorefrontFooter() {
 
           {/* Shop */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold">{t("shop")}</h3>
-            <ul className="space-y-2">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-foreground">
+              {t("shop")}
+            </h3>
+            <ul className="space-y-2.5">
               <li>
                 <Link
                   href="/products"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t("allProducts")}
                 </Link>
@@ -103,7 +112,7 @@ export function StorefrontFooter() {
               <li>
                 <Link
                   href="/products?condition=NEW"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t("newProducts")}
                 </Link>
@@ -111,7 +120,7 @@ export function StorefrontFooter() {
               <li>
                 <Link
                   href="/products?condition=REFURBISHED"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-destructive"
                 >
                   {t("refurbished")}
                 </Link>
@@ -121,12 +130,14 @@ export function StorefrontFooter() {
 
           {/* Services */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold">{t("services")}</h3>
-            <ul className="space-y-2">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-foreground">
+              {t("services")}
+            </h3>
+            <ul className="space-y-2.5">
               <li>
                 <Link
                   href="/checkout"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t("order")}
                 </Link>
@@ -134,7 +145,7 @@ export function StorefrontFooter() {
               <li>
                 <Link
                   href="/affiliate"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t("affiliateProgram")}
                 </Link>
@@ -142,7 +153,7 @@ export function StorefrontFooter() {
               <li>
                 <Link
                   href="/blog"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   {tNav("blog")}
                 </Link>
@@ -152,12 +163,14 @@ export function StorefrontFooter() {
 
           {/* Company */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold">{t("company")}</h3>
-            <ul className="space-y-2">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-foreground">
+              {t("company")}
+            </h3>
+            <ul className="space-y-2.5">
               <li>
                 <Link
                   href="/about"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t("aboutUs")}
                 </Link>
@@ -165,7 +178,7 @@ export function StorefrontFooter() {
               <li>
                 <Link
                   href="/contact"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t("contactUs")}
                 </Link>
@@ -173,7 +186,7 @@ export function StorefrontFooter() {
               <li>
                 <a
                   href="mailto:contact@theeyeinformatique.cm"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   contact@theeyeinformatique.cm
                 </a>
@@ -188,16 +201,16 @@ export function StorefrontFooter() {
           <p>
             © {new Date().getFullYear()} {APP_NAME}. {t("allRightsReserved")}
           </p>
-          <div className="flex gap-4">
+          <div className="flex gap-6 text-xs font-semibold">
             <Link
               href="/legal/privacy-policy"
-              className="hover:text-foreground transition-colors"
+              className="hover:text-primary transition-colors"
             >
               {t("privacy")}
             </Link>
             <Link
               href="/legal/terms"
-              className="hover:text-foreground transition-colors"
+              className="hover:text-primary transition-colors"
             >
               {t("terms")}
             </Link>

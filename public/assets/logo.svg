@@ -1,11 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 320" width="100%" height="100%">
   <defs>
-    <!-- Optional subtle gradients for richness if desired -->
-    <linearGradient id="teiBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="teiBlueAsset" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1E40AF" />
       <stop offset="100%" stop-color="#0035B9" />
     </linearGradient>
-    <linearGradient id="teiRed" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="teiRedAsset" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FF1A1A" />
       <stop offset="100%" stop-color="#D90429" />
     </linearGradient>
@@ -14,13 +13,12 @@
   <!-- Top Red Arc / Eyebrow -->
   <path
     d="M 180 50 Q 285 5 410 50 Q 300 30 180 50 Z"
-    fill="url(#teiRed)"
+    fill="url(#teiRedAsset)"
   />
 
   <!-- Main "Tei" Group -->
   <g id="tei-letters">
     <!-- Big Stylized Blue 'T' -->
-    <!-- Distinctive dynamic shape: angled top bar with left pointed wing, slanted central stem -->
     <path
       d="M 90 102 
          L 375 102 
@@ -34,11 +32,10 @@
          L 90 178 
          L 125 102 
          Z"
-      fill="url(#teiBlue)"
+      fill="url(#teiBlueAsset)"
     />
 
     <!-- Stylized Red 'e' -->
-    <!-- Slanted loop nestled next to the T stem -->
     <path
       d="M 270 120
          C 220 120, 180 160, 180 205
@@ -54,14 +51,11 @@
          C 232 152, 252 145, 272 145
          C 292 145, 305 155, 305 175
          L 226 175 Z"
-      fill="url(#teiRed)"
+      fill="url(#teiRedAsset)"
     />
 
     <!-- Stylized Black 'i' -->
-    <!-- Dot of the 'i' -->
     <ellipse cx="380" cy="115" rx="16" ry="18" fill="#111827" transform="rotate(-15 380 115)" />
-
-    <!-- Stem of the 'i' with smooth italic stroke -->
     <path
       d="M 368 152
          L 332 272
@@ -82,7 +76,7 @@
        Q 250 280 395 258
        Q 250 294 100 310
        Z"
-    fill="url(#teiRed)"
+    fill="url(#teiRedAsset)"
   />
 
   <!-- Subtitle: "The Eye Informatique" -->

@@ -168,20 +168,23 @@ export function NavMain({
               >
                 <div className="overflow-hidden">
                   <SidebarMenuSub className="mx-0 mt-2 gap-1 border-l-0 px-0 py-0 pl-11">
-                    {item.items.map((sub) => (
-                      <SidebarMenuSubItem key={sub.title}>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={activeSubItem?.url === sub.url}
-                          className="h-9 rounded-xl px-3 text-sidebar-foreground/65 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground"
-                        >
-                          <Link href={sub.url}>
-                            <span className="size-1.5 rounded-full bg-current/35" />
-                            <span>{sub.title}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
+                    {item.items.map((sub) => {
+                      const isSubActive = activeSubItem?.url === sub.url;
+                      return (
+                        <SidebarMenuSubItem key={sub.title}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isSubActive}
+                            className="h-9 rounded-xl px-3 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground data-[active=true]:bg-primary/10 data-[active=true]:font-semibold data-[active=true]:text-primary"
+                          >
+                            <Link href={sub.url}>
+                              <span className={`size-1.5 rounded-full transition-colors ${isSubActive ? "bg-primary" : "bg-current/35"}`} />
+                              <span>{sub.title}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      );
+                    })}
                   </SidebarMenuSub>
                 </div>
               </div>
@@ -192,18 +195,18 @@ export function NavMain({
                 asChild
                 tooltip={item.title}
                 isActive={matchesPath(pathname, item.url, item.match)}
-                className="group/nav-button h-11 rounded-2xl px-3 transition-all duration-200 hover:bg-sidebar-accent/70 data-[active=true]:bg-sidebar-accent data-[active=true]:shadow-sm"
+                className="group/nav-button h-11 rounded-2xl px-3 transition-all duration-200 hover:bg-sidebar-accent/70 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:shadow-xs"
               >
                 <Link href={item.url ?? "#"}>
                   {(() => {
                     const Icon = ICON_MAP[item.icon];
                     return Icon ? (
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-sidebar-border/70 bg-background/80 text-sidebar-foreground/60 transition-colors group-data-[active=true]/nav-button:border-primary/20 group-data-[active=true]/nav-button:bg-primary/10 group-data-[active=true]/nav-button:text-primary">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-sidebar-border/70 bg-background/80 text-sidebar-foreground/60 transition-colors group-data-[active=true]/nav-button:border-primary/30 group-data-[active=true]/nav-button:bg-primary/15 group-data-[active=true]/nav-button:text-primary">
                         <Icon className="size-4" />
                       </span>
                     ) : null;
                   })()}
-                  <span className="font-medium text-sidebar-foreground/85">
+                  <span className="font-medium group-data-[active=true]/nav-button:font-semibold">
                     {item.title}
                   </span>
                 </Link>

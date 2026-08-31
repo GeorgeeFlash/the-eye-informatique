@@ -1,1 +1,93 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200" width="200" height="200"><rect width="200" height="200" fill="url('#gradient')"></rect><defs><linearGradient id="gradient" gradientTransform="rotate(127 0.5 0.5)"><stop offset="0%" stop-color="#0ab0bc"></stop><stop offset="100%" stop-color="#3c0c64"></stop></linearGradient></defs><g><g fill="#df442b" transform="matrix(6.7098653076083,0,0,6.7098653076083,7.639055684952027,149.28759229890557)" stroke="#f5d373" stroke-width="0.2"><path d="M12.24-14.22L12.24-11.57L7.97-11.57L7.97 0L4.54 0L4.54-11.57L0.35-11.57L0.35-14.22L12.24-14.22ZM17.77 0.20L17.77 0.20Q15.34 0.20 13.84-1.25Q12.33-2.71 12.33-5.03L12.33-5.03L12.33-5.30Q12.33-6.92 12.93-8.16Q13.54-9.40 14.69-10.08Q15.84-10.76 17.42-10.76L17.42-10.76Q19.65-10.76 20.94-9.38Q22.23-8.00 22.23-5.53L22.23-5.53L22.23-4.25L15.68-4.25Q15.86-3.36 16.46-2.85Q17.05-2.34 18.00-2.34L18.00-2.34Q19.56-2.34 20.44-3.44L20.44-3.44L21.94-1.66Q21.33-0.81 20.20-0.31Q19.07 0.20 17.77 0.20ZM17.40-8.22L17.40-8.22Q15.96-8.22 15.68-6.31L15.68-6.31L19.00-6.31L19.00-6.56Q19.02-7.35 18.60-7.79Q18.18-8.22 17.40-8.22ZM27.02-10.57L27.02 0L23.72 0L23.72-10.57L27.02-10.57ZM23.53-13.29L23.53-13.29Q23.53-13.99 24.03-14.44Q24.54-14.89 25.35-14.89Q26.16-14.89 26.67-14.44Q27.18-13.99 27.18-13.29Q27.18-12.59 26.67-12.14Q26.16-11.69 25.35-11.69Q24.54-11.69 24.03-12.14Q23.53-12.59 23.53-13.29Z"></path></g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="teiBlueFav" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E40AF" />
+      <stop offset="100%" stop-color="#0035B9" />
+    </linearGradient>
+    <linearGradient id="teiRedFav" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF1A1A" />
+      <stop offset="100%" stop-color="#D90429" />
+    </linearGradient>
+  </defs>
+
+  <!-- Top Red Arc -->
+  <path
+    d="M 45 18 Q 72 6 105 18 Q 75 12 45 18 Z"
+    fill="url(#teiRedFav)"
+  />
+
+  <!-- Main Mark -->
+  <g id="tei-favicon-letters">
+    <!-- Blue 'T' -->
+    <path
+      d="M 20 32
+         L 95 32
+         L 90 42
+         L 72 42
+         L 52 82
+         L 32 82
+         L 48 42
+         L 40 42
+         L 28 54
+         L 20 54
+         L 28 32
+         Z"
+      fill="url(#teiBlueFav)"
+    />
+
+    <!-- Red 'e' -->
+    <path
+      d="M 70 36
+         C 56 36, 45 47, 45 60
+         C 45 74, 58 82, 72 82
+         C 82 82, 90 77, 94 70
+         L 84 64
+         C 80 69, 76 72, 70 72
+         C 62 72, 57 68, 57 61
+         L 95 61
+         C 96 58, 97 53, 95 48
+         C 92 41, 83 36, 70 36 Z
+         M 58 52
+         C 60 45, 66 43, 71 43
+         C 77 43, 81 46, 81 52
+         L 58 52 Z"
+      fill="url(#teiRedFav)"
+    />
+
+    <!-- Black 'i' -->
+    <ellipse cx="102" cy="35" rx="4.5" ry="5.5" fill="#111827" transform="rotate(-15 102 35)" />
+    <path
+      d="M 98 46
+         L 88 82
+         L 100 82
+         C 104 74, 108 65, 111 57
+         C 114 50, 118 46, 122 46
+         L 122 43
+         C 114 43, 106 48, 101 54
+         L 104 46
+         Z"
+      fill="#111827"
+    />
+  </g>
+
+  <!-- Red Underline Swoosh -->
+  <path
+    d="M 24 88
+       Q 65 85 105 78
+       Q 65 91 24 96
+       Z"
+    fill="url(#teiRedFav)"
+  />
+
+  <!-- Subtle Script Underline Subtext -->
+  <text
+    x="64"
+    y="108"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="9"
+    font-weight="bold"
+    font-style="italic"
+    fill="#111827"
+  >The Eye Informatique</text>
+</svg>

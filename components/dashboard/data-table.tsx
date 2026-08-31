@@ -157,13 +157,13 @@ export function DataTable<TData, TValue>({
       )}
 
       {/* Table */}
-      <div className="rounded-md border">
+      <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/30">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
