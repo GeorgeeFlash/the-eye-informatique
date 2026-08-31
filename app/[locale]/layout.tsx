@@ -40,7 +40,7 @@ export async function generateMetadata(
   const previousImages = (await parent).openGraph?.images || [];
 
   const heroBanner = await getHeroBanner();
-  let heroImage = "/assets/banner.png";
+  let heroImage = new URL("/assets/banner.png", APP_URL).toString();
 
   if (heroBanner?.image) {
     try {

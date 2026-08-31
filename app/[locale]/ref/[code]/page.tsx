@@ -49,8 +49,9 @@ export async function generateMetadata(
   }
 
   const image = product.images[0]?.url ?? "/assets/banner.png";
+  const absoluteImage = new URL(image, APP_URL).toString();
   const productImage = {
-    url: image,
+    url: absoluteImage,
     width: 1200,
     height: 630,
     alt: product.name,

@@ -3,6 +3,7 @@ import { getProductBySlug } from "@/actions/product.actions";
 import { ProductGallery } from "@/components/storefront/product-gallery";
 import { ProductDetails } from "@/components/storefront/product-details";
 import { ProductViewTracker } from "@/components/storefront/product-view-tracker";
+import { APP_URL } from "@/lib/constants";
 import type { Metadata, ResolvingMetadata } from "next";
 
 interface Props {
@@ -18,8 +19,9 @@ export async function generateMetadata(
   if (!product) return {};
   const previousImages = (await parent).openGraph?.images || [];
   const image = product.images[0]?.url ?? "/assets/banner.png";
+  const absoluteImage = new URL(image, APP_URL).toString();
   const productImage = {
-    url: image,
+    url: absoluteImage,
     width: 1200,
     height: 630,
     alt: product.name,
