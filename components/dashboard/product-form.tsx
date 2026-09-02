@@ -63,11 +63,11 @@ const formSchema = productSchema.extend({
       }),
     )
     .min(1, "At least one image is required"),
-  branchId: z.cuid().optional(),
+  branchId: z.string().min(1).optional(),
   featureValues: z
     .array(
       z.object({
-        featureFieldId: z.string().cuid(),
+        featureFieldId: z.string().min(1, "Feature field ID is required"),
         value: z.string(),
       }),
     )
