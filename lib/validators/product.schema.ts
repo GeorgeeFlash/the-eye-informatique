@@ -42,7 +42,7 @@ export const productSchema = productSchemaBase.superRefine((data, ctx) => {
 });
 
 export const productVariantSchema = z.object({
-  id: z.cuid2().optional(),
+  id: z.string().min(1).optional(),
   sku: z.string().min(1),
   color: z.string().optional(),
   condition: z.enum(["NEW", "REFURBISHED"]).default("NEW"),

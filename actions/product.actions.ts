@@ -19,7 +19,7 @@ import { logActivity } from "@/lib/activity-log";
 // ---------------------------------------------------------------------------
 
 const featureValueInput = z.object({
-  featureFieldId: z.string().cuid(),
+  featureFieldId: z.string().min(1),
   value: z.string(),
 });
 
@@ -37,7 +37,7 @@ const createProductInput = productSchema.extend({
       }),
     )
     .min(1, "At least one image is required"),
-  branchId: z.string().cuid().optional(),
+  branchId: z.string().min(1).optional(),
   featureValues: z.array(featureValueInput).optional(),
 });
 
@@ -47,7 +47,7 @@ const updateProductInput = productSchemaBase.partial().extend({
   images: z
     .array(
       z.object({
-        id: z.string().cuid().optional(),
+        id: z.string().min(1).optional(),
         url: z.string().url(),
         alt: z.string().optional(),
         sortOrder: z.coerce.number().int().nonnegative().default(0),
@@ -60,7 +60,7 @@ const updateProductInput = productSchemaBase.partial().extend({
     .array(productVariantSchema)
     .min(1, "At least one variant is required")
     .optional(),
-  branchId: z.string().cuid().optional(),
+  branchId: z.string().min(1).optional(),
 });
 
 type UpdateProductInput = z.infer<typeof updateProductInput>;
@@ -545,8 +545,8 @@ export async function createProductVariant(
 // ---------------------------------------------------------------------------
 
 const updateStockInput = z.object({
-  variantId: z.string().cuid(),
-  branchId: z.string().cuid(),
+  variantId: z.string().min(1),
+  branchId: z.string().min(1),
   quantity: z.coerce.number().int(),
 });
 

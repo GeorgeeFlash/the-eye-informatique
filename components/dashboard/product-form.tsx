@@ -502,7 +502,7 @@ export function ProductForm({
       console.log("First default image:", defaultValues.images[0]);
       console.log("First image url:", defaultValues.images[0].url);
       console.log("First image url type:", typeof defaultValues.images[0].url);
-      
+
       // Validate URLs
       defaultValues.images.forEach((img, idx) => {
         try {
@@ -651,7 +651,10 @@ export function ProductForm({
         }
       });
       if (invalidImages.length > 0) {
-        console.error("Invalid image URLs found during client validation:", invalidImages);
+        console.error(
+          "Invalid image URLs found during client validation:",
+          invalidImages,
+        );
         setServerError(
           `${invalidImages.length} image(s) have invalid URLs. Please re-upload them.`,
         );
@@ -703,9 +706,7 @@ export function ProductForm({
               }
             }
             if (errorMessages.length > 0) {
-              setServerError(
-                `Validation failed:\n${errorMessages.join("\n")}`,
-              );
+              setServerError(`Validation failed:\n${errorMessages.join("\n")}`);
             }
           } else {
             console.error("Unexpected error format:", result.error);
@@ -1024,7 +1025,7 @@ export function ProductForm({
                                           onChange={(e) =>
                                             field.onChange(
                                               e.target.value === ""
-                                                ? 0
+                                                ? ""
                                                 : Number(e.target.value),
                                             )
                                           }
