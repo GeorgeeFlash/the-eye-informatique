@@ -113,6 +113,8 @@ export function ImageUploader({
           isPrimary: value.length === 0 && i === 0,
         }));
 
+        console.log("New images uploaded:", newImages);
+
         onChange([...value, ...newImages]);
       } catch {
         setUploadError("Upload failed. Please try again.");

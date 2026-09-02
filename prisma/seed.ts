@@ -15,10 +15,10 @@ async function main() {
   // 1. Branches
   // -------------------------------------------------------------------------
   const yaoundeBranch = await db.branch.upsert({
-    where: { id: "branch-yaounde" },
+    where: { id: "clx9k3m4p5q6r7s8t9u0v1w2x" },
     update: {},
     create: {
-      id: "branch-yaounde",
+      id: "clx9k3m4p5q6r7s8t9u0v1w2x",
       name: "TEI Yaoundé - Siège",
       city: "Yaoundé",
       address: "Kennedy Avenue, City Center",
@@ -28,10 +28,10 @@ async function main() {
   })
 
   const douala = await db.branch.upsert({
-    where: { id: "branch-douala" },
+    where: { id: "cm5p9k2j7n4q8r1b3v6w0y5t8" },
     update: {},
     create: {
-      id: "branch-douala",
+      id: "cm5p9k2j7n4q8r1b3v6w0y5t8",
       name: "TEI Douala",
       city: "Douala",
       address: "Joy Street, Akwa",
@@ -41,10 +41,10 @@ async function main() {
   })
 
   const bamenda = await db.branch.upsert({
-    where: { id: "branch-bamenda" },
+    where: { id: "ckj8f2k5q3n7x9r1b4v6w0y5t" },
     update: {},
     create: {
-      id: "branch-bamenda",
+      id: "ckj8f2k5q3n7x9r1b4v6w0y5t",
       name: "TEI Bamenda - Head Office",
       city: "Bamenda",
       address: "Foncha Junction, Nkwen",
@@ -142,24 +142,24 @@ async function main() {
   // -------------------------------------------------------------------------
 
   // Smartphones — Android
-  await db.categoryFeatureField.upsert({ where: { id: "ff-and-screen" }, update: {}, create: { id: "ff-and-screen", categoryId: smartphonesAndroid.id, name: "Screen Size", type: "TEXT", sortOrder: 1 } })
-  await db.categoryFeatureField.upsert({ where: { id: "ff-and-ram" }, update: {}, create: { id: "ff-and-ram", categoryId: smartphonesAndroid.id, name: "RAM", type: "DROPDOWN", options: ["4GB", "6GB", "8GB", "12GB", "16GB"], sortOrder: 2 } })
-  await db.categoryFeatureField.upsert({ where: { id: "ff-and-storage" }, update: {}, create: { id: "ff-and-storage", categoryId: smartphonesAndroid.id, name: "Storage", type: "DROPDOWN", options: ["64GB", "128GB", "256GB", "512GB"], sortOrder: 3 } })
-  await db.categoryFeatureField.upsert({ where: { id: "ff-and-battery" }, update: {}, create: { id: "ff-and-battery", categoryId: smartphonesAndroid.id, name: "Battery", type: "TEXT", sortOrder: 4 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff1a2b3c4d5e6f7g8h9i0j1k" }, update: {}, create: { id: "cff1a2b3c4d5e6f7g8h9i0j1k", categoryId: smartphonesAndroid.id, name: "Screen Size", type: "TEXT", sortOrder: 1 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff2b3c4d5e6f7g8h9i0j2k1l" }, update: {}, create: { id: "cff2b3c4d5e6f7g8h9i0j2k1l", categoryId: smartphonesAndroid.id, name: "RAM", type: "DROPDOWN", options: ["4GB", "6GB", "8GB", "12GB", "16GB"], sortOrder: 2 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff3c4d5e6f7g8h9i0j2k1l2m" }, update: {}, create: { id: "cff3c4d5e6f7g8h9i0j2k1l2m", categoryId: smartphonesAndroid.id, name: "Storage", type: "DROPDOWN", options: ["64GB", "128GB", "256GB", "512GB"], sortOrder: 3 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff4d5e6f7g8h9i0j2k1l2m3n" }, update: {}, create: { id: "cff4d5e6f7g8h9i0j2k1l2m3n", categoryId: smartphonesAndroid.id, name: "Battery", type: "TEXT", sortOrder: 4 } })
 
   // Laptops
-  await db.categoryFeatureField.upsert({ where: { id: "ff-lap-cpu" }, update: {}, create: { id: "ff-lap-cpu", categoryId: laptops.id, name: "Processor", type: "TEXT", sortOrder: 1 } })
-  await db.categoryFeatureField.upsert({ where: { id: "ff-lap-ram" }, update: {}, create: { id: "ff-lap-ram", categoryId: laptops.id, name: "RAM", type: "DROPDOWN", options: ["8GB", "16GB", "32GB", "64GB"], sortOrder: 2 } })
-  await db.categoryFeatureField.upsert({ where: { id: "ff-lap-storage" }, update: {}, create: { id: "ff-lap-storage", categoryId: laptops.id, name: "Storage", type: "DROPDOWN", options: ["256GB", "512GB", "1TB", "2TB"], sortOrder: 3 } })
-  await db.categoryFeatureField.upsert({ where: { id: "ff-lap-display" }, update: {}, create: { id: "ff-lap-display", categoryId: laptops.id, name: "Screen Size", type: "TEXT", sortOrder: 4 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff5e6f7g8h9i0j2k1l2m3n4o" }, update: {}, create: { id: "cff5e6f7g8h9i0j2k1l2m3n4o", categoryId: laptops.id, name: "Processor", type: "TEXT", sortOrder: 1 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff6f7g8h9i0j2k1l2m3n4o5p" }, update: {}, create: { id: "cff6f7g8h9i0j2k1l2m3n4o5p", categoryId: laptops.id, name: "RAM", type: "DROPDOWN", options: ["8GB", "16GB", "32GB", "64GB"], sortOrder: 2 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff7g8h9i0j2k1l2m3n4o5p6q" }, update: {}, create: { id: "cff7g8h9i0j2k1l2m3n4o5p6q", categoryId: laptops.id, name: "Storage", type: "DROPDOWN", options: ["256GB", "512GB", "1TB", "2TB"], sortOrder: 3 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff8h9i0j2k1l2m3n4o5p6q7r" }, update: {}, create: { id: "cff8h9i0j2k1l2m3n4o5p6q7r", categoryId: laptops.id, name: "Screen Size", type: "TEXT", sortOrder: 4 } })
 
   // Earphones
-  await db.categoryFeatureField.upsert({ where: { id: "ff-ecu-conn" }, update: {}, create: { id: "ff-ecu-conn", categoryId: ecouteurs.id, name: "Connectivity", type: "DROPDOWN", options: ["Wired", "Bluetooth", "Wireless"], sortOrder: 1 } })
-  await db.categoryFeatureField.upsert({ where: { id: "ff-ecu-nc" }, update: {}, create: { id: "ff-ecu-nc", categoryId: ecouteurs.id, name: "Noise Cancellation", type: "DROPDOWN", options: ["Yes", "No"], sortOrder: 2 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff9i0j2k1l2m3n4o5p6q7r8s" }, update: {}, create: { id: "cff9i0j2k1l2m3n4o5p6q7r8s", categoryId: ecouteurs.id, name: "Connectivity", type: "DROPDOWN", options: ["Wired", "Bluetooth", "Wireless"], sortOrder: 1 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff0j1k2l3m4n5o6p7q8r9s0t" }, update: {}, create: { id: "cff0j1k2l3m4n5o6p7q8r9s0t", categoryId: ecouteurs.id, name: "Noise Cancellation", type: "DROPDOWN", options: ["Yes", "No"], sortOrder: 2 } })
 
   // Speakers
-  await db.categoryFeatureField.upsert({ where: { id: "ff-hp-conn" }, update: {}, create: { id: "ff-hp-conn", categoryId: hautParleurs.id, name: "Connectivity", type: "DROPDOWN", options: ["Bluetooth", "Wired", "Wi-Fi"], sortOrder: 1 } })
-  await db.categoryFeatureField.upsert({ where: { id: "ff-hp-battery" }, update: {}, create: { id: "ff-hp-battery", categoryId: hautParleurs.id, name: "Battery Life", type: "TEXT", sortOrder: 2 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff1k2l3m4n5o6p7q8r9s0t1u" }, update: {}, create: { id: "cff1k2l3m4n5o6p7q8r9s0t1u", categoryId: hautParleurs.id, name: "Connectivity", type: "DROPDOWN", options: ["Bluetooth", "Wired", "Wi-Fi"], sortOrder: 1 } })
+  await db.categoryFeatureField.upsert({ where: { id: "cff2l3m4n5o6p7q8r9s0t1u2v" }, update: {}, create: { id: "cff2l3m4n5o6p7q8r9s0t1u2v", categoryId: hautParleurs.id, name: "Battery Life", type: "TEXT", sortOrder: 2 } })
 
   console.log("  ✔ Feature Fields")
 
@@ -567,44 +567,44 @@ async function main() {
   // -------------------------------------------------------------------------
 
   // Samsung Galaxy A55 5G
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "ff-and-screen" } }, update: {}, create: { productId: samsung.id, featureFieldId: "ff-and-screen", value: "6.6\"" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "ff-and-ram" } }, update: {}, create: { productId: samsung.id, featureFieldId: "ff-and-ram", value: "8GB" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "ff-and-storage" } }, update: {}, create: { productId: samsung.id, featureFieldId: "ff-and-storage", value: "128GB" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "ff-and-battery" } }, update: {}, create: { productId: samsung.id, featureFieldId: "ff-and-battery", value: "5000 mAh" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "cff1a2b3c4d5e6f7g8h9i0j1k" } }, update: {}, create: { productId: samsung.id, featureFieldId: "cff1a2b3c4d5e6f7g8h9i0j1k", value: "6.6\"" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "cff2b3c4d5e6f7g8h9i0j2k1l" } }, update: {}, create: { productId: samsung.id, featureFieldId: "cff2b3c4d5e6f7g8h9i0j2k1l", value: "8GB" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "cff3c4d5e6f7g8h9i0j2k1l2m" } }, update: {}, create: { productId: samsung.id, featureFieldId: "cff3c4d5e6f7g8h9i0j2k1l2m", value: "128GB" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: samsung.id, featureFieldId: "cff4d5e6f7g8h9i0j2k1l2m3n" } }, update: {}, create: { productId: samsung.id, featureFieldId: "cff4d5e6f7g8h9i0j2k1l2m3n", value: "5000 mAh" } })
 
   // Apple MacBook Air M2
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "ff-lap-cpu" } }, update: {}, create: { productId: macbook.id, featureFieldId: "ff-lap-cpu", value: "Apple M2" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "ff-lap-ram" } }, update: {}, create: { productId: macbook.id, featureFieldId: "ff-lap-ram", value: "8GB" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "ff-lap-storage" } }, update: {}, create: { productId: macbook.id, featureFieldId: "ff-lap-storage", value: "256GB" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "ff-lap-display" } }, update: {}, create: { productId: macbook.id, featureFieldId: "ff-lap-display", value: "13.6\"" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "cff5e6f7g8h9i0j2k1l2m3n4o" } }, update: {}, create: { productId: macbook.id, featureFieldId: "cff5e6f7g8h9i0j2k1l2m3n4o", value: "Apple M2" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "cff6f7g8h9i0j2k1l2m3n4o5p" } }, update: {}, create: { productId: macbook.id, featureFieldId: "cff6f7g8h9i0j2k1l2m3n4o5p", value: "8GB" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "cff7g8h9i0j2k1l2m3n4o5p6q" } }, update: {}, create: { productId: macbook.id, featureFieldId: "cff7g8h9i0j2k1l2m3n4o5p6q", value: "256GB" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: macbook.id, featureFieldId: "cff8h9i0j2k1l2m3n4o5p6q7r" } }, update: {}, create: { productId: macbook.id, featureFieldId: "cff8h9i0j2k1l2m3n4o5p6q7r", value: "13.6\"" } })
 
   // Apple AirPods Pro 2nd Generation
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: airpods.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: airpods.id, featureFieldId: "ff-ecu-conn", value: "Bluetooth" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: airpods.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: airpods.id, featureFieldId: "ff-ecu-nc", value: "Yes" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: airpods.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s" } }, update: {}, create: { productId: airpods.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s", value: "Bluetooth" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: airpods.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t" } }, update: {}, create: { productId: airpods.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t", value: "Yes" } })
 
   // Standard Earphones
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_b.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: earphones_b.id, featureFieldId: "ff-ecu-conn", value: "Wired" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_b.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: earphones_b.id, featureFieldId: "ff-ecu-nc", value: "No" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_b.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s" } }, update: {}, create: { productId: earphones_b.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s", value: "Wired" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_b.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t" } }, update: {}, create: { productId: earphones_b.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t", value: "No" } })
 
   // Premium Earphones
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_c.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: earphones_c.id, featureFieldId: "ff-ecu-conn", value: "Bluetooth" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_c.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: earphones_c.id, featureFieldId: "ff-ecu-nc", value: "Yes" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_c.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s" } }, update: {}, create: { productId: earphones_c.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s", value: "Bluetooth" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: earphones_c.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t" } }, update: {}, create: { productId: earphones_c.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t", value: "Yes" } })
 
   // Sport Headphones
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_a.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: headphones_a.id, featureFieldId: "ff-ecu-conn", value: "Wired" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_a.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: headphones_a.id, featureFieldId: "ff-ecu-nc", value: "No" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_a.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s" } }, update: {}, create: { productId: headphones_a.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s", value: "Wired" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_a.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t" } }, update: {}, create: { productId: headphones_a.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t", value: "No" } })
 
   // Gaming Headset
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_b.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: headphones_b.id, featureFieldId: "ff-ecu-conn", value: "Bluetooth" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_b.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: headphones_b.id, featureFieldId: "ff-ecu-nc", value: "No" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_b.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s" } }, update: {}, create: { productId: headphones_b.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s", value: "Bluetooth" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_b.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t" } }, update: {}, create: { productId: headphones_b.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t", value: "No" } })
 
   // Studio Headphones
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_c.id, featureFieldId: "ff-ecu-conn" } }, update: {}, create: { productId: headphones_c.id, featureFieldId: "ff-ecu-conn", value: "Wired" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_c.id, featureFieldId: "ff-ecu-nc" } }, update: {}, create: { productId: headphones_c.id, featureFieldId: "ff-ecu-nc", value: "No" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_c.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s" } }, update: {}, create: { productId: headphones_c.id, featureFieldId: "cff9i0j2k1l2m3n4o5p6q7r8s", value: "Wired" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: headphones_c.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t" } }, update: {}, create: { productId: headphones_c.id, featureFieldId: "cff0j1k2l3m4n5o6p7q8r9s0t", value: "No" } })
 
   // Portable Speaker
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: speaker.id, featureFieldId: "ff-hp-conn" } }, update: {}, create: { productId: speaker.id, featureFieldId: "ff-hp-conn", value: "Bluetooth" } })
-  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: speaker.id, featureFieldId: "ff-hp-battery" } }, update: {}, create: { productId: speaker.id, featureFieldId: "ff-hp-battery", value: "12 hours" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: speaker.id, featureFieldId: "cff1k2l3m4n5o6p7q8r9s0t1u" } }, update: {}, create: { productId: speaker.id, featureFieldId: "cff1k2l3m4n5o6p7q8r9s0t1u", value: "Bluetooth" } })
+  await db.productFeatureValue.upsert({ where: { productId_featureFieldId: { productId: speaker.id, featureFieldId: "cff2l3m4n5o6p7q8r9s0t1u2v" } }, update: {}, create: { productId: speaker.id, featureFieldId: "cff2l3m4n5o6p7q8r9s0t1u2v", value: "12 hours" } })
 
   console.log("  ✔ Feature Values")
 

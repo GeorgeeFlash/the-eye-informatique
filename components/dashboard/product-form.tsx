@@ -56,14 +56,14 @@ const formSchema = productSchema.extend({
   images: z
     .array(
       z.object({
-        url: z.string().url("Must be a valid URL"),
+        url: z.url("Must be a valid URL"),
         alt: z.string().optional(),
         sortOrder: z.coerce.number().default(0),
         isPrimary: z.boolean().default(false),
       }),
     )
     .min(1, "At least one image is required"),
-  branchId: z.string().cuid().optional(),
+  branchId: z.cuid().optional(),
   featureValues: z
     .array(
       z.object({
@@ -114,6 +114,336 @@ interface ProductFormProps {
   onCategoryChange?: (categoryId: string) => void;
 }
 
+function ProductBasicInfoSection({
+  form,
+  categories,
+  t,
+  handleNameBlur,
+  handleRegenerateSlug,
+}: {
+  form: ReturnType<typeof useForm<FormValues>>;
+  categories: CategoryOption[];
+  t: ReturnType<typeof useTranslations>;
+  handleNameBlur: () => void;
+  handleRegenerateSlug: () => void;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("basicInfo")}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("name")}</FormLabel>
+                <FormControl>
+                  <Input {...field} onBlur={handleNameBlur} />
+                </FormControl>
+                <FormDescription>{t("nameHint")}</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="slug"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("slug")}</FormLabel>
+                <FormControl>
+                  <div className="flex gap-2">
+                    <Input {...field} className="flex-1" />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="icon"
+                      title={t("regenerateSlug")}
+                      onClick={handleRegenerateSlug}
+                    >
+                      <RefreshCwIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </FormControl>
+                <FormDescription>{t("slugHint")}</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("description")}</FormLabel>
+              <FormControl>
+                <Textarea rows={4} {...field} />
+              </FormControl>
+              <FormDescription>{t("descriptionHint")}</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("category")}</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("selectCategory")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>{t("categoryHint")}</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="brand"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("brand")}</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormDescription>{t("brandHint")}</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProductPricingSection({
+  form,
+  t,
+}: {
+  form: ReturnType<typeof useForm<FormValues>>;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const watchCommissionType = form.watch("commissionType");
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("pricingCommission")}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <FormField
+          control={form.control}
+          name="basePrice"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("basePrice")}</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === "" ? "" : Number(e.target.value),
+                    )
+                  }
+                />
+              </FormControl>
+              <FormDescription>{t("basePriceHint")}</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="commissionType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("commissionType")}</FormLabel>
+                <Select
+                  value={field.value ?? "NONE"}
+                  onValueChange={(v) => {
+                    field.onChange(v === "NONE" ? null : v);
+                    if (v === "NONE") form.setValue("commissionValue", null);
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="NONE">{t("commissionNone")}</SelectItem>
+                    <SelectItem value="PERCENTAGE">
+                      {t("commissionPercentage")}
+                    </SelectItem>
+                    <SelectItem value="FIXED">
+                      {t("commissionFixed")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>{t("commissionTypeHint")}</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {watchCommissionType && (
+            <FormField
+              control={form.control}
+              name="commissionValue"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {watchCommissionType === "PERCENTAGE"
+                      ? t("commissionPercent")
+                      : t("commissionAmount")}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={
+                        watchCommissionType === "PERCENTAGE" ? 100 : undefined
+                      }
+                      step={watchCommissionType === "PERCENTAGE" ? 0.01 : 1}
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? null : Number(e.target.value),
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormDescription>{t("commissionValueHint")}</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProductSettingsSection({
+  form,
+  t,
+  isCentralAdmin,
+  isEditing,
+  branches,
+}: {
+  form: ReturnType<typeof useForm<FormValues>>;
+  t: ReturnType<typeof useTranslations>;
+  isCentralAdmin: boolean;
+  isEditing: boolean;
+  branches: BranchOption[];
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("settings")}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {isCentralAdmin && !isEditing && branches.length > 0 && (
+          <FormField
+            control={form.control}
+            name="branchId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("branch")}</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("selectBranch")} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {branches.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>{t("branchHint")}</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <div className="flex gap-6">
+          <FormField
+            control={form.control}
+            name="isActive"
+            render={({ field }) => (
+              <FormItem className="flex items-center gap-2 space-y-0">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div>
+                  <FormLabel className="font-normal">{t("active")}</FormLabel>
+                  <FormDescription className="text-xs">
+                    {t("activeHint")}
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="isFeatured"
+            render={({ field }) => (
+              <FormItem className="flex items-center gap-2 space-y-0">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div>
+                  <FormLabel className="font-normal">{t("featured")}</FormLabel>
+                  <FormDescription className="text-xs">
+                    {t("featuredHint")}
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -147,7 +477,7 @@ export function ProductForm({
       slug: "",
       description: "",
       basePrice: 0,
-      categoryId: "",
+      categoryId: undefined,
       brand: "",
       commissionType: null,
       commissionValue: null,
@@ -160,6 +490,49 @@ export function ProductForm({
     },
   });
 
+  // Reset only when the loaded product changes. Using the entire defaultValues
+  // object in the dependency array causes a reset loop on each render, which keeps
+  // the form "clean" and prevents the Save button from ever becoming dirty.
+  useEffect(() => {
+    if (!defaultValues?.id) return;
+
+    console.log("Resetting form with defaultValues:", defaultValues);
+    console.log("Default images:", defaultValues.images);
+    if (defaultValues.images && defaultValues.images.length > 0) {
+      console.log("First default image:", defaultValues.images[0]);
+      console.log("First image url:", defaultValues.images[0].url);
+      console.log("First image url type:", typeof defaultValues.images[0].url);
+      
+      // Validate URLs
+      defaultValues.images.forEach((img, idx) => {
+        try {
+          new URL(img.url);
+          console.log(`Image ${idx} URL is valid: ${img.url}`);
+        } catch (e) {
+          console.error(`Image ${idx} URL is INVALID: ${img.url}`, e);
+        }
+      });
+    }
+
+    form.reset({
+      name: defaultValues.name ?? "",
+      slug: defaultValues.slug ?? "",
+      description: defaultValues.description ?? "",
+      basePrice: defaultValues.basePrice ?? 0,
+      categoryId: defaultValues.categoryId ?? undefined,
+      brand: defaultValues.brand ?? "",
+      commissionType: defaultValues.commissionType ?? null,
+      commissionValue: defaultValues.commissionValue ?? null,
+      isActive: defaultValues.isActive ?? true,
+      isFeatured: defaultValues.isFeatured ?? false,
+      variants: defaultValues.variants ?? [
+        { sku: "", condition: "NEW", stock: 0, price: 0 },
+      ],
+      images: defaultValues.images ?? [],
+      featureValues: defaultValues.featureValues ?? [],
+    });
+  }, [defaultValues?.id, form]);
+
   const {
     fields: variantFields,
     append: appendVariant,
@@ -168,12 +541,12 @@ export function ProductForm({
 
   const selectedAxisValueIds = variantAxes.map((axis) =>
     axis.values.map((v) => v.id),
-  )
+  );
 
   async function handleGenerateMatrix() {
-    setIsGenerating(true)
+    setIsGenerating(true);
     startTransition(async () => {
-      const basePrice = Number(form.getValues("basePrice")) || 0
+      const basePrice = Number(form.getValues("basePrice")) || 0;
       const result = await generateVariantsFromAxes(
         defaultValues!.id!,
         selectedAxisValueIds,
@@ -182,16 +555,16 @@ export function ProductForm({
           autoGenerateSku: generationMode === "auto",
           basePrice,
         },
-      )
+      );
       if ("error" in result && result.error) {
-        setServerError(result.error as string)
-        setIsGenerating(false)
-        return
+        setServerError(result.error as string);
+        setIsGenerating(false);
+        return;
       }
-      setServerError(null)
-      setIsGenerating(false)
-      router.refresh()
-    })
+      setServerError(null);
+      setIsGenerating(false);
+      router.refresh();
+    });
   }
 
   const watchCommissionType = form.watch("commissionType");
@@ -231,13 +604,26 @@ export function ProductForm({
 
   const handleImagesChange = useCallback(
     (images: UploadedImage[]) => {
-      form.setValue("images", images, { shouldValidate: true });
+      form.setValue("images", images, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [form],
   );
 
   async function onSubmit(values: FormValues) {
     setServerError(null);
+
+    // Validate required fields before submission
+    if (!values.categoryId) {
+      setServerError(t("categoryRequired") || "Category is required");
+      return;
+    }
+    if (!values.images || values.images.length === 0) {
+      setServerError(t("imageRequired") || "At least one image is required");
+      return;
+    }
 
     // Client-side validation for required dynamic feature fields
     const missingRequired = featureFields
@@ -254,39 +640,89 @@ export function ProductForm({
       return;
     }
 
-    startTransition(async () => {
-      const result = isEditing
-        ? await updateProduct(defaultValues!.id!, values)
-        : await createProduct(values);
-
-      if ("error" in result && result.error) {
-        if (typeof result.error === "string") {
-          setServerError(result.error);
-        } else if (
-          typeof result.error === "object" &&
-          "fieldErrors" in result.error
-        ) {
-          // Map server-side Zod field errors to form fields
-          const fieldErrors = result.error.fieldErrors as Record<
-            string,
-            string[]
-          >;
-          for (const [fieldName, messages] of Object.entries(fieldErrors)) {
-            if (messages && messages.length > 0) {
-              form.setError(fieldName as keyof FormValues, {
-                type: "server",
-                message: messages[0],
-              });
-            }
-          }
-        } else {
-          setServerError(t("validationError"));
+    // Validate image URLs before submission
+    if (values.images && values.images.length > 0) {
+      const invalidImages = values.images.filter((img) => {
+        try {
+          new URL(img.url);
+          return false;
+        } catch {
+          return true;
         }
+      });
+      if (invalidImages.length > 0) {
+        console.error("Invalid image URLs found during client validation:", invalidImages);
+        setServerError(
+          `${invalidImages.length} image(s) have invalid URLs. Please re-upload them.`,
+        );
         return;
       }
+    }
 
-      router.push("/admin/products");
-      router.refresh();
+    console.log("✅ All client validations passed");
+    console.log("Form values ready to submit:", values);
+    console.log("Images count:", values.images?.length);
+    if (values.images && values.images.length > 0) {
+      console.log("First image to submit:", values.images[0]);
+    }
+    console.log("Starting transition for form submission");
+    console.log("Form values:", values);
+    console.log("Images array:", values.images);
+    if (values.images && values.images.length > 0) {
+      console.log("First image:", values.images[0]);
+      console.log("First image url type:", typeof values.images[0].url);
+      console.log("First image url value:", values.images[0].url);
+    }
+    startTransition(async () => {
+      try {
+        const result = isEditing
+          ? await updateProduct(defaultValues!.id!, values)
+          : await createProduct(values);
+
+        if ("error" in result && result.error) {
+          if (typeof result.error === "string") {
+            setServerError(result.error);
+          } else if (
+            typeof result.error === "object" &&
+            "fieldErrors" in result.error
+          ) {
+            // Map server-side Zod field errors to form fields
+            const fieldErrors = result.error.fieldErrors as Record<
+              string,
+              string[]
+            >;
+            console.error("Server field errors:", fieldErrors);
+            const errorMessages = [];
+            for (const [fieldName, messages] of Object.entries(fieldErrors)) {
+              if (messages && messages.length > 0) {
+                form.setError(fieldName as keyof FormValues, {
+                  type: "server",
+                  message: messages[0],
+                });
+                errorMessages.push(`${fieldName}: ${messages[0]}`);
+              }
+            }
+            if (errorMessages.length > 0) {
+              setServerError(
+                `Validation failed:\n${errorMessages.join("\n")}`,
+              );
+            }
+          } else {
+            console.error("Unexpected error format:", result.error);
+            setServerError(t("validationError"));
+          }
+          return;
+        }
+
+        console.log("Refreshing...");
+        router.push("/admin/products");
+        router.refresh();
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : t("validationError");
+        console.error("Form submission error:", error);
+        setServerError(`Error: ${message}`);
+      }
     });
   }
 
@@ -294,10 +730,44 @@ export function ProductForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, (errors) => {
+          console.log("Form validation errors:", errors);
+        })}
+        className="space-y-8"
+      >
         {serverError && (
-          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive whitespace-pre-wrap">
             {serverError}
+          </div>
+        )}
+
+        {/* Display all form validation errors */}
+        {Object.keys(form.formState.errors).length > 0 && (
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 space-y-2">
+            <p className="font-semibold text-destructive text-sm">
+              Form Validation Errors:
+            </p>
+            <ul className="text-destructive text-sm space-y-1 list-disc list-inside">
+              {Object.entries(form.formState.errors).map(([field, error]) => {
+                let msg = "Invalid field";
+                if (
+                  error &&
+                  typeof error === "object" &&
+                  "message" in error &&
+                  typeof error.message === "string"
+                ) {
+                  msg = error.message;
+                } else if (Array.isArray(error)) {
+                  msg = `Multiple errors (${error.length})`;
+                }
+                return (
+                  <li key={field}>
+                    <strong>{field}:</strong> {msg}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
 
@@ -325,221 +795,15 @@ export function ProductForm({
 
           {/* Right column — Form sections */}
           <div className="space-y-6 lg:col-span-2">
-            {/* Basic Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("basicInfo")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("name")}</FormLabel>
-                        <FormControl>
-                          <Input {...field} onBlur={handleNameBlur} />
-                        </FormControl>
-                        <FormDescription>{t("nameHint")}</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("slug")}</FormLabel>
-                        <FormControl>
-                          <div className="flex gap-2">
-                            <Input {...field} className="flex-1" />
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              size="icon"
-                              title={t("regenerateSlug")}
-                              onClick={handleRegenerateSlug}
-                            >
-                              <RefreshCwIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </FormControl>
-                        <FormDescription>{t("slugHint")}</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+            <ProductBasicInfoSection
+              form={form}
+              categories={categories}
+              t={t}
+              handleNameBlur={handleNameBlur}
+              handleRegenerateSlug={handleRegenerateSlug}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("description")}</FormLabel>
-                      <FormControl>
-                        <Textarea rows={4} {...field} />
-                      </FormControl>
-                      <FormDescription>{t("descriptionHint")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="categoryId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("category")}</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={t("selectCategory")} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {categories.map((c) => (
-                              <SelectItem key={c.id} value={c.id}>
-                                {c.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>{t("categoryHint")}</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="brand"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("brand")}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormDescription>{t("brandHint")}</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Pricing & Commission */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("pricingCommission")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="basePrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("basePrice")}</FormLabel>
-                      <FormControl>
-                        <Input type="number" min={0} {...field} />
-                      </FormControl>
-                      <FormDescription>{t("basePriceHint")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="commissionType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("commissionType")}</FormLabel>
-                        <Select
-                          value={field.value ?? "NONE"}
-                          onValueChange={(v) => {
-                            field.onChange(v === "NONE" ? null : v);
-                            if (v === "NONE")
-                              form.setValue("commissionValue", null);
-                          }}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="NONE">
-                              {t("commissionNone")}
-                            </SelectItem>
-                            <SelectItem value="PERCENTAGE">
-                              {t("commissionPercentage")}
-                            </SelectItem>
-                            <SelectItem value="FIXED">
-                              {t("commissionFixed")}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          {t("commissionTypeHint")}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {watchCommissionType && (
-                    <FormField
-                      control={form.control}
-                      name="commissionValue"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {watchCommissionType === "PERCENTAGE"
-                              ? t("commissionPercent")
-                              : t("commissionAmount")}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={0}
-                              max={
-                                watchCommissionType === "PERCENTAGE"
-                                  ? 100
-                                  : undefined
-                              }
-                              step={
-                                watchCommissionType === "PERCENTAGE" ? 0.01 : 1
-                              }
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value === ""
-                                    ? null
-                                    : Number(e.target.value),
-                                )
-                              }
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            {t("commissionValueHint")}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <ProductPricingSection form={form} t={t} />
 
             {/* Category Features (dynamic) */}
             {featureFields.length > 0 && (
@@ -561,90 +825,100 @@ export function ProductForm({
                           : null;
 
                       return (
-                        <FormItem key={ff.id}>
-                          <FormLabel>
-                            {ff.name}
-                            {ff.isRequired && (
-                              <span className="text-destructive ml-1">*</span>
-                            )}
-                          </FormLabel>
-                          {ff.type === "DROPDOWN" && ff.options ? (
-                            <Select
-                              value={
-                                arrayIndex !== null
-                                  ? form.getValues(
-                                      `featureValues.${arrayIndex}.value`,
-                                    )
-                                  : ""
-                              }
-                              onValueChange={(v) => {
-                                const current =
-                                  form.getValues("featureValues") ?? [];
-                                if (arrayIndex !== null) {
-                                  const updated = [...current];
-                                  updated[arrayIndex] = {
-                                    ...updated[arrayIndex],
-                                    value: v,
-                                  };
-                                  form.setValue("featureValues", updated);
-                                } else {
-                                  form.setValue("featureValues", [
-                                    ...current,
-                                    { featureFieldId: ff.id, value: v },
-                                  ]);
-                                }
-                              }}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue
-                                    placeholder={t("selectOption")}
-                                  />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {ff.options.map((opt) => (
-                                  <SelectItem key={opt} value={opt}>
-                                    {opt}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <FormControl>
-                              <Input
-                                type={ff.type === "NUMBER" ? "number" : "text"}
-                                value={
-                                  arrayIndex !== null
-                                    ? form.getValues(
-                                        `featureValues.${arrayIndex}.value`,
-                                      )
-                                    : ""
-                                }
-                                onChange={(e) => {
-                                  const current =
-                                    form.getValues("featureValues") ?? [];
-                                  if (arrayIndex !== null) {
-                                    const updated = [...current];
-                                    updated[arrayIndex] = {
-                                      ...updated[arrayIndex],
-                                      value: e.target.value,
-                                    };
-                                    form.setValue("featureValues", updated);
-                                  } else {
-                                    form.setValue("featureValues", [
-                                      ...current,
-                                      {
-                                        featureFieldId: ff.id,
-                                        value: e.target.value,
-                                      },
-                                    ]);
+                        <FormField
+                          key={ff.id}
+                          name={`featureValues.${ff.id}`}
+                          render={() => (
+                            <FormItem>
+                              <FormLabel>
+                                {ff.name}
+                                {ff.isRequired && (
+                                  <span className="text-destructive ml-1">
+                                    *
+                                  </span>
+                                )}
+                              </FormLabel>
+                              {ff.type === "DROPDOWN" && ff.options ? (
+                                <Select
+                                  value={
+                                    arrayIndex !== null
+                                      ? form.getValues(
+                                          `featureValues.${arrayIndex}.value`,
+                                        )
+                                      : ""
                                   }
-                                }}
-                              />
-                            </FormControl>
+                                  onValueChange={(v) => {
+                                    const current =
+                                      form.getValues("featureValues") ?? [];
+                                    if (arrayIndex !== null) {
+                                      const updated = [...current];
+                                      updated[arrayIndex] = {
+                                        ...updated[arrayIndex],
+                                        value: v,
+                                      };
+                                      form.setValue("featureValues", updated);
+                                    } else {
+                                      form.setValue("featureValues", [
+                                        ...current,
+                                        { featureFieldId: ff.id, value: v },
+                                      ]);
+                                    }
+                                  }}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue
+                                        placeholder={t("selectOption")}
+                                      />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {ff.options.map((opt) => (
+                                      <SelectItem key={opt} value={opt}>
+                                        {opt}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <FormControl>
+                                  <Input
+                                    type={
+                                      ff.type === "NUMBER" ? "number" : "text"
+                                    }
+                                    value={
+                                      arrayIndex !== null
+                                        ? form.getValues(
+                                            `featureValues.${arrayIndex}.value`,
+                                          )
+                                        : ""
+                                    }
+                                    onChange={(e) => {
+                                      const current =
+                                        form.getValues("featureValues") ?? [];
+                                      if (arrayIndex !== null) {
+                                        const updated = [...current];
+                                        updated[arrayIndex] = {
+                                          ...updated[arrayIndex],
+                                          value: e.target.value,
+                                        };
+                                        form.setValue("featureValues", updated);
+                                      } else {
+                                        form.setValue("featureValues", [
+                                          ...current,
+                                          {
+                                            featureFieldId: ff.id,
+                                            value: e.target.value,
+                                          },
+                                        ]);
+                                      }
+                                    }}
+                                  />
+                                </FormControl>
+                              )}
+                            </FormItem>
                           )}
-                        </FormItem>
+                        />
                       );
                     })}
                 </CardContent>
@@ -703,8 +977,12 @@ export function ProductForm({
                         <thead>
                           <tr className="border-b">
                             <th className="text-left py-2 px-2">SKU</th>
-                            <th className="text-left py-2 px-2">{t("price")} (XAF)</th>
-                            <th className="text-left py-2 px-2">{t("stock")}</th>
+                            <th className="text-left py-2 px-2">
+                              {t("price")} (XAF)
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("stock")}
+                            </th>
                             <th className="text-left py-2 px-2 w-16"></th>
                           </tr>
                         </thead>
@@ -742,6 +1020,14 @@ export function ProductForm({
                                           type="number"
                                           min={0}
                                           {...field}
+                                          value={field.value ?? ""}
+                                          onChange={(e) =>
+                                            field.onChange(
+                                              e.target.value === ""
+                                                ? 0
+                                                : Number(e.target.value),
+                                            )
+                                          }
                                           className="h-8 text-xs w-24"
                                         />
                                       </FormControl>
@@ -761,6 +1047,14 @@ export function ProductForm({
                                           type="number"
                                           min={0}
                                           {...field}
+                                          value={field.value ?? ""}
+                                          onChange={(e) =>
+                                            field.onChange(
+                                              e.target.value === ""
+                                                ? 0
+                                                : Number(e.target.value),
+                                            )
+                                          }
                                           className="h-8 text-xs w-20"
                                         />
                                       </FormControl>
@@ -867,7 +1161,9 @@ export function ProductForm({
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="NEW">{t("new")}</SelectItem>
+                                  <SelectItem value="NEW">
+                                    {t("new")}
+                                  </SelectItem>
                                   <SelectItem value="REFURBISHED">
                                     {t("refurbished")}
                                   </SelectItem>
@@ -884,7 +1180,19 @@ export function ProductForm({
                             <FormItem>
                               <FormLabel>{t("price")} (XAF)</FormLabel>
                               <FormControl>
-                                <Input type="number" min={0} {...field} />
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value === ""
+                                        ? 0
+                                        : Number(e.target.value),
+                                    )
+                                  }
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -897,7 +1205,19 @@ export function ProductForm({
                             <FormItem>
                               <FormLabel>{t("stock")}</FormLabel>
                               <FormControl>
-                                <Input type="number" min={0} {...field} />
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value === ""
+                                        ? 0
+                                        : Number(e.target.value),
+                                    )
+                                  }
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -942,7 +1262,9 @@ export function ProductForm({
                                   }
                                 />
                               </FormControl>
-                              <FormDescription>{t("weightHint")}</FormDescription>
+                              <FormDescription>
+                                {t("weightHint")}
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -954,92 +1276,13 @@ export function ProductForm({
               </Card>
             )}
 
-            {/* Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("settings")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Central Admin: branch selector */}
-                {isCentralAdmin && !isEditing && branches.length > 0 && (
-                  <FormField
-                    control={form.control}
-                    name="branchId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("branch")}</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={t("selectBranch")} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {branches.map((b) => (
-                              <SelectItem key={b.id} value={b.id}>
-                                {b.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>{t("branchHint")}</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                <div className="flex gap-6">
-                  <FormField
-                    control={form.control}
-                    name="isActive"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center gap-2 space-y-0">
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div>
-                          <FormLabel className="font-normal">
-                            {t("active")}
-                          </FormLabel>
-                          <FormDescription className="text-xs">
-                            {t("activeHint")}
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="isFeatured"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center gap-2 space-y-0">
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div>
-                          <FormLabel className="font-normal">
-                            {t("featured")}
-                          </FormLabel>
-                          <FormDescription className="text-xs">
-                            {t("featuredHint")}
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <ProductSettingsSection
+              form={form}
+              t={t}
+              isCentralAdmin={isCentralAdmin}
+              isEditing={isEditing}
+              branches={branches}
+            />
           </div>
         </div>
 
