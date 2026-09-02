@@ -466,9 +466,10 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
     revalidateProducts();
     return { success: true };
   } catch (error) {
+    console.log("Unable to update product: ", { productId: id, error })
     return {
       error:
-        error instanceof Error ? error.message : "Unable to update product.",
+        error instanceof Error && "Unable to update product.",
     };
   }
 }
