@@ -1,6 +1,12 @@
 import { inngest } from "../client"
 import { db } from "@/server/db"
 import { createNotification } from "@/actions/notification.actions"
+import {
+  createDisbursement,
+  confirmDisbursement,
+  detectCameroonGateway,
+} from "@/server/payunit"
+import { APP_URL } from "@/lib/constants"
 
 // M5.6 — Monthly affiliate commission payouts
 // Runs on the 1st of every month at midnight
@@ -46,6 +52,27 @@ export const monthlyAffiliatePayout = inngest.createFunction(
         .filter((affiliate) => affiliate.total > 0)
         .map((affiliate) =>
           step.run(`payout-${affiliate.id}`, async () => {
+            const payoutId = `PAYOUT-MTH-${Date.now().toString(36).toUpperCase()}-${affiliate.id.slice(-4)}`
+            const gateway = detectCameroonGateway(
+              affiliate.payoutPhone,
+              affiliate.payoutMethod,
+            )
+
+            // Disburse funds via PayUnit
+            const disbursement = await createDisbursement({
+              amount: affiliate.total,
+              accountNumber: affiliate.payoutPhone ?? "",
+              beneficiaryName: affiliate.userName ?? "Affiliate",
+              gateway,
+              transactionId: payoutId,
+            })
+
+            await confirmDisbursement({
+              payToken: disbursement.pay_token,
+              message: `Monthly affiliate commission payout ${payoutId}`,
+              notifyUrl: `${APP_URL}/api/webhooks/payunit`,
+            })
+
             await db.$transaction(async (tx) => {
               await tx.commissionPayout.create({
                 data: {
@@ -53,6 +80,7 @@ export const monthlyAffiliatePayout = inngest.createFunction(
                   amount: affiliate.total,
                   currency: "XAF",
                   status: "PENDING",
+                  payunitDisbursementId: disbursement.pay_token,
                 },
               })
 

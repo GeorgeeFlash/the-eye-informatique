@@ -132,6 +132,28 @@ export async function getCheckoutStatus(checkoutId: string) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Detects whether a Cameroon phone number belongs to Orange Money or MTN Mobile Money.
+ * Orange prefixes: 69x, 655, 656, 657, 658, 659
+ * MTN prefixes: 67x, 68x, 650, 651, 652, 653, 654
+ */
+export function detectCameroonGateway(
+  phone?: string | null,
+  fallbackMethod?: string | null
+): "CM_ORANGE" | "CM_MTNMOMO" {
+  if (fallbackMethod === "ORANGE") return "CM_ORANGE";
+  if (fallbackMethod === "MTN" || fallbackMethod === "CM_MTNMOMO") return "CM_MTNMOMO";
+
+  if (!phone) return "CM_MTNMOMO";
+  const cleaned = phone.replace(/[\s\-\+\(\)]/g, "").replace(/^237/, "");
+  // Check for Orange Cameroon
+  if (/^6(9\d|5[5-9])\d{6}$/.test(cleaned)) {
+    return "CM_ORANGE";
+  }
+  // Default to MTN MoMo
+  return "CM_MTNMOMO";
+}
+
+/**
  * Create a disbursement to send money via mobile money.
  */
 export async function createDisbursement(params: {

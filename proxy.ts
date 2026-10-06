@@ -27,9 +27,16 @@ const isAuthRoute = createRouteMatcher([
 // API and Serwist routes that must never be touched by the intl middleware
 const isApiRoute = createRouteMatcher(["/api/(.*)", "/trpc/(.*)"])
 const isSerwistRoute = createRouteMatcher(["/serwist/(.*)"])
+const isRefRoute = createRouteMatcher(["/ref/(.*)"])
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const ip = getIp(req)
+
+  // Redirect legacy /en/ref/... or /fr/ref/... to canonical /ref/...
+  if (req.nextUrl.pathname.startsWith("/en/ref/") || req.nextUrl.pathname.startsWith("/fr/ref/")) {
+    const cleanPath = req.nextUrl.pathname.replace(/^\/(en|fr)/, "")
+    return NextResponse.redirect(new URL(cleanPath, req.url))
+  }
 
   // 1a. Stricter rate limits on auth endpoints
   if (isAuthRoute(req)) {
@@ -59,8 +66,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   }
 
   // 3. next-intl — locale detection & routing
-  // API, tRPC, and Serwist routes must NOT be processed by the intl middleware
-  if (isApiRoute(req) || isSerwistRoute(req)) {
+  // API, tRPC, Serwist, and referral routes must NOT be processed by the intl middleware
+  if (isApiRoute(req) || isSerwistRoute(req) || isRefRoute(req)) {
     return NextResponse.next()
   }
 

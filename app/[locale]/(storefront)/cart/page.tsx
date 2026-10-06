@@ -14,11 +14,15 @@ import {
   TrashIcon,
   ShoppingBagIcon,
   MapPinIcon,
+  ShieldCheckIcon,
 } from "lucide-react";
 import { Locale } from "@/lib/constants";
+import { useUser } from "@clerk/nextjs";
 
 export default function CartPage() {
   const t = useTranslations("cart");
+  const tAuth = useTranslations("auth");
+  const { isSignedIn } = useUser();
   const locale = useLocale() as Locale;
   const { items, removeItem, updateQuantity, totalPrice, totalItems, isEmpty } =
     useCart();
@@ -159,12 +163,15 @@ export default function CartPage() {
 
               <Separator />
 
-              <div className="flex justify-between font-semibold">
-                <span>{t("total")}</span>
-                <span className="text-lg">
-                  {formatCurrency(totalPrice, locale)}
-                </span>
-              </div>
+              {!isSignedIn && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 flex items-start gap-2.5 text-xs">
+                  <ShieldCheckIcon className="size-4 text-primary shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <span className="font-semibold text-foreground">{tAuth("memberPerksCartTitle")}</span>
+                    <p className="text-muted-foreground text-[11px] leading-snug">{tAuth("memberPerksCartDesc")}</p>
+                  </div>
+                </div>
+              )}
 
               <Button asChild size="lg" className="w-full">
                 <Link href="/checkout">{t("checkout")}</Link>

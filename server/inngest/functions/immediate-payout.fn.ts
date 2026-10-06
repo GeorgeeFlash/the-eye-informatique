@@ -1,6 +1,6 @@
 import { inngest } from "../client";
 import { db } from "@/server/db";
-import { createDisbursement, confirmDisbursement } from "@/server/payunit";
+import { createDisbursement, confirmDisbursement, detectCameroonGateway } from "@/server/payunit";
 import { createNotification } from "@/actions/notification.actions";
 import { APP_URL } from "@/lib/constants";
 
@@ -51,14 +51,16 @@ export const immediateAffiliatePayout = inngest.createFunction(
     const payoutId = `PAYOUT-IMM-${Date.now().toString(36).toUpperCase()}`;
 
     await step.run("process-payout", async () => {
+      const gateway = detectCameroonGateway(
+        referral.affiliate.payoutPhone,
+        referral.affiliate.payoutMethod
+      );
+
       const disbursement = await createDisbursement({
         amount: referral.commission,
         accountNumber: referral.affiliate.payoutPhone ?? "",
         beneficiaryName: "Affiliate",
-        gateway:
-          referral.affiliate.payoutMethod === "ORANGE"
-            ? "CM_ORANGE"
-            : "CM_MTNMOMO",
+        gateway,
         transactionId: payoutId,
       });
 
@@ -109,7 +111,7 @@ export const immediateAffiliatePayout = inngest.createFunction(
               payoutMethod: referral.affiliate.payoutMethod,
             },
           },
-        })
+        });
       }
 
       await createNotification({

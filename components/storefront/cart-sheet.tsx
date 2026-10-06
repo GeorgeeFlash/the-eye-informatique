@@ -15,11 +15,14 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { MinusIcon, PlusIcon, TrashIcon, ShoppingBagIcon } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { MinusIcon, PlusIcon, TrashIcon, ShoppingBagIcon, ShieldCheckIcon } from "lucide-react";
 import { Locale } from "@/lib/constants";
 
 export function CartSheet() {
   const t = useTranslations("cart");
+  const tAuth = useTranslations("auth");
+  const { isSignedIn } = useUser();
   const locale = useLocale() as Locale;
   const cartSheetOpen = useUiStore((s) => s.cartSheetOpen);
   const setCartSheetOpen = useUiStore((s) => s.setCartSheetOpen);
@@ -165,6 +168,17 @@ export function CartSheet() {
                 </span>
               </div>
               <Separator />
+
+              {!isSignedIn && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-2.5 flex items-start gap-2 text-xs">
+                  <ShieldCheckIcon className="size-4 text-primary shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <span className="font-semibold text-foreground">{tAuth("memberPerksCartTitle")}</span>
+                    <p className="text-muted-foreground text-[11px] leading-snug">{tAuth("memberPerksCartDesc")}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col gap-2">
                 <Button
                   asChild

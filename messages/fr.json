@@ -1250,7 +1250,24 @@
     "branchesTitle": "Nos Agences",
     "headquarters": "Si\u00e8ge"  },
   "auth": {
-    "registerAsAffiliate": "S'inscrire comme affilié"
+    "registerAsAffiliate": "S'inscrire comme affilié",
+    "benefitsTitle": "Pourquoi créer un compte ?",
+    "benefitsSubtitle": "Bénéficiez de la garantie officielle, du paiement échelonné et du suivi de livraison en direct.",
+    "fastSignupBadge": "Prend moins de 30 secondes • Sans carte bancaire",
+    "checkoutNoticeTitle": "Vous y êtes presque !",
+    "checkoutNoticeDesc": "Créez votre compte gratuit pour valider votre commande, suivre votre colis et recevoir votre certificat de garantie numérique.",
+    "benefitWarrantyTitle": "Garantie Numérique Officielle",
+    "benefitWarrantyDesc": "Chaque appareil s'accompagne d'une carte de garantie officielle avec QR code valable dans toutes nos agences au Cameroun.",
+    "benefitInstallmentsTitle": "Paiement en 3 Tranches",
+    "benefitInstallmentsDesc": "Payez à votre rythme en 3 fois sans stress via MTN Mobile Money ou Orange Money.",
+    "benefitTrackingTitle": "Suivi de Livraison en Direct",
+    "benefitTrackingDesc": "Suivez votre colis depuis nos agences de Douala et Yaoundé jusqu'à votre porte avec alertes en temps réel.",
+    "benefitAffiliateTitle": "Gagnez des Commissions",
+    "benefitAffiliateDesc": "Partagez vos coups de cœur tech et gagnez de l'argent viré directement sur votre compte Mobile Money.",
+    "benefitSupportTitle": "Support Prioritaire WhatsApp",
+    "benefitSupportDesc": "Accès direct à nos techniciens qualifiés pour l'installation, les pilotes et le service après-vente.",
+    "memberPerksCartTitle": "Avantages Membres à chaque commande",
+    "memberPerksCartDesc": "Certificat de garantie officiel & paiement en plusieurs fois dès l'inscription gratuite."
   },
   "adminError": {
     "accessDenied": "Accès refusé",

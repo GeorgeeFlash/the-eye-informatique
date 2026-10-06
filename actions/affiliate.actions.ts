@@ -11,7 +11,7 @@ import { createLocalizedNotification } from "@/lib/notifications"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { APP_URL, DEFAULT_PAGE_SIZE } from "@/lib/constants"
-import { createDisbursement, confirmDisbursement } from "@/server/payunit"
+import { createDisbursement, confirmDisbursement, detectCameroonGateway } from "@/server/payunit"
 import { inngest } from "@/server/inngest/client"
 import type { AuthUser } from "@/lib/auth"
 import { payoutPreferenceSchema } from "@/lib/validators/affiliate.schema"
@@ -224,12 +224,14 @@ export async function requestPayout() {
 
   const payoutId = `PAYOUT-${Date.now().toString(36).toUpperCase()}`
 
+  const gateway = detectCameroonGateway(profile.payoutPhone, profile.payoutMethod)
+
   // Create a PayUnit disbursement to the affiliate's mobile money account
   const disbursement = await createDisbursement({
     amount,
     accountNumber: profile.payoutPhone ?? "",
     beneficiaryName: user.name ?? "Affiliate",
-    gateway: profile.payoutMethod === "ORANGE" ? "CM_ORANGE" : "CM_MTNMOMO",
+    gateway,
     transactionId: payoutId,
   })
 
@@ -542,10 +544,14 @@ export async function trackAffiliateClick(code: string) {
   const result = await getAffiliateLink(code)
   if (!result) return null
 
-  await db.affiliateLink.update({
-    where: { id: result.linkId },
-    data: { clickCount: { increment: 1 } },
-  })
+  try {
+    await db.affiliateLink.update({
+      where: { id: result.linkId },
+      data: { clickCount: { increment: 1 } },
+    })
+  } catch (error) {
+    console.error("Failed to increment affiliate link click count:", error)
+  }
 
   return result
 }
@@ -603,7 +609,14 @@ export async function confirmReferralCommission(orderId: string) {
   }
 
   totalCommission = Math.round(totalCommission)
-  if (totalCommission <= 0) return
+  if (totalCommission <= 0) {
+    // Confirm referral with 0 commission so it does not remain PENDING indefinitely
+    await db.affiliateReferral.update({
+      where: { id: referral.id },
+      data: { commission: 0, status: "CONFIRMED" },
+    })
+    return
+  }
 
   await db.$transaction(async (tx) => {
     await tx.affiliateReferral.update({

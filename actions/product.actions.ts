@@ -894,3 +894,33 @@ export async function getConsolidatedStock(branchId?: string) {
 
   return records;
 }
+
+/**
+ * Get related products from the same category (excludes the given product).
+ * Used by the "You may also like" section on product detail pages.
+ */
+export async function getRelatedProducts(
+  productId: string,
+  categoryId: string,
+  limit = 4,
+) {
+  const products = await db.product.findMany({
+    where: {
+      isActive: true,
+      categoryId,
+      id: { not: productId },
+    },
+    include: {
+      images: { where: { isPrimary: true }, take: 1 },
+      variants: {
+        select: { id: true, price: true, stock: true, condition: true },
+        take: 1,
+        orderBy: { price: "asc" },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  return products;
+}

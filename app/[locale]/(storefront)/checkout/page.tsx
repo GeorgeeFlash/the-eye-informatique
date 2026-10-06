@@ -12,9 +12,16 @@ export async function generateMetadata() {
   return { title: t("title") };
 }
 
-export default async function CheckoutPage() {
+export default async function CheckoutPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/sign-in");
+  if (!user) {
+    redirect(`/${locale}/sign-up?redirect_url=/${locale}/checkout&source=checkout`);
+  }
 
   const [addresses, branches, installmentCount, interCityShippingFee] =
     await Promise.all([

@@ -1252,7 +1252,24 @@
     "headquarters": "Headquarters"
   },
   "auth": {
-    "registerAsAffiliate": "Register as Affiliate"
+    "registerAsAffiliate": "Register as Affiliate",
+    "benefitsTitle": "Why Create an Account?",
+    "benefitsSubtitle": "Unlock official warranty protection, installment payments, and live delivery tracking.",
+    "fastSignupBadge": "Takes less than 30 seconds • No credit card required",
+    "checkoutNoticeTitle": "You're one step away from checkout!",
+    "checkoutNoticeDesc": "Create your free account to finalize your order, track your package, and receive your official digital warranty card.",
+    "benefitWarrantyTitle": "Official Digital Warranty",
+    "benefitWarrantyDesc": "Every device includes an official digital warranty certificate with QR verification for easy claims at all our Cameroon branches.",
+    "benefitInstallmentsTitle": "Pay in 3 Installments",
+    "benefitInstallmentsDesc": "Spread your purchase across 3 manageable installments using MTN Mobile Money or Orange Money.",
+    "benefitTrackingTitle": "Live Order Tracking",
+    "benefitTrackingDesc": "Track your delivery from our Yaoundé & Douala hubs straight to your door with real-time updates.",
+    "benefitAffiliateTitle": "Earn Referral Commissions",
+    "benefitAffiliateDesc": "Share tech products you love and earn cash commissions directly into your Mobile Money wallet.",
+    "benefitSupportTitle": "Priority WhatsApp Support",
+    "benefitSupportDesc": "Direct access to certified tech experts for setup assistance, driver downloads, and troubleshooting.",
+    "memberPerksCartTitle": "Member Perks with Every Order",
+    "memberPerksCartDesc": "Official warranty certificate & installment payment options available on free signup."
   },
   "adminError": {
     "accessDenied": "Access Denied",

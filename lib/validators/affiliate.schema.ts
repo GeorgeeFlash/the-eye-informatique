@@ -10,7 +10,21 @@ export const affiliateApplicationSchema = z.object({
 })
 
 export const affiliateLinkSchema = z.object({
-  targetUrl: z.string().url(),
+  targetUrl: z
+    .string()
+    .min(1, "Target URL is required")
+    .refine(
+      (val) => {
+        if (val.startsWith("/")) return true
+        try {
+          new URL(val)
+          return true
+        } catch {
+          return false
+        }
+      },
+      { message: "Enter a valid URL or relative path starting with /" }
+    ),
   code: z
     .string()
     .min(3)

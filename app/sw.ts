@@ -3,7 +3,7 @@
 /// <reference lib="webworker" />
 import { defaultCache } from "@serwist/turbopack/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
+import { NetworkOnly, Serwist } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -14,21 +14,29 @@ declare global {
 declare const self: ServiceWorkerGlobalScope;
 
 const serwist = new Serwist({
-    precacheEntries: self.__SW_MANIFEST,
-    skipWaiting: true,
-    clientsClaim: true,
-    navigationPreload: true,
-    runtimeCaching: defaultCache,
-    fallbacks: {
-        entries: [
-            {
-                url: '/~offline',
-                matcher({ request }) {
-                    return request.destination === 'document'
-                },
-            },
-        ],
+  precacheEntries: self.__SW_MANIFEST,
+  skipWaiting: true,
+  clientsClaim: true,
+  navigationPreload: true,
+  runtimeCaching: [
+    {
+      matcher: ({ url }) =>
+        url.pathname.startsWith("/ref/") ||
+        url.pathname.includes("/ref/"),
+      handler: new NetworkOnly(),
     },
-})
+    ...defaultCache,
+  ],
+  fallbacks: {
+    entries: [
+      {
+        url: "/~offline",
+        matcher({ request }) {
+          return request.destination === "document";
+        },
+      },
+    ],
+  },
+});
 
-serwist.addEventListeners()
+serwist.addEventListeners();

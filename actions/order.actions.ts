@@ -280,16 +280,16 @@ export async function createOrder(data: CreateOrderInput) {
       if (refCookie) {
         const [affiliateId, linkId] = refCookie.split(":")
         if (affiliateId && linkId) {
-          // Validate the affiliate is still active
+          // Validate the affiliate is still active and prevent self-referral
           const affiliate = await tx.affiliateProfile.findUnique({
             where: { id: affiliateId },
-            select: { id: true, status: true },
+            select: { id: true, status: true, userId: true },
           })
           const link = await tx.affiliateLink.findUnique({
             where: { id: linkId },
             select: { id: true },
           })
-          if (affiliate?.status === "APPROVED" && link) {
+          if (affiliate?.status === "APPROVED" && link && affiliate.userId !== user.id) {
             await tx.affiliateReferral.create({
               data: {
                 linkId,
@@ -300,6 +300,8 @@ export async function createOrder(data: CreateOrderInput) {
               },
             })
           }
+          // Clear referral cookie after attributing referral
+          cookieStore.delete(REFERRAL_COOKIE_NAME)
         }
       }
 

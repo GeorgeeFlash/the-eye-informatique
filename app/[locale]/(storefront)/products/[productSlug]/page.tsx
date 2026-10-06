@@ -3,6 +3,7 @@ import { getProductBySlug } from "@/actions/product.actions";
 import { ProductGallery } from "@/components/storefront/product-gallery";
 import { ProductDetails } from "@/components/storefront/product-details";
 import { ProductViewTracker } from "@/components/storefront/product-view-tracker";
+import { YouMayAlsoLike } from "@/components/storefront/you-may-also-like";
 import { APP_URL } from "@/lib/constants";
 import type { Metadata, ResolvingMetadata } from "next";
 
@@ -90,15 +91,26 @@ export default async function ProductDetailPage({ params }: Props) {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
-      <ProductViewTracker productId={product.id} />
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Gallery */}
-        <ProductGallery images={images} productName={product.name} />
+    <div className="flex flex-col">
+      <div className="container mx-auto max-w-7xl px-4 py-8">
+        <ProductViewTracker productId={product.id} />
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Gallery */}
+          <ProductGallery images={images} productName={product.name} />
 
-        {/* Details */}
-        <ProductDetails product={serializedProduct} />
+          {/* Details */}
+          <ProductDetails product={serializedProduct} />
+        </div>
       </div>
+
+      {/* You May Also Like */}
+      {product.categoryId && (
+        <YouMayAlsoLike
+          productId={product.id}
+          categoryId={product.categoryId}
+          categorySlug={product.category?.slug}
+        />
+      )}
     </div>
   );
 }
