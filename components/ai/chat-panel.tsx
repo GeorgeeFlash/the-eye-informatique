@@ -155,6 +155,12 @@ export function ChatPanel() {
         "fixed inset-x-0 top-0 z-60 flex h-dvh max-h-dvh w-full flex-col bg-background pt-[env(safe-area-inset-top)] shadow-2xl animate-in fade-in-0 duration-200",
         "md:inset-auto md:top-auto md:right-6 md:bottom-6 md:h-[min(560px,85dvh)] md:max-h-[85dvh] md:w-[min(400px,calc(100vw-3rem))] md:rounded-2xl md:border md:pt-0 md:slide-in-from-bottom-2",
       )}
+      onClick={(event) => {
+        if (window.innerWidth >= 768) return;
+        const anchor = (event.target as HTMLElement).closest("a");
+        if (!anchor) return;
+        setOpen(false);
+      }}
     >
       {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b px-4 py-3">

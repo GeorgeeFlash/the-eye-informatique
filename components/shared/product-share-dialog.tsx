@@ -172,20 +172,20 @@ export function ProductShareDialog({
         </DialogTrigger>
       )}
 
-      <DialogContent className="max-w-lg p-6 sm:rounded-xl">
-        <DialogHeader className="space-y-1">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              <Share2Icon className="h-5 w-5 text-primary" />
+      <DialogContent className="max-h-[min(85dvh,calc(100%-2rem))] w-full max-w-[calc(100%-1.5rem)] overflow-y-auto p-4 sm:max-w-lg sm:rounded-xl sm:p-6">
+        <DialogHeader className="space-y-1 pr-8">
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold sm:text-xl">
+              <Share2Icon className="h-5 w-5 shrink-0 text-primary" />
               {t("title")}
             </DialogTitle>
             {isLoadingLink ? (
-              <Badge variant="outline" className="animate-pulse gap-1 text-xs">
-                <Loader2Icon className="h-3 w-3 animate-spin" />
-                {t("generatingLink")}
+              <Badge variant="outline" className="max-w-full animate-pulse gap-1 text-xs">
+                <Loader2Icon className="h-3 w-3 shrink-0 animate-spin" />
+                <span className="truncate">{t("generatingLink")}</span>
               </Badge>
             ) : isAffiliate ? (
-              <Badge className="bg-green-600 hover:bg-green-700 text-white text-xs">
+              <Badge className="bg-green-600 text-xs text-white hover:bg-green-700">
                 {t("affiliateBadge")}
               </Badge>
             ) : (
@@ -194,15 +194,15 @@ export function ProductShareDialog({
               </Badge>
             )}
           </div>
-          <DialogDescription className="text-xs text-muted-foreground">
+          <DialogDescription className="text-left text-xs text-muted-foreground">
             {t("subtitle")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
           {/* Visual Card Preview */}
-          <div className="flex gap-4 rounded-xl border bg-muted/30 p-3 shadow-xs">
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border bg-background">
+          <div className="flex gap-3 rounded-xl border bg-muted/30 p-3 shadow-xs sm:gap-4">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border bg-background sm:h-24 sm:w-24">
               {product.imageUrl ? (
                 <Image
                   src={product.imageUrl}
@@ -248,17 +248,17 @@ export function ProductShareDialog({
 
           {/* Share Link Input */}
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <Input
                 readOnly
                 value={shareUrl}
-                className="font-mono text-xs h-9 bg-background select-all"
+                className="h-10 min-w-0 bg-background font-mono text-xs select-all sm:h-9"
               />
               <Button
                 type="button"
                 size="sm"
                 variant="secondary"
-                className="shrink-0 gap-1.5 h-9"
+                className="h-10 w-full shrink-0 gap-1.5 sm:h-9 sm:w-auto"
                 onClick={handleCopyLink}
               >
                 {copiedLink ? (
@@ -276,13 +276,13 @@ export function ProductShareDialog({
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {locale === "fr" ? "Partager sur les réseaux" : "Share to channels"}
             </p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2">
               {/* WhatsApp */}
               <Button
                 asChild
                 variant="outline"
                 size="sm"
-                className="h-10 border-green-200 bg-green-50/50 hover:bg-green-100 hover:text-green-800 dark:border-green-900/50 dark:bg-green-950/20 dark:hover:bg-green-950/40 text-green-700 dark:text-green-400 font-medium justify-start gap-2"
+                className="h-auto min-h-10 min-w-0 justify-start gap-2 whitespace-normal border-green-200 bg-green-50/50 px-2.5 text-xs font-medium text-green-700 hover:bg-green-100 hover:text-green-800 sm:text-sm dark:border-green-900/50 dark:bg-green-950/20 dark:text-green-400 dark:hover:bg-green-950/40"
               >
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
                   <SendIcon className="h-4 w-4" />
@@ -295,7 +295,7 @@ export function ProductShareDialog({
                 asChild
                 variant="outline"
                 size="sm"
-                className="h-10 border-blue-200 bg-blue-50/50 hover:bg-blue-100 hover:text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/20 dark:hover:bg-blue-950/40 text-blue-700 dark:text-blue-400 font-medium justify-start gap-2"
+                className="h-auto min-h-10 min-w-0 justify-start gap-2 whitespace-normal border-blue-200 bg-blue-50/50 px-2.5 text-xs font-medium text-blue-700 hover:bg-blue-100 hover:text-blue-800 sm:text-sm dark:border-blue-900/50 dark:bg-blue-950/20 dark:text-blue-400 dark:hover:bg-blue-950/40"
               >
                 <a href={facebookUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLinkIcon className="h-4 w-4" />
@@ -308,7 +308,7 @@ export function ProductShareDialog({
                 asChild
                 variant="outline"
                 size="sm"
-                className="h-10 border-sky-200 bg-sky-50/50 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/20 dark:hover:bg-sky-950/40 text-sky-700 dark:text-sky-400 font-medium justify-start gap-2"
+                className="h-auto min-h-10 min-w-0 justify-start gap-2 whitespace-normal border-sky-200 bg-sky-50/50 px-2.5 text-xs font-medium text-sky-700 hover:bg-sky-100 hover:text-sky-800 sm:text-sm dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-sky-400 dark:hover:bg-sky-950/40"
               >
                 <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
                   <SendIcon className="h-4 w-4" />
@@ -321,7 +321,7 @@ export function ProductShareDialog({
                 asChild
                 variant="outline"
                 size="sm"
-                className="h-10 font-medium justify-start gap-2"
+                className="h-auto min-h-10 min-w-0 justify-start gap-2 whitespace-normal px-2.5 text-xs font-medium sm:text-sm"
               >
                 <a href={twitterUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLinkIcon className="h-4 w-4" />
@@ -334,7 +334,7 @@ export function ProductShareDialog({
                 asChild
                 variant="outline"
                 size="sm"
-                className="h-10 font-medium justify-start gap-2"
+                className="h-auto min-h-10 min-w-0 justify-start gap-2 whitespace-normal px-2.5 text-xs font-medium sm:text-sm"
               >
                 <a href={emailUrl}>
                   <MailIcon className="h-4 w-4" />
@@ -347,7 +347,7 @@ export function ProductShareDialog({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-10 font-medium justify-start gap-2"
+                className="h-auto min-h-10 min-w-0 justify-start gap-2 whitespace-normal px-2.5 text-xs font-medium sm:text-sm"
                 onClick={handleNativeShare}
               >
                 <Share2Icon className="h-4 w-4" />
@@ -358,9 +358,9 @@ export function ProductShareDialog({
 
           {/* Copy Full Marketing Text Banner */}
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold flex items-center gap-1.5 text-primary">
-                <SparklesIcon className="h-3.5 w-3.5" />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <span className="flex items-center gap-1.5 text-xs font-semibold leading-snug text-primary">
+                <SparklesIcon className="h-3.5 w-3.5 shrink-0" />
                 {locale === "fr"
                   ? "Argumentaire de vente prêt à l'emploi"
                   : "Ready-to-Post Marketing Pitch"}
@@ -369,7 +369,7 @@ export function ProductShareDialog({
                 type="button"
                 size="sm"
                 variant="default"
-                className="h-7 text-xs gap-1"
+                className="h-9 w-full gap-1 text-xs sm:h-7 sm:w-auto"
                 onClick={handleCopyPitch}
               >
                 {copiedPitch ? (
@@ -380,7 +380,7 @@ export function ProductShareDialog({
                 {t("copyPitch")}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground whitespace-pre-line line-clamp-3 bg-background/80 p-2 rounded border font-mono">
+            <p className="line-clamp-4 wrap-break-word rounded border bg-background/80 p-2 font-mono text-xs whitespace-pre-line text-muted-foreground sm:line-clamp-3">
               {marketingPitch}
             </p>
           </div>
