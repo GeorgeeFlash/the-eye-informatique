@@ -15,20 +15,28 @@ export const searchProducts = tool({
   inputSchema: z.object({
     query: z
       .string()
+      .max(120)
       .describe(
         "Search keywords — product name, brand, type, or description terms. " +
         "Extract the most meaningful search terms from the customer message.",
       ),
     category: z
       .string()
+      .max(60)
       .optional()
       .describe("Category name to filter by (e.g. 'Laptops', 'Phones'). Only use when the customer explicitly mentions a category."),
     minPrice: z
       .number()
+      .finite()
+      .min(0)
+      .max(1_000_000_000)
       .optional()
       .describe("Minimum price in XAF. Only use when the customer mentions a budget floor."),
     maxPrice: z
       .number()
+      .finite()
+      .min(0)
+      .max(1_000_000_000)
       .optional()
       .describe("Maximum price in XAF. Only use when the customer mentions a budget ceiling."),
     condition: z
@@ -44,6 +52,8 @@ export const searchProducts = tool({
     const keywords = query
       .split(/\s+/)
       .filter((w) => w.length > 1)
+      .slice(0, 6)
+      .map((w) => w.slice(0, 40))
     if (keywords.length > 0) {
       where.AND = keywords.map((kw) => ({
         OR: [
@@ -135,7 +145,10 @@ export const getProductDetails = tool({
     "Use when the customer wants to know more about a specific product you previously found, " +
     "or when they mention a product by name and need specs, variants, availability, or reviews.",
   inputSchema: z.object({
-    slug: z.string().describe("The product slug (URL-friendly identifier)."),
+    slug: z
+      .string()
+      .max(160)
+      .describe("The product slug (URL-friendly identifier)."),
   }),
   execute: async ({ slug }) => {
     const product = await db.product.findUnique({
@@ -230,6 +243,8 @@ export const navigateTo = tool({
       .describe("The navigation intent."),
     productSlug: z
       .string()
+      .max(160)
+      .regex(/^[a-z0-9-]+$/)
       .optional()
       .describe("Required only when intent is 'product_page'. The product slug to link to."),
   }),
@@ -245,7 +260,7 @@ export const navigateTo = tool({
       guarantee: { path: "/guarantee", label: "Guarantee Policy" },
     }
 
-    if (intent === "product_page" && productSlug) {
+    if (intent === "product_page" && productSlug && /^[a-z0-9-]+$/.test(productSlug)) {
       return { path: `/products/${productSlug}`, label: `View Product` }
     }
 

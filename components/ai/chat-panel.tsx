@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Markdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { IRIS_MAX_MESSAGE_CHARS } from "@/lib/iris-guard";
 import { ChatProductCard, type ChatProductCardProps } from "./product-card";
 import { ChatLinkCard } from "./link-card";
 import {
@@ -123,7 +124,7 @@ export function ChatPanel() {
 
   function submit(text: string) {
     const trimmed = text.trim();
-    if (!trimmed || isLoading) return;
+    if (!trimmed || trimmed.length > IRIS_MAX_MESSAGE_CHARS || isLoading) return;
     clearError();
     sendMessage({ text: trimmed }, { body: { locale } });
     setInput("");
@@ -136,7 +137,7 @@ export function ChatPanel() {
       <button
         onClick={() => setOpen(true)}
         aria-label={t("irisOpen")}
-        className="fixed right-4 bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-[60] flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation sm:right-6 sm:bottom-6"
+        className="fixed right-4 bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-60 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation sm:right-6 sm:bottom-6"
       >
         <SparklesIcon className="size-5 sm:size-6" />
       </button>
@@ -151,7 +152,7 @@ export function ChatPanel() {
       aria-modal="true"
       aria-label={t("irisTitle")}
       className={cn(
-        "fixed inset-x-0 top-0 z-[60] flex h-dvh max-h-dvh w-full flex-col bg-background pt-[env(safe-area-inset-top)] shadow-2xl animate-in fade-in-0 duration-200",
+        "fixed inset-x-0 top-0 z-60 flex h-dvh max-h-dvh w-full flex-col bg-background pt-[env(safe-area-inset-top)] shadow-2xl animate-in fade-in-0 duration-200",
         "md:inset-auto md:top-auto md:right-6 md:bottom-6 md:h-[min(560px,85dvh)] md:max-h-[85dvh] md:w-[min(400px,calc(100vw-3rem))] md:rounded-2xl md:border md:pt-0 md:slide-in-from-bottom-2",
       )}
     >
@@ -416,18 +417,22 @@ export function ChatPanel() {
             <div className="flex flex-col items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2.5">
               <div className="flex items-center gap-2">
                 <AlertCircleIcon className="size-3.5 shrink-0 text-destructive" />
-                <span className="text-xs text-destructive">{t("irisError")}</span>
+                <span className="text-xs text-destructive">
+                  {irisErrorText(error, t)}
+                </span>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  clearError();
-                  void regenerate({ body: { locale } });
-                }}
-                className="text-xs font-medium text-primary underline-offset-2 hover:underline"
-              >
-                {t("irisRetry")}
-              </button>
+              {!isIrisLimitError(error) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearError();
+                    void regenerate({ body: { locale } });
+                  }}
+                  className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  {t("irisRetry")}
+                </button>
+              )}
             </div>
           )}
 
@@ -466,6 +471,7 @@ export function ChatPanel() {
             onKeyDown={handleKeyDown}
             placeholder={t("irisPlaceholder")}
             disabled={isLoading}
+            maxLength={IRIS_MAX_MESSAGE_CHARS}
             enterKeyHint="send"
             autoComplete="off"
             className="max-h-30 min-h-11 flex-1 resize-none overflow-y-auto rounded-xl border bg-muted/50 px-3.5 py-2.5 text-base outline-none transition-[border-color,box-shadow] placeholder:text-muted-foreground focus:border-primary/50 focus:ring-1 focus:ring-primary/30 disabled:opacity-50 md:text-sm"
@@ -482,7 +488,7 @@ export function ChatPanel() {
           ) : (
             <button
               type="submit"
-              disabled={!input.trim()}
+              disabled={!input.trim() || input.trim().length > IRIS_MAX_MESSAGE_CHARS}
               aria-label={t("send")}
               className="flex size-11 shrink-0 touch-manipulation items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40 active:scale-95"
             >
@@ -491,11 +497,29 @@ export function ChatPanel() {
           )}
         </form>
         <p className="mt-1.5 text-center text-[10px] text-muted-foreground/70">
-          {t("irisPoweredBy")}
+          {input.length >= IRIS_MAX_MESSAGE_CHARS - 80
+            ? `${input.length}/${IRIS_MAX_MESSAGE_CHARS}`
+            : t("irisPoweredBy")}
         </p>
       </div>
     </div>
   );
+}
+
+function isIrisLimitError(error: Error) {
+  return (
+    error.message.includes("rate_limited") ||
+    error.message.includes("message_too_long")
+  );
+}
+
+function irisErrorText(
+  error: Error,
+  t: (key: "irisRateLimited" | "irisTooLong" | "irisError") => string,
+) {
+  if (error.message.includes("rate_limited")) return t("irisRateLimited");
+  if (error.message.includes("message_too_long")) return t("irisTooLong");
+  return t("irisError");
 }
 
 /* ── Animated 3-dot thinking indicator ─────────────────────────────────── */

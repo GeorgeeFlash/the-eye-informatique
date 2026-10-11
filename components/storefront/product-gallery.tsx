@@ -41,11 +41,15 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <Carousel setApi={setApi} className="w-full">
-        <CarouselContent>
+    <div className="flex min-w-0 max-w-full flex-col gap-3">
+      <Carousel
+        setApi={setApi}
+        opts={{ align: "start", containScroll: "trimSnaps" }}
+        className="w-full min-w-0 max-w-full overflow-hidden"
+      >
+        <CarouselContent className="ml-0">
           {sorted.map((img, index) => (
-            <CarouselItem key={`${img.url}-${index}`}>
+            <CarouselItem key={`${img.url}-${index}`} className="pl-0">
               <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
                 <Image
                   src={img.url}

@@ -1,9 +1,9 @@
 // "You May Also Like" section – server component (M11.2)
 import { getRelatedProducts } from "@/actions/product.actions";
-import { ProductCard } from "@/components/storefront/product-card";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { SparklesIcon, ArrowRightIcon } from "lucide-react";
+import {
+  RelatedProductsCarousel,
+  type RelatedProduct,
+} from "@/components/storefront/related-products-carousel";
 import { getTranslations } from "next-intl/server";
 
 interface Props {
@@ -17,7 +17,7 @@ export async function YouMayAlsoLike({
   productId,
   categoryId,
   categorySlug,
-  limit = 4,
+  limit = 12,
 }: Props) {
   const [related, t] = await Promise.all([
     getRelatedProducts(productId, categoryId, limit),
@@ -26,54 +26,29 @@ export async function YouMayAlsoLike({
 
   if (related.length === 0) return null;
 
-  return (
-    <section className="container mx-auto max-w-7xl border-t border-border/60 px-4 py-8 sm:py-10">
-      {/* Section header */}
-      <div className="mb-4 flex items-end justify-between sm:mb-6">
-        <div>
-          <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-            <SparklesIcon className="size-3.5" />
-            <span>Curated For You</span>
-          </div>
-          <h2 className="text-xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            You May Also Like
-          </h2>
-        </div>
-        {categorySlug && (
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="shrink-0 font-semibold text-primary hover:bg-primary/10 hover:text-primary"
-          >
-            <Link href={`/products?category=${categorySlug}`}>
-              {t("viewAll")} <ArrowRightIcon className="ml-1 size-4" />
-            </Link>
-          </Button>
-        )}
-      </div>
+  const products: RelatedProduct[] = related.map((product) => {
+    const variant = product.variants[0];
+    const image = product.images[0];
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: Number(variant?.price ?? 0),
+      imageUrl: image?.url,
+      condition: variant?.condition ?? "NEW",
+      inStock: (variant?.stock ?? 0) > 0,
+      variantId: variant?.id ?? "",
+      variantStock: variant?.stock ?? 0,
+    };
+  });
 
-      {/* Product grid */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {related.map((product) => {
-          const variant = product.variants[0];
-          const image = product.images[0];
-          return (
-            <ProductCard
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              slug={product.slug}
-              price={Number(variant?.price ?? 0)}
-              imageUrl={image?.url}
-              condition={variant?.condition ?? "NEW"}
-              inStock={(variant?.stock ?? 0) > 0}
-              variantId={variant?.id ?? ""}
-              variantStock={variant?.stock ?? 0}
-            />
-          );
-        })}
-      </div>
-    </section>
+  return (
+    <RelatedProductsCarousel
+      products={products}
+      viewAllHref={
+        categorySlug ? `/products?category=${categorySlug}` : undefined
+      }
+      viewAllLabel={t("viewAll")}
+    />
   );
 }

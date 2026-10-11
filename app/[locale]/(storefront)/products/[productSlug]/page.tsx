@@ -91,10 +91,10 @@ export default async function ProductDetailPage({ params }: Props) {
   };
 
   return (
-    <div className="flex flex-col pb-24 sm:pb-0">
-      <div className="container mx-auto max-w-7xl px-4 py-5 sm:py-8">
+    <div className="flex min-w-0 flex-col overflow-x-clip pb-24 sm:pb-0">
+      <div className="container mx-auto min-w-0 max-w-7xl px-4 py-5 sm:py-8">
         <ProductViewTracker productId={product.id} />
-        <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
+        <div className="grid min-w-0 gap-6 lg:grid-cols-2 lg:gap-8">
           {/* Gallery */}
           <ProductGallery images={images} productName={product.name} />
 

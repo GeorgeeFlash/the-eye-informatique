@@ -34,6 +34,20 @@ export const aiRateLimit = new Ratelimit({
   prefix: "rl:ai",
 })
 
+/** Public Iris chat — 8 messages per minute per IP */
+export const irisRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(8, "60s"),
+  prefix: "rl:iris",
+})
+
+/** Public Iris chat — 60 messages per day per IP */
+export const irisDailyRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(60, "1 d"),
+  prefix: "rl:iris:day",
+})
+
 // ---------------------------------------------------------------------------
 // IP extraction helpers
 // ---------------------------------------------------------------------------

@@ -915,6 +915,8 @@
     "irisPoweredBy": "Powered by Iris AI",
     "irisError": "Iris couldn't reply. Please try again.",
     "irisRetry": "Try again",
+    "irisRateLimited": "Iris is getting a lot of questions. Please wait a moment and try again.",
+    "irisTooLong": "That message is too long. Please shorten it.",
     "irisSuggestion1": "Find me a laptop",
     "irisSuggestion2": "Do you have refurbished phones?",
     "irisSuggestion3": "What's your return policy?",
