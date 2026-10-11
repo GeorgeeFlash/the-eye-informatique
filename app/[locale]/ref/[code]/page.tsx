@@ -5,6 +5,7 @@ import { getProductBySlug } from "@/actions/product.actions";
 import { APP_URL, REFERRAL_COOKIE_NAME, REFERRAL_COOKIE_TTL_DAYS } from "@/lib/constants";
 import { cookies } from "next/headers";
 import type { Metadata, ResolvingMetadata } from "next";
+import { buildProductSocialMetadata, plainShareText } from "@/lib/seo";
 
 const getProductBySlugCached = cache(getProductBySlug);
 const getAffiliateLinkCached = cache(getAffiliateLink);
@@ -48,29 +49,17 @@ export async function generateMetadata(
     return { title: "The Eye Informatique" };
   }
 
-  const image = product.images[0]?.url ?? "/assets/banner.png";
-  const absoluteImage = new URL(image, APP_URL).toString();
-  const productImage = {
-    url: absoluteImage,
-    width: 1200,
-    height: 630,
-    alt: product.name,
-  };
+  const description = plainShareText(product.description);
 
   return {
     title: product.name,
-    description: product.description?.slice(0, 160) ?? "",
-    openGraph: {
+    description,
+    ...buildProductSocialMetadata({
       title: product.name,
-      description: product.description?.slice(0, 160) ?? "",
-      images: [productImage, ...previousImages],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: product.name,
-      description: product.description?.slice(0, 160) ?? "",
-      images: [productImage],
-    },
+      description,
+      images: product.images,
+      fallbackImages: previousImages,
+    }),
   };
 }
 
