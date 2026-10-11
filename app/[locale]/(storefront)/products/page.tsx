@@ -88,13 +88,13 @@ export default async function ProductsPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8 space-y-6">
+    <div className="container mx-auto max-w-7xl space-y-4 px-4 py-5 sm:space-y-6 sm:py-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
           {t("productsTitle")}
         </h1>
-        <div className="w-full sm:w-72">
+        <div className="hidden w-full sm:block sm:w-72">
           <SearchBar />
         </div>
       </div>
@@ -110,7 +110,7 @@ export default async function ProductsPage({ searchParams }: Props) {
       />
 
       {/* Condition Tabs */}
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {[
           { label: t("all"), value: undefined, isRefurb: false },
           { label: t("new"), value: "NEW", isRefurb: false },
@@ -125,7 +125,7 @@ export default async function ProductsPage({ searchParams }: Props) {
               <Button
                 variant={isActive ? (isRefurb ? "destructive" : "default") : "outline"}
                 size="sm"
-                className={`font-semibold transition-all ${
+                className={`shrink-0 font-semibold transition-all ${
                   !isActive && isRefurb ? "hover:border-destructive/40 hover:text-destructive hover:bg-destructive/5" : ""
                 }`}
               >
@@ -155,7 +155,7 @@ export default async function ProductsPage({ searchParams }: Props) {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => {
             const cheapestVariant = product.variants.reduce(
               (min, v) => (Number(v.price) < Number(min.price) ? v : min),

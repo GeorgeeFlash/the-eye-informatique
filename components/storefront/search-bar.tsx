@@ -20,13 +20,14 @@ export function SearchBar() {
   }, [debouncedQuery, router])
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t("placeholder")}
-        className="pl-9"
+        className="h-10 pl-9 sm:h-9"
+        enterKeyHint="search"
       />
     </div>
   )

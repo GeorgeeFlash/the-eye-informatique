@@ -46,13 +46,14 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         <CarouselContent>
           {sorted.map((img, index) => (
             <CarouselItem key={`${img.url}-${index}`}>
-              <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+              <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
                 <Image
                   src={img.url}
                   alt={img.altText ?? productName}
                   fill
                   priority={index === 0}
-                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-contain p-3 sm:p-6"
                 />
               </div>
             </CarouselItem>
@@ -68,12 +69,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       </Carousel>
 
       {sorted.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto">
+        <div className="flex gap-2 overflow-x-auto scrollbar-none">
           {sorted.map((img, i) => (
             <button
               key={`${img.url}-thumb-${i}`}
               onClick={() => api?.scrollTo(i)}
-              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 ${
+              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-md border-2 sm:h-16 sm:w-16 ${
                 i === selected ? "border-primary" : "border-transparent"
               }`}
               type="button"

@@ -19,6 +19,7 @@ import { CartSheet } from "@/components/storefront/cart-sheet";
 import { MobileNav } from "@/components/storefront/header/mobile-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Logo } from "@/components/shared/logo";
+import { SearchBar } from "@/components/storefront/search-bar";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/types";
 
@@ -56,15 +57,22 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
       {/* Brand Accent Top Stripe */}
       <div className="h-0.75 w-full bg-linear-to-r from-primary via-primary/80 to-destructive" />
 
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      {/* Main header row */}
+      <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8 gap-2">
         {/* Left: mobile menu + logo */}
-        <div className="flex items-center gap-3">
-          <MobileNav />
-          <Logo size="md" />
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <MobileNav userRole={userRole} />
+          <Logo size="md" showName={false} className="sm:hidden" />
+          <Logo size="md" className="hidden sm:inline-flex" />
         </div>
 
-        {/* Center: desktop navigation */}
-        <NavigationMenu className="hidden md:flex">
+        {/* Center: search bar (hidden on mobile, shown on sm+) */}
+        <div className="hidden sm:flex flex-1 mx-4 lg:mx-8 max-w-md min-w-0">
+          <SearchBar />
+        </div>
+
+        {/* Center: desktop navigation (only on md+) */}
+        <NavigationMenu className="hidden md:flex shrink-0">
           <NavigationMenuList className="gap-1">
             {/* Products mega-menu */}
             <NavigationMenuItem>
@@ -111,13 +119,19 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
         </NavigationMenu>
 
         {/* Right: actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <LocaleSwitcher />
-          <ThemeToggle />
+        <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
+          <LocaleSwitcher className="hidden sm:flex" />
+          <ThemeToggle className="hidden sm:inline-flex" />
           <CartButton />
           <AuthActions userRole={userRole} />
         </div>
       </div>
+
+      {/* Mobile search bar row */}
+      <div className="sm:hidden border-t border-border/40 px-3 py-2 bg-background/80 backdrop-blur-sm">
+        <SearchBar />
+      </div>
+
       <CartSheet />
     </header>
   );

@@ -218,13 +218,13 @@ export function CheckoutForm({
                   name="deliveryMethod"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-4">
                         <Button
                           type="button"
                           variant={
                             field.value === "PICKUP" ? "default" : "outline"
                           }
-                          className="h-auto flex-col gap-2 p-4"
+                          className="h-auto flex-col gap-1.5 p-3 text-center text-xs leading-tight sm:gap-2 sm:p-4 sm:text-sm"
                           onClick={() => field.onChange("PICKUP")}
                         >
                           <StoreIcon className="size-6" />
@@ -235,7 +235,7 @@ export function CheckoutForm({
                           variant={
                             field.value === "DELIVERY" ? "default" : "outline"
                           }
-                          className="h-auto flex-col gap-2 p-4"
+                          className="h-auto flex-col gap-1.5 p-3 text-center text-xs leading-tight sm:gap-2 sm:p-4 sm:text-sm"
                           onClick={() => field.onChange("DELIVERY")}
                         >
                           <TruckIcon className="size-6" />
@@ -416,7 +416,7 @@ export function CheckoutForm({
                   control={form.control}
                   name="installments"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <FormItem className="flex flex-col items-start gap-3 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">
                           {t("payInInstallments")}
@@ -427,6 +427,7 @@ export function CheckoutForm({
                       </div>
                       <FormControl>
                         <Switch
+                          className="shrink-0"
                           checked={field.value}
                           onCheckedChange={field.onChange}
                         />

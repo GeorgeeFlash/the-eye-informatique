@@ -35,7 +35,7 @@ export default async function AboutPage() {
 
   if (!data) {
     return (
-      <div className="container mx-auto px-4 py-20 text-center">
+      <div className="container mx-auto px-4 py-12 sm:py-20 text-center">
         <h1 className="text-3xl font-bold">{t("title")}</h1>
         <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
       </div>
@@ -45,7 +45,7 @@ export default async function AboutPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-linear-to-br from-primary/10 via-background to-secondary/10 py-20">
+      <section className="relative overflow-hidden bg-linear-to-br from-primary/10 via-background to-secondary/10 py-12 sm:py-20">
         {data.bannerImage && (
           <Image
             src={urlFor(data.bannerImage).width(1920).height(720).url()}
@@ -57,11 +57,11 @@ export default async function AboutPage() {
         )}
         <div className="pointer-events-none absolute inset-0 bg-background/35" />
         <div className="container relative z-10 mx-auto px-4 text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight md:text-5xl">
+          <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl md:text-5xl">
             {data.title}
           </h1>
           {data.subtitle && (
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+            <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
               {data.subtitle}
             </p>
           )}
@@ -70,7 +70,7 @@ export default async function AboutPage() {
 
       {/* Mission */}
       {data.mission && data.mission.body && (
-        <section className="py-16">
+        <section className="py-10 sm:py-16">
           <div className="container mx-auto px-4">
             <h2 className="mb-6 text-center text-2xl font-bold">
               {data.mission.title ?? t("missionTitle")}
@@ -84,7 +84,7 @@ export default async function AboutPage() {
 
       {/* Story */}
       {data.story && (
-        <section className="border-t bg-muted/30 py-16">
+        <section className="border-t bg-muted/30 py-10 sm:py-16">
           <div className="container mx-auto px-4">
             <h2 className="mb-6 text-center text-2xl font-bold">
               {data.story.title ?? t("storyTitle")}
@@ -111,7 +111,7 @@ export default async function AboutPage() {
 
       {/* Services */}
       {data.services?.length > 0 && (
-        <section className="border-t py-16">
+        <section className="border-t py-10 sm:py-16">
           <div className="container mx-auto px-4">
             <h2 className="mb-10 text-center text-2xl font-bold">
               {t("servicesTitle")}
@@ -167,7 +167,7 @@ export default async function AboutPage() {
 
       {/* Stats */}
       {data.stats?.length > 0 && (
-        <section className="border-t bg-primary/5 py-16">
+        <section className="border-t bg-primary/5 py-10 sm:py-16">
           <div className="container mx-auto px-4">
             <h2 className="mb-10 text-center text-2xl font-bold">
               {t("statsTitle")}
@@ -176,7 +176,7 @@ export default async function AboutPage() {
               {data.stats.map(
                 (stat: { _key: string; value: string; label: string }) => (
                   <div key={stat._key} className="text-center">
-                    <div className="text-3xl font-extrabold text-primary">
+                    <div className="text-2xl font-extrabold text-primary sm:text-3xl">
                       {stat.value}
                     </div>
                     <div className="mt-1 text-sm text-muted-foreground">
@@ -192,7 +192,7 @@ export default async function AboutPage() {
 
       {/* Team */}
       {data.team?.length > 0 && (
-        <section className="border-t py-16">
+        <section className="border-t py-10 sm:py-16">
           <div className="container mx-auto px-4">
             <h2 className="mb-10 text-center text-2xl font-bold">
               {t("teamTitle")}
@@ -233,7 +233,7 @@ export default async function AboutPage() {
 
       {/* Branches */}
       {data.branches?.length > 0 && (
-        <section className="border-t bg-muted/30 py-16">
+        <section className="border-t bg-muted/30 py-10 sm:py-16">
           <div className="container mx-auto px-4">
             <h2 className="mb-10 text-center text-2xl font-bold">
               {t("branchesTitle")}

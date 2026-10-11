@@ -32,11 +32,12 @@ export function BranchFilter({ branches, activeBranchId }: BranchFilterProps) {
   }
 
   return (
-    <nav className="flex gap-2 overflow-x-auto pb-2">
+    <nav className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
       <Button
         asChild
         variant={!activeBranchId ? "default" : "outline"}
         size="sm"
+        className="shrink-0"
       >
         <Link href={buildHref(undefined)}>{t("allBranches")}</Link>
       </Button>

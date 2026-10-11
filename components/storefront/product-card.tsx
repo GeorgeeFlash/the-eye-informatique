@@ -66,32 +66,33 @@ export function ProductCard({
   };
 
   return (
-    <Card className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-border/80 bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
+    <Card className="group relative flex flex-col justify-between gap-0 overflow-hidden rounded-xl border border-border/80 bg-card py-0 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
       <div className="flex flex-col">
         {/* Image Stage */}
-        <Link href={`/products/${slug}`} className="relative block aspect-square overflow-hidden bg-muted/40 p-4">
+        <Link href={`/products/${slug}`} className="relative block aspect-square overflow-hidden bg-muted/40 p-2 sm:p-4">
           {imageUrl ? (
             <Image
               src={imageUrl}
               alt={name}
               unoptimized
               fill
-              className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-contain p-2 transition-transform duration-500 group-hover:scale-105 sm:p-4"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
-              <SparklesIcon className="size-10" />
+              <SparklesIcon className="size-8 sm:size-10" />
             </div>
           )}
 
           {/* Condition Badge */}
-          <div className="absolute left-3 top-3 flex flex-col gap-1 z-10">
+          <div className="absolute left-1.5 top-1.5 z-10 flex flex-col gap-1 sm:left-3 sm:top-3">
             {condition === "REFURBISHED" ? (
-              <Badge className="bg-destructive text-white hover:bg-destructive/90 border-0 shadow-xs text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+              <Badge className="border-0 bg-destructive px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-xs hover:bg-destructive/90 sm:px-2 sm:text-[10px]">
                 {t("refurbished")}
               </Badge>
             ) : (
-              <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 border-0 shadow-xs text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+              <Badge className="border-0 bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground shadow-xs hover:bg-primary/90 sm:px-2 sm:text-[10px]">
                 {t("new")}
               </Badge>
             )}
@@ -99,46 +100,45 @@ export function ProductCard({
 
           {/* Stock Status Badge */}
           {!inStock && (
-            <Badge className="absolute right-3 top-3 bg-zinc-900/90 text-zinc-100 dark:bg-zinc-800/90 border-0 text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider z-10">
+            <Badge className="absolute right-1.5 top-1.5 z-10 border-0 bg-zinc-900/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-100 sm:right-3 sm:top-3 sm:px-2 sm:text-[10px] dark:bg-zinc-800/90">
               {t("outOfStock")}
             </Badge>
           )}
         </Link>
 
         {/* Content */}
-        <CardContent className="flex flex-col gap-2 p-4 pt-3">
+        <CardContent className="flex flex-col gap-1.5 p-2.5 pt-2 sm:gap-2 sm:p-4 sm:pt-3">
           <Link href={`/products/${slug}`} className="group-hover:text-primary transition-colors">
-            <h3 className="line-clamp-2 text-sm font-semibold leading-snug tracking-tight text-foreground min-h-10">
+            <h3 className="line-clamp-2 min-h-8 text-xs font-semibold leading-snug tracking-tight text-foreground sm:min-h-10 sm:text-sm">
               {name}
             </h3>
           </Link>
-          <div className="flex items-baseline justify-between pt-1">
-            <p className="text-lg font-extrabold tracking-tight text-foreground">
-              {formatCurrency(price, locale as Locale)}
-            </p>
-          </div>
+          <p className="text-sm font-extrabold leading-tight tracking-tight text-foreground sm:text-lg">
+            {formatCurrency(price, locale as Locale)}
+          </p>
         </CardContent>
       </div>
 
       {/* Action Footer */}
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-2.5 pt-0 sm:p-4">
         <Button
           className={cn(
-            "w-full gap-2 font-semibold shadow-xs transition-all duration-200",
+            "h-9 w-full gap-1.5 px-2 text-xs font-semibold shadow-xs transition-all duration-200 sm:h-10 sm:gap-2 sm:px-4 sm:text-sm",
             canAddToCart
               ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20"
               : "bg-muted text-muted-foreground hover:bg-muted"
           )}
           disabled={!canAddToCart}
           onClick={handleAddToCart}
+          aria-label={canAddToCart ? t("addToCart") : t("outOfStock")}
         >
           {canAddToCart ? (
             <>
-              <ShoppingCartIcon className="size-4" />
-              <span>{t("addToCart")}</span>
+              <ShoppingCartIcon className="size-4 shrink-0" />
+              <span className="hidden truncate sm:inline">{t("addToCart")}</span>
             </>
           ) : (
-            <span>{t("outOfStock")}</span>
+            <span className="truncate">{t("outOfStock")}</span>
           )}
         </Button>
       </CardFooter>

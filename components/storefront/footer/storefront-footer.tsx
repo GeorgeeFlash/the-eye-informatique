@@ -32,10 +32,10 @@ export function StorefrontFooter() {
       {/* Brand accent top stripe */}
       <div className="h-0.5 w-full bg-linear-to-r from-primary via-primary/50 to-destructive" />
 
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
           {/* Brand column */}
-          <div className="space-y-4">
+          <div className="col-span-2 space-y-4 lg:col-span-1">
             <Logo asLink={false} size="lg" />
             <p className="text-sm text-muted-foreground leading-relaxed">
               {t("tagline")}
@@ -186,7 +186,7 @@ export function StorefrontFooter() {
               <li>
                 <a
                   href="mailto:contact@theeyeinformatique.cm"
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+                  className="break-all text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   contact@theeyeinformatique.cm
                 </a>

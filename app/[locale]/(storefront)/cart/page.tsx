@@ -43,19 +43,19 @@ export default function CartPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-2xl font-bold">
+    <div className="container mx-auto px-4 py-5 sm:py-8">
+      <h1 className="mb-5 text-xl font-bold sm:mb-8 sm:text-2xl">
         {t("title")} ({t("items", { count: totalItems })})
       </h1>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
         {/* Item list */}
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
-            <Card key={item.variantId}>
-              <CardContent className="flex gap-4 p-4">
+            <Card key={item.variantId} className="gap-0 py-0">
+              <CardContent className="flex gap-3 p-3 sm:gap-4 sm:p-4">
                 {/* Thumbnail */}
-                <div className="relative size-24 shrink-0 overflow-hidden rounded-md bg-muted">
+                <div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted sm:size-24">
                   {item.imageUrl ? (
                     <Image
                       src={item.imageUrl}
@@ -72,30 +72,28 @@ export default function CartPage() {
                 </div>
 
                 {/* Details */}
-                <div className="flex flex-1 flex-col justify-between">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-medium leading-snug line-clamp-2">
-                        {item.productName}
+                <div className="flex min-w-0 flex-1 flex-col justify-between">
+                  <div className="min-w-0">
+                    <p className="line-clamp-2 text-sm font-medium leading-snug sm:text-base">
+                      {item.productName}
+                    </p>
+                    {item.variantLabel && (
+                      <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+                        {item.variantLabel}
                       </p>
-                      {item.variantLabel && (
-                        <p className="mt-0.5 text-sm text-muted-foreground">
-                          {item.variantLabel}
-                        </p>
-                      )}
-                      {item.branchCity && (
-                        <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                          <MapPinIcon className="size-3" />
-                          {t("shipsFrom", { city: item.branchCity })}
-                        </p>
-                      )}
-                    </div>
-                    <p className="shrink-0 text-sm text-muted-foreground">
+                    )}
+                    {item.branchCity && (
+                      <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                        <MapPinIcon className="size-3 shrink-0" />
+                        {t("shipsFrom", { city: item.branchCity })}
+                      </p>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {formatCurrency(item.price, locale)} × {item.quantity}
                     </p>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between">
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                     {/* Qty stepper */}
                     <div className="flex items-center gap-1">
                       <Button
@@ -139,7 +137,7 @@ export default function CartPage() {
                     </div>
 
                     {/* Line total */}
-                    <p className="text-base font-semibold">
+                    <p className="text-sm font-semibold sm:text-base">
                       {formatCurrency(item.price * item.quantity, locale)}
                     </p>
                   </div>

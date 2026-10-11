@@ -34,8 +34,8 @@ export default async function CheckoutPage({
   const t = await getTranslations("checkout");
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">{t("title")}</h1>
+    <div className="container mx-auto px-4 py-5 sm:py-8">
+      <h1 className="mb-5 text-2xl font-bold sm:mb-8 sm:text-3xl">{t("title")}</h1>
       <CheckoutForm
         addresses={addresses.map((a) => ({
           id: a.id,

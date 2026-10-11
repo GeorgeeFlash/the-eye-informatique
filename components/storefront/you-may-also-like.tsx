@@ -27,15 +27,15 @@ export async function YouMayAlsoLike({
   if (related.length === 0) return null;
 
   return (
-    <section className="container mx-auto max-w-7xl px-4 py-10 border-t border-border/60">
+    <section className="container mx-auto max-w-7xl border-t border-border/60 px-4 py-8 sm:py-10">
       {/* Section header */}
-      <div className="flex items-end justify-between mb-6">
+      <div className="mb-4 flex items-end justify-between sm:mb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary mb-1">
+          <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
             <SparklesIcon className="size-3.5" />
             <span>Curated For You</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          <h2 className="text-xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             You May Also Like
           </h2>
         </div>
@@ -44,7 +44,7 @@ export async function YouMayAlsoLike({
             asChild
             variant="ghost"
             size="sm"
-            className="font-semibold text-primary hover:text-primary hover:bg-primary/10"
+            className="shrink-0 font-semibold text-primary hover:bg-primary/10 hover:text-primary"
           >
             <Link href={`/products?category=${categorySlug}`}>
               {t("viewAll")} <ArrowRightIcon className="ml-1 size-4" />
@@ -54,7 +54,7 @@ export async function YouMayAlsoLike({
       </div>
 
       {/* Product grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {related.map((product) => {
           const variant = product.variants[0];
           const image = product.images[0];

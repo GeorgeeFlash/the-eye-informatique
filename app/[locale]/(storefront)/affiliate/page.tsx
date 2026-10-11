@@ -54,12 +54,12 @@ export default async function AffiliateLandingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-linear-to-br from-primary/10 via-background to-secondary/10 py-20">
+      <section className="bg-linear-to-br from-primary/10 via-background to-secondary/10 py-12 sm:py-20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight md:text-5xl">
+          <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl md:text-5xl">
             {data.title}
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
             {data.subtitle}
           </p>
           {data.heroDescription && (
@@ -67,8 +67,8 @@ export default async function AffiliateLandingPage() {
               {data.heroDescription}
             </p>
           )}
-          <div className="mt-8 flex justify-center gap-4">
-            <Button asChild size="lg">
+          <div className="mt-8 flex justify-center px-2">
+            <Button asChild size="lg" className="w-full max-w-xs sm:w-auto">
               <Link href="/dashboard/affiliate-apply">
                 {data.cta?.buttonLabel ?? t("applyNow")}
               </Link>

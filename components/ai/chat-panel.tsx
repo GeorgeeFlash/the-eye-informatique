@@ -95,9 +95,9 @@ export function ChatPanel() {
       <button
         onClick={() => setOpen(true)}
         aria-label={t("irisOpen")}
-        className="fixed bottom-6 right-6 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="fixed bottom-4 right-4 z-50 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:bottom-6 sm:right-6 sm:size-14"
       >
-        <SparklesIcon className="size-6" />
+        <SparklesIcon className="size-5 sm:size-6" />
       </button>
     );
   }

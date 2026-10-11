@@ -19,11 +19,12 @@ export function CategoryNav({ categories, activeSlug }: CategoryNavProps) {
   const t = useTranslations("storefront")
 
   return (
-    <nav className="flex gap-2 overflow-x-auto pb-2">
+    <nav className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
       <Button
         asChild
         variant={!activeSlug ? "default" : "outline"}
         size="sm"
+        className="shrink-0"
       >
         <Link href="/products">{t("all")}</Link>
       </Button>

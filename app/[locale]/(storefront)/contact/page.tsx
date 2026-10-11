@@ -12,9 +12,9 @@ export default async function ContactPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="mx-auto max-w-2xl text-center mb-10">
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+    <div className="container mx-auto px-4 py-8 sm:py-12">
+      <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-10">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
           {t("title")}
         </h1>
         <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>

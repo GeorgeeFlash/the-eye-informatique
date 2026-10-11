@@ -11,13 +11,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { LOCALES } from "@/lib/constants"
+import { cn } from "@/lib/utils"
 
 const localeNames: Record<string, string> = {
   en: "English",
   fr: "Français",
 }
 
-export function LocaleSwitcher() {
+export function LocaleSwitcher({ className }: { className?: string }) {
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
@@ -33,7 +34,7 @@ export function LocaleSwitcher() {
     <Select value={locale} onValueChange={onLocaleChange} disabled={isPending}>
       {/* suppressHydrationWarning: Radix generates aria-controls via useId(),
           which differs between Next.js SSR and client due to RSC fiber tree depth */}
-      <SelectTrigger className="w-32" suppressHydrationWarning>
+      <SelectTrigger className={cn("w-32", className)} suppressHydrationWarning>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

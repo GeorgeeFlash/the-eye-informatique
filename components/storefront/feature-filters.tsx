@@ -78,13 +78,13 @@ export function FeatureFilters({ featureFields }: Props) {
           </Button>
         )}
       </div>
-      <div className="flex flex-wrap gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
         {featureFields.map((ff) => {
           const currentValue = searchParams.get(`ff_${ff.id}`) ?? "";
 
           if (ff.type === "DROPDOWN" && ff.options && ff.options.length > 0) {
             return (
-              <div key={ff.id} className="min-w-35">
+              <div key={ff.id} className="min-w-0 sm:min-w-35">
                 <label className="text-xs text-muted-foreground mb-1 block">
                   {ff.name}
                 </label>
@@ -112,7 +112,7 @@ export function FeatureFilters({ featureFields }: Props) {
 
           // TEXT & NUMBER: simple input with enter to apply
           return (
-            <div key={ff.id} className="min-w-35">
+            <div key={ff.id} className="min-w-0 sm:min-w-35">
               <label className="text-xs text-muted-foreground mb-1 block">
                 {ff.name}
               </label>
