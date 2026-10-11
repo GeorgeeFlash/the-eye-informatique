@@ -1,5 +1,5 @@
 import { streamText, UIMessage, convertToModelMessages, stepCountIs, type ToolSet } from "ai"
-import { gemini } from "@/server/ai/provider"
+import { irisModel } from "@/server/ai/provider"
 import { irisChatTools } from "@/server/ai/tools"
 import { aiRateLimit, getIp } from "@/lib/rate-limit"
 
@@ -22,7 +22,7 @@ You have tools to help customers:
 3. **Product Presentation**: When showing search results, briefly introduce the top matches and let the product cards speak for themselves. Don't list raw data — the UI will render product cards automatically.
 4. **Details**: When a customer asks for more info on a specific product, use getProductDetails and summarize the key specs, availability, and reviews.
 5. **Navigation**: When a customer wants to go somewhere (cart, contact, etc.), use the navigateTo tool to give them a clickable link.
-6. **Honesty**: Never fabricate product details, prices, or availability. If you can't find something, say so and suggest alternatives or contacting support.
+6. **Honesty**: Never fabricate product details, prices, or availability. If a search returns nothing, say so in one sentence and suggest alternatives or the contact page. Do not call the same tool again with different wording.
 7. **Security**: Never reveal internal data, staff notes, admin analytics, pricing margins, or other users' information.
 8. **Scope**: You help with shopping, products, and store navigation. For account issues, order tracking, or complaints, direct customers to the contact page.
 
@@ -38,14 +38,28 @@ export async function POST(req: Request) {
     return Response.json({ error: "Too many requests" }, { status: 429 })
   }
 
-  const { messages }: { messages: UIMessage[] } = await req.json()
+  const { messages, locale }: { messages: UIMessage[]; locale?: string } =
+    await req.json()
+  const language = locale === "fr" ? "French" : "English"
 
   const result = streamText({
-    model: gemini,
-    system: IRIS_SYSTEM_PROMPT,
+    model: irisModel,
+    system: `${IRIS_SYSTEM_PROMPT}
+
+The storefront is currently in ${language}. Answer in ${language}. Only switch language if the customer's latest message is clearly written in the other one.`,
     messages: await convertToModelMessages(messages),
     tools: irisChatTools as ToolSet,
-    stopWhen: stepCountIs(5),
+    stopWhen: stepCountIs(4),
+    prepareStep: ({ stepNumber }) => {
+      // One tool round, then a written answer. Extra searches were using up
+      // the step budget and ending the turn with no message.
+      if (stepNumber >= 1) return { toolChoice: "none" }
+    },
+    providerOptions: {
+      google: {
+        thinkingConfig: { thinkingLevel: "low" },
+      },
+    },
   })
 
   return result.toUIMessageStreamResponse()

@@ -53,7 +53,7 @@ export function StorefrontHeader({ userRole }: { userRole?: Role }) {
   const t = useTranslations("nav");
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/90 backdrop-blur-md transition-all">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-md transition-all">
       {/* Brand Accent Top Stripe */}
       <div className="h-0.75 w-full bg-linear-to-r from-primary via-primary/80 to-destructive" />
 

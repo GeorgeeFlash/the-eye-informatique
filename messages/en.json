@@ -913,6 +913,8 @@
     "irisOpen": "Open Iris assistant",
     "irisScrollDown": "Latest",
     "irisPoweredBy": "Powered by Iris AI",
+    "irisError": "Iris couldn't reply. Please try again.",
+    "irisRetry": "Try again",
     "irisSuggestion1": "Find me a laptop",
     "irisSuggestion2": "Do you have refurbished phones?",
     "irisSuggestion3": "What's your return policy?",

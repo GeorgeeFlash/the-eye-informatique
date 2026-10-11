@@ -2,13 +2,12 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useChat } from "@ai-sdk/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Markdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ChatProductCard, type ChatProductCardProps } from "./product-card";
 import { ChatLinkCard } from "./link-card";
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   XIcon,
   SendIcon,
@@ -28,14 +27,16 @@ const SUGGESTION_KEYS = [
 
 export function ChatPanel() {
   const t = useTranslations("ai");
-  const isMobile = useIsMobile();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [showScrollBtn, setShowScrollBtn] = useState(false);
-  const { messages, sendMessage, status, stop } = useChat();
+  const { messages, sendMessage, status, stop, error, regenerate, clearError } =
+    useChat();
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const isLoading = status === "streaming" || status === "submitted";
 
@@ -68,6 +69,45 @@ export function ChatPanel() {
     return () => window.removeEventListener("keydown", handler);
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const previousOverflow = document.body.style.overflow;
+
+    const lockScroll = () => {
+      document.body.style.overflow = mq.matches ? "hidden" : previousOverflow;
+    };
+    lockScroll();
+    mq.addEventListener("change", lockScroll);
+
+    const viewport = window.visualViewport;
+    const panel = panelRef.current;
+    const syncKeyboard = () => {
+      if (!panel) return;
+      if (!mq.matches || !viewport) {
+        panel.style.top = "";
+        panel.style.height = "";
+        return;
+      }
+      panel.style.top = `${viewport.offsetTop}px`;
+      panel.style.height = `${viewport.height}px`;
+    };
+    syncKeyboard();
+    viewport?.addEventListener("resize", syncKeyboard);
+    viewport?.addEventListener("scroll", syncKeyboard);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      mq.removeEventListener("change", lockScroll);
+      viewport?.removeEventListener("resize", syncKeyboard);
+      viewport?.removeEventListener("scroll", syncKeyboard);
+      if (panel) {
+        panel.style.top = "";
+        panel.style.height = "";
+      }
+    };
+  }, [open]);
+
   function handleTextareaChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value);
     e.target.style.height = "auto";
@@ -84,7 +124,8 @@ export function ChatPanel() {
   function submit(text: string) {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
-    sendMessage({ text: trimmed });
+    clearError();
+    sendMessage({ text: trimmed }, { body: { locale } });
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
   }
@@ -95,7 +136,7 @@ export function ChatPanel() {
       <button
         onClick={() => setOpen(true)}
         aria-label={t("irisOpen")}
-        className="fixed bottom-4 right-4 z-50 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:bottom-6 sm:right-6 sm:size-14"
+        className="fixed right-4 bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-[60] flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation sm:right-6 sm:bottom-6"
       >
         <SparklesIcon className="size-5 sm:size-6" />
       </button>
@@ -105,11 +146,13 @@ export function ChatPanel() {
   /* ── Panel ────────────────────────────────────────────────── */
   return (
     <div
+      ref={panelRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("irisTitle")}
       className={cn(
-        "fixed z-50 flex flex-col bg-background shadow-2xl animate-in fade-in-0 duration-200",
-        isMobile
-          ? "inset-0"
-          : "bottom-6 right-6 h-[min(560px,85dvh)] w-100 rounded-2xl border slide-in-from-bottom-2",
+        "fixed inset-x-0 top-0 z-[60] flex h-dvh max-h-dvh w-full flex-col bg-background pt-[env(safe-area-inset-top)] shadow-2xl animate-in fade-in-0 duration-200",
+        "md:inset-auto md:top-auto md:right-6 md:bottom-6 md:h-[min(560px,85dvh)] md:max-h-[85dvh] md:w-[min(400px,calc(100vw-3rem))] md:rounded-2xl md:border md:pt-0 md:slide-in-from-bottom-2",
       )}
     >
       {/* Header */}
@@ -129,7 +172,7 @@ export function ChatPanel() {
         <Button
           variant="ghost"
           size="icon"
-          className="shrink-0"
+          className="size-11 shrink-0 touch-manipulation md:size-9"
           onClick={() => setOpen(false)}
           aria-label={t("close")}
         >
@@ -161,7 +204,7 @@ export function ChatPanel() {
                     key={key}
                     type="button"
                     onClick={() => submit(t(key))}
-                    className="rounded-full border bg-background px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-accent hover:text-accent-foreground active:scale-95"
+                    className="max-w-full rounded-full border bg-background px-3.5 py-2 text-left text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground active:scale-95 touch-manipulation md:py-1.5 md:text-xs"
                   >
                     {t(key)}
                   </button>
@@ -286,7 +329,7 @@ export function ChatPanel() {
                         );
                       }
                       if (part.state === "output-error") {
-                        return <ToolError key={i} />;
+                        return <ToolError key={i} label={t("irisError")} />;
                       }
                       return (
                         <ToolLoader key={i} label={t("searchingProducts")} />
@@ -325,7 +368,7 @@ export function ChatPanel() {
                         );
                       }
                       if (part.state === "output-error") {
-                        return <ToolError key={i} />;
+                        return <ToolError key={i} label={t("irisError")} />;
                       }
                       return <ToolLoader key={i} label={t("loadingProduct")} />;
                     }
@@ -369,6 +412,25 @@ export function ChatPanel() {
             </div>
           )}
 
+          {error && (
+            <div className="flex flex-col items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <AlertCircleIcon className="size-3.5 shrink-0 text-destructive" />
+                <span className="text-xs text-destructive">{t("irisError")}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  clearError();
+                  void regenerate({ body: { locale } });
+                }}
+                className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+              >
+                {t("irisRetry")}
+              </button>
+            </div>
+          )}
+
           {/* Auto-scroll anchor */}
           <div ref={bottomRef} />
         </div>
@@ -388,7 +450,7 @@ export function ChatPanel() {
       </div>
 
       {/* Input area */}
-      <div className="shrink-0 border-t p-3">
+      <div className="shrink-0 border-t p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-3">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -404,14 +466,16 @@ export function ChatPanel() {
             onKeyDown={handleKeyDown}
             placeholder={t("irisPlaceholder")}
             disabled={isLoading}
-            className="max-h-30 flex-1 resize-none overflow-y-auto rounded-xl border bg-muted/50 px-3.5 py-2.5 text-sm outline-none transition-[border-color,box-shadow] placeholder:text-muted-foreground focus:border-primary/50 focus:ring-1 focus:ring-primary/30 disabled:opacity-50"
+            enterKeyHint="send"
+            autoComplete="off"
+            className="max-h-30 min-h-11 flex-1 resize-none overflow-y-auto rounded-xl border bg-muted/50 px-3.5 py-2.5 text-base outline-none transition-[border-color,box-shadow] placeholder:text-muted-foreground focus:border-primary/50 focus:ring-1 focus:ring-primary/30 disabled:opacity-50 md:text-sm"
           />
           {isLoading ? (
             <button
               type="button"
               onClick={() => stop()}
               aria-label="Stop"
-              className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-destructive text-destructive-foreground transition-opacity hover:opacity-85"
+              className="flex size-11 shrink-0 touch-manipulation items-center justify-center rounded-xl bg-destructive text-destructive-foreground transition-opacity hover:opacity-85"
             >
               <StopCircleIcon className="size-4" />
             </button>
@@ -420,7 +484,7 @@ export function ChatPanel() {
               type="submit"
               disabled={!input.trim()}
               aria-label={t("send")}
-              className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40 active:scale-95"
+              className="flex size-11 shrink-0 touch-manipulation items-center justify-center rounded-xl bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40 active:scale-95"
             >
               <SendIcon className="size-4" />
             </button>
@@ -460,13 +524,11 @@ function ToolLoader({ label }: { label: string }) {
 }
 
 /* ── Tool error indicator ───────────────────────────────────────────────── */
-function ToolError() {
+function ToolError({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2 rounded-xl border border-dashed border-destructive/40 bg-destructive/5 px-3 py-2.5">
       <AlertCircleIcon className="size-3.5 shrink-0 text-destructive" />
-      <span className="text-xs text-destructive/80">
-        Something went wrong. Please try again.
-      </span>
+      <span className="text-xs text-destructive/80">{label}</span>
     </div>
   );
 }

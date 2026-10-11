@@ -91,6 +91,10 @@ export async function generateMetadata(
 
 export const viewport: Viewport = {
   themeColor: "#ffffff",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
 };
 
 export default async function LocaleLayout({

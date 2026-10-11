@@ -433,7 +433,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         aria-hidden={!showStickyBar}
         inert={!showStickyBar}
       >
-        <div className="flex items-center gap-3 px-3 py-2.5 pr-20 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+        <div className="flex items-center gap-3 px-3 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
           <p className="min-w-0 shrink text-base font-extrabold leading-tight tracking-tight">
             {formatCurrency(price, locale as Locale)}
           </p>

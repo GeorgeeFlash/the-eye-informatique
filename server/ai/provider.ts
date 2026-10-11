@@ -1,5 +1,8 @@
 import { google } from "@ai-sdk/google"
 
-// Gemini 3 Flash Preview — free tier model used across all AI features (M11)
-// Requires: GOOGLE_GENERATIVE_AI_API_KEY environment variable
-export const gemini = google("gemini-3.5-flash-preview")
+// Requires: GOOGLE_GENERATIVE_AI_API_KEY environment variable.
+// `gemini-3.5-flash-preview` is not a real model id and fails every request.
+export const gemini = google("gemini-3.8-flash")
+
+// Faster model for Iris. Multi-step tool calls on 3.8 Flash stall for tens of seconds.
+export const irisModel = google("gemini-3.5-flash-lite")

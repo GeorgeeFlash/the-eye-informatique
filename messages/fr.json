@@ -913,6 +913,8 @@
     "irisOpen": "Ouvrir l'assistant Iris",
     "irisScrollDown": "Dernier",
     "irisPoweredBy": "Propulsé par Iris IA",
+    "irisError": "Iris n'a pas pu répondre. Veuillez réessayer.",
+    "irisRetry": "Réessayer",
     "irisSuggestion1": "Trouvez-moi un ordinateur portable",
     "irisSuggestion2": "Avez-vous des téléphones reconditionnés ?",
     "irisSuggestion3": "Quelle est votre politique de retour ?",

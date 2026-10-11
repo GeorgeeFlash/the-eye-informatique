@@ -45,7 +45,7 @@ export function ChatLinkCard({ path, label, intent }: ChatLinkCardProps) {
       <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
         <Icon className="size-4 text-primary" />
       </div>
-      <span className="text-sm font-medium">{label}</span>
+      <span className="min-w-0 flex-1 truncate text-sm font-medium">{label}</span>
       <ExternalLinkIcon className="ml-auto size-3.5 text-muted-foreground" />
     </Link>
   );

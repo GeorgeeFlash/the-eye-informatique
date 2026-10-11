@@ -61,7 +61,7 @@ export function ChatProductCard({
         <p className="mt-0.5 truncate text-[10px] uppercase tracking-wide text-muted-foreground/70">
           {category}
         </p>
-        <div className="mt-1.5 flex items-center gap-1.5">
+        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
           <span className="text-sm font-semibold">
             {formatCurrency(price, locale)}
           </span>
